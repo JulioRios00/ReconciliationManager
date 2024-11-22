@@ -1,0 +1,145 @@
+service: serverless-ccs
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
+
+params:
+  dev:
+    REFINADO_BUCKET_NAME: mtw-refinado-dev
+    ELEMENTAR_SECRETS_MANAGER_ARN: arn:aws:secretsmanager:us-east-1:018061303185:secret:dev/elementarapp/postgresql-gCV4D2
+    EC2_SCHEDULE_ENABLED: false
+    VPCID: vpc-03dac6c8184066691
+    SUBNETIDS:
+      - subnet-0f422697b93f26468
+      - subnet-0f7b4d6469d48d3e2
+      - subnet-066989fc5c38653f5
+    ISSUERURL: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_JRwQ9y4Jg
+    AUDIENCE:
+      - 5vlilotkr9mtdpvb47fjv9fd73
+      - 3jau7sgvhq5p5b8jisofb6q44q
+    FRONTEND_URL: https://dev.makethefuture.tech
+  qa:
+    REFINADO_BUCKET_NAME: mtw-refinado-qa
+    ELEMENTAR_SECRETS_MANAGER_ARN: arn:aws:secretsmanager:us-east-1:836450907988:secret:qa/elementarapp/postgresql-9JvHvI
+    EC2_SCHEDULE_ENABLED: true
+    VPCID: vpc-0f99334641d2742ad
+    SUBNETIDS:
+      - subnet-06ca06fff01bd0072
+      - subnet-0dee63a9f84fc8025
+      - subnet-0b5208e68482bae8b
+    ISSUERURL: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_QOe2Jmpv0
+    AUDIENCE:
+      - 3922dnengp42j32svasveio6s
+      - 73vrpleruhe0t51o5s7q6cg421
+    FRONTEND_URL: https://qa.makethefuture.tech
+  prod:
+    REFINADO_BUCKET_NAME: mtw-refinado
+    ELEMENTAR_SECRETS_MANAGER_ARN: arn:aws:secretsmanager:us-east-1:123642328289:secret:prod/elementarapp/postgresql-31ElMk
+    EC2_SCHEDULE_ENABLED: true
+    VPCID: vpc-05a05692560fcbf00
+    SUBNETIDS:
+      - subnet-04dabd8732bb73e14
+      - subnet-0fe1305f8b7cca960
+      - subnet-0098eeb6a89e0c1fa
+    ISSUERURL: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_7IIETToot
+    AUDIENCE:
+      - 5f76vi9glpqrvnni8khe981nth
+      - 5r07k8oorvtg4rd43raggbqvj8
+    FRONTEND_URL: https://www.makethefuture.tech
+
+provider:
+  name: aws
+  region: us-east-1
+  stage: dev
+  apiGateway:
+    apiKeys:
+      - ${self:custom.stage}-myFreeKey
+    usagePlan:
+      quota:
+        limit: 5000
+        offset: 2
+        period: MONTH
+      throttle:
+        burstLimit: 200
+        rateLimit: 100
+  stackTags:
+    service: ${self:service}-${self:custom.stage}
+    slv_env: ${self:custom.stage}
+    slv_costcenter: makeTheWay
+    slv_app: ccs
+  environment:
+    EMAIL_PASSWORD: ndwbonthulvwdaxp
+    ENV: ${self:custom.stage}
+    ACCOUNT_ID: ${aws:accountId}
+    LOG_LEVEL: INFO
+    ENVIRONMENT: ${self:custom.stage}
+    FRONTEND_URL: ${param:FRONTEND_URL}
+    ELEMENTAR_SECRETS_MANAGER_ARN: ${param:ELEMENTAR_SECRETS_MANAGER_ARN}
+    ELEMENTAR_BUCKET_NAME: mtw-elementar-${self:custom.stage}-${aws:accountId}
+    MAKE_THE_PRICE_BUCKET_NAME: mtw-make-the-price-${self:custom.stage}-${aws:accountId}
+    REFINADO_BUCKET_NAME: ${param:REFINADO_BUCKET_NAME}
+    
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+            - secretsmanager:DescribeSecret
+          Resource:
+            - ${param:ELEMENTAR_SECRETS_MANAGER_ARN}
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource:
+            - '*'
+
+  vpc:
+    securityGroupIds:
+      - Ref: LambdaSecurityGroup
+    subnetIds: ${param:SUBNETIDS}
+  httpApi:
+    cors: true
+    authorizers:
+        CognitoAuthorizer:
+          type: jwt
+          identitySource: $request.header.Authorization
+          issuerUrl: ${param:ISSUERURL}
+          audience: ${param:AUDIENCE}
+  ecr:
+    images:
+      document_api:
+        path: "./src"
+        file: Dockerfile.documentapi
+  tracing:
+    apiGateway: true
+    lambda: true
+  logRetentionInDays: 30
+  
+package:
+  individually: true
+  patterns:
+    - '!__pycache__/**'
+    - '!node_modules/**'
+    - '!.aws-sam/**'
+    - '!Pipfile'
+    - '!Pipfile.lock'
+    - '!package.json'
+    - '!package-lock.json'
+    - '!README.md'
+    - '!.venv/**'
+
+functions:
+  document_api: ${file(src/app/document_api/document_api.yml)}
+
+resources:
+  - Conditions:
+      EnvQa : !Equals [ "${self:custom.stage}", "qa"]
+      EnvProd : !Equals [ "${self:custom.stage}", "prod"]
+      CreateResource: !Or [Condition: "EnvQa", Condition: "EnvProd"]
+  - ${file(resources/vpc/vpc.yml)}
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-plugin-resource-tagging

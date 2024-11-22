@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - npm install -g serverless
+      - npm install
+      - pip install alembic
+      - pip install psycopg2-binary
+      - pip install flask_authorize 
+  build:
+    commands: 
+      - alembic upgrade head
+      - serverless deploy --stage $ENVIRONMENT

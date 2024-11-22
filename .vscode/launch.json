@@ -1,0 +1,88 @@
+{
+  "configurations": [
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "document_api.main (python3.8)",
+      "invokeTarget": {
+        "target": "code",
+        "projectRoot": "${workspaceFolder}/src",
+        "lambdaHandler": "app/document_api/document_api.main"
+      },
+      "lambda": {
+        "runtime": "python3.8",
+        "payload": {
+          "json": {
+            "body": "{\"id_documento\":\"9c5b3719-a739-4566-ae24-01f13565473f\", \"key\":\"public/dlm/76575675675676/Requisição de mudança/reproc_nota5.csv\"}",
+            //"body": "{\"document_id\":\"9c5b3719-a739-4566-ae24-01f13565473f\", \"document_type_id\":\"85ca3454-38af-45d5-aae4-f50d13038ba8\",\"tag_id\":\"5fdf040e-a8ab-4996-875d-1f300ca4628c\",\"validation\":true}",
+          // "body": "{\"id_palavra_chave\":\"1f7c7408-075f-40fc-8221-2e8dff2c9263\", \"id_documento\":\"1b0e451b-d5e9-446e-bd1a-9d81fa2dae46\"}",
+          // "body": "{\"key\":\"public/dlm/76575675675676/change requests/novo_documento.csv\", \"type_document_id\":\"3f0343b5-e8ae-4a22-ba79-e930319b825a\"}",
+          // "body": "{\"id_documento\":\"c596f703-092e-4edf-8707-90d0f940dc79\", \"id_anexo\":\"531530aa-86e0-47e3-829a-5ab50be26123\"}",
+           // "body": "{\"list_emails\":[\"gabriel@maketheway.tech\", \"gabrielomperim@gmail.com\", \"gabrielolimartins@icloud.com\"], \"email_subject\": \"TesteSubject\", \"email_body\": \"TesteBody\" }",
+            "resource": "/{proxy+}",
+            "path": "/document/list/files",
+            "httpMethod": "GET",
+            "queryStringParameters": {
+              "document_type_id":"bd90c2b4-7174-4816-8db8-590cbebc1f29"
+            },
+            "pathParameters": {
+              "proxy": ""
+            },
+            "stageVariables": {
+              "baz": "qux"
+            },
+            "headers": {
+              "Authorization": "Bearer eyJraWQiOiJ1QUU5c2NXOWo4a09wT1FkK0pjUzRDTlVMcVhiNGg0WUF6cXk0Y2c1dE1ZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjNGI4ODQwOC1mMDMxLTcwMTMtMDQ2Ny1iMTI0YjBlYTNjNTIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KUndROXk0SmciLCJjbGllbnRfaWQiOiI1dmxpbG90a3I5bXRkcHZiNDdmanY5ZmQ3MyIsIm9yaWdpbl9qdGkiOiJiMzFlZjlkYi1hMjNmLTQ4MDgtYmZhNC04YjBkMWQ4MjA4N2YiLCJldmVudF9pZCI6Ijg0ZmViNTgzLTI3MWUtNDlmYi05MDNmLTNiMzNjYWY1ZTEzMyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MjEzMDkxNzIsImV4cCI6MTcyMTMyNTUxNywiaWF0IjoxNzIxMzIxOTE3LCJqdGkiOiJhODQ4MzFjZi1kZTA2LTQ3NDctYTAyOS04OTgyODIzM2E5MzUiLCJ1c2VybmFtZSI6ImM0Yjg4NDA4LWYwMzEtNzAxMy0wNDY3LWIxMjRiMGVhM2M1MiJ9.e2HVshTdy1ExtUYpgSxaRPGbjbncapHdgOPUdeebE1GqMWFxNQya9RCdxyB3yjxDp_L6ZeJiw9lgkSNeNqZ06rpmWxmXAkTmfWOCt3m9Hx4SieATFArDyiVssze2gNYm4tL1uYWQgL7Qop5RzPKWn_XrhgJ_dm8a-Sao98sSbhLYinI9JTGXJ8Yfg3irTcJSSVf1xvhUup4DvKX4aJU8WckyVYUo0J9qnCmS8dkt_IstIvnWoxtJLVt-UA_v0IFt5miowWqAzsali3okyOxOyQ4-7rBlnFrN0ZjiQEU4uDyG2vBC18g0QruGRgiNU1CHa4LqZ548sor2LCXLabYbHQ",
+              "Content-Type": "application/json",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+              "Accept-Encoding": "gzip, deflate, sdch",
+              "Accept-Language": "pt,en-US,en;q=0.8",
+              "Cache-Control": "max-age=0",
+              "CloudFront-Forwarded-Proto": "https",
+              "CloudFront-Is-Desktop-Viewer": "true",
+              "CloudFront-Is-Mobile-Viewer": "false",
+              "CloudFront-Is-SmartTV-Viewer": "false",
+              "CloudFront-Is-Tablet-Viewer": "false",
+              "CloudFront-Viewer-Country": "US",
+              "Host": "1234567890.execute-api.{dns_suffix}",
+              "Upgrade-Insecure-Requests": "1",
+              "User-Agent": "Custom User Agent String",
+              "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
+              "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
+              "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
+              "X-Forwarded-Port": "443",
+              "X-Forwarded-Proto": "https"
+            },
+            "requestContext": {
+              "accountId": "123456789012",
+              "resourceId": "123456",
+              "stage": "prod",
+              "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+              "identity": {
+                "cognitoIdentityPoolId": null,
+                "accountId": null,
+                "cognitoIdentityId": null,
+                "caller": null,
+                "apiKey": null,
+                "sourceIp": "127.0.0.1",
+                "cognitoAuthenticationType": null,
+                "cognitoAuthenticationProvider": null,
+                "userArn": null,
+                "userAgent": "Custom User Agent String",
+                "user": null
+              },
+              "resourcePath": "/{proxy+}",
+              "httpMethod": "GET",
+              "apiId": "1234567890"
+            },
+            "isBase64Encoded": false
+          }
+        },
+        "environmentVariables": {
+          "EMAIL_PASSWORD": "ndwbonthulvwdaxp",
+          "FRONTEND_URL": "https://dev.makethefuture.tech"
+        }
+      }
+    },
+  ]
+}

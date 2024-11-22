@@ -1,0 +1,14 @@
+image: document_api
+description: document api
+memorySize: 128
+timeout: 29
+iamRoleStatementsInherit: true
+events:
+  - httpApi:
+      method: '*'
+      path: '/document/{proxy+}'
+      authorizer: 
+        name: CognitoAuthorizer
+  - httpApi:
+      method: 'OPTIONS'
+      path: '/document/{proxy+}'
