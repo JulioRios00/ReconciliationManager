@@ -6,6 +6,7 @@ from src.models.base import Base
 from src.common.conexao_banco import SECRET_JSON
 # Do not remove this imports
 # from src.models.schema_ccs import *
+from src.models.schema_ccs import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -33,7 +34,7 @@ target_metadata = [Base.metadata]
 # SCHEMA_NAME = 'public'
 
 def include_object(object, name, type_, reflected, compare_to):
-    if type_ == 'table' and object.schema != 'ccs' and object.schema != 'public' and object.schema != None:
+    if type_ == 'table' and object.schema != 'ccs' and object.schema != None:
         return False
     return True
 
