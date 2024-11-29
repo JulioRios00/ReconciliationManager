@@ -112,6 +112,9 @@ provider:
       document_api:
         path: "./src"
         file: Dockerfile.documentapi
+      american_airline:
+        path: "./src"
+        file: Dockerfile.amirecanairline
   tracing:
     apiGateway: true
     lambda: true
@@ -132,6 +135,7 @@ package:
 
 functions:
   document_api: ${file(src/app/document_api/document_api.yml)}
+  american_airline: ${file(src/app/extract_data_app/american_airline.yml)}
 
 resources:
   - Conditions:

@@ -1,0 +1,6 @@
+fitz
+PyPDF2
+PyMuPDF
+serverless-wsgi
+boto3
+

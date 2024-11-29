@@ -14,3 +14,6 @@ pytest
 HTMLParser
 flask-swagger
 requests
+fitz
+PyPDF2
+PyMuPDF
