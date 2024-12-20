@@ -1,0 +1,38 @@
+from repositories.ccs_repository import FlightRepository, ConfigurationRepository, FlightDateRepository, SourceRepository
+from services.american_airline_service import extract_data
+from datetime import datetime
+
+class FlightService:
+    def __init__(self, db_session):
+        self.flight_repository = FlightRepository(db_session)
+        self.configuration_repository = ConfigurationRepository(db_session)
+        self.flight_date_repository = FlightDateRepository(db_session)
+        self.data_source_repository = SourceRepository(db_session)
+
+
+    def process_pdf_and_store(self, pdf_file, bucket, key):
+        extracted_data = extract_data(pdf_file, bucket)
+        # flights_to_insert = []
+
+        for page, data in extracted_data.items():
+            flight_data = data.get("flight_data")
+            service_data = data.get("service_data")
+            page_number = int(page.split()[1])
+            
+            if flight_data:
+                try:
+                    id_fligth = self.flight_repository.insert_flight(flight_data)
+                    if id_fligth:
+                        self.data_source_repository.insert_data_source(key, page_number, id_fligth)
+                        date_strs = flight_data.get("datas", "").split(", ")
+                        for date_str in date_strs:
+                            try:
+                                date_obj = datetime.strptime(date_str, "%d/%m/%Y").date()
+                                self.flight_date_repository.insert_flight_date(date_obj, id_fligth)
+                            except Exception as e:
+                                print(f"Error parsing or inserting date {date_str}: {e}")
+
+                        if service_data:
+                            self.configuration_repository.insert_configuration(service_data, id_fligth)
+                except Exception as e:
+                    print(f"Error processing flight data for page {page_number}: {e}")

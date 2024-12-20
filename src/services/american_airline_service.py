@@ -230,8 +230,8 @@ def extract_data(pdf_file, bucket):
             page = pdf_document.load_page(page_num - 1)
             bold_texts = detect_bold_text(page)
             extracted_dates = extract_and_organize_dates(bold_texts)
-            final_data = extract_flight_data(flight_details, extracted_dates)
-            page_data["final_data"] = final_data  # Store final data for the current page
+            flight_data = extract_flight_data(flight_details, extracted_dates)
+            page_data["flight_data"] = flight_data  # Store final data for the current page
 
             if class_details:
                 # Parse service data using class details
@@ -247,12 +247,12 @@ def extract_data(pdf_file, bucket):
     # Convert the result data to JSON
     body = json.dumps(result_data, indent=6)
 
-    # Define S3 file key and upload
-    file_key = "public/test_pdf/results.json"
-    upload_file(file_key, bucket, body)
+    # # Define S3 file key and upload
+    # file_key = "public/test_pdf/results.json"
+    # upload_file(file_key, bucket, body)
 
-    print(f"Data successfully uploaded to S3 at {file_key}")
+    # print(f"Data successfully uploaded to S3 at {file_key}")
 
-    end_time = time.time()
-    exec_time = datetime.timedelta(seconds=(end_time - start_time))
-    print(f'\n--- Execution Time: {exec_time} ---')
+    # end_time = time.time()
+    # exec_time = datetime.timedelta(seconds=(end_time - start_time))
+    return result_data

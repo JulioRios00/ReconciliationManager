@@ -1,6 +1,6 @@
 image: document_api
 description: document api
-memorySize: 128
+memorySize: 1024
 timeout: 29
 iamRoleStatementsInherit: true
 events:
