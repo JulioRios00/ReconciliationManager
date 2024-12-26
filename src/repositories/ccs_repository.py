@@ -2,7 +2,7 @@
 from repositories.repository import Repository
 from typing import List, Dict
 #Tables
-from models.schema_ccs import Flight, Configuration, FlightDate, DataSourc
+from models.schema_ccs import Flight, Configuration, FlightDate, DataSourc, PriceReport
 
 class FlightRepository(Repository):
     def __init__(self, db_session):
@@ -94,8 +94,39 @@ class SourceRepository(Repository):
         super().__init__(db_session, DataSourc)
 
     def insert_data_source(self, file_name, page_number, id_fligth):
-        print(file_name, page_number, id_fligth)
         data_source = DataSourc(source = file_name, page = page_number, id_fligth = id_fligth)
         self.session.add(data_source)
         self.session.commit()
         print(f"Inserted data source for flight ID {id_fligth} from source {file_name} on page {page_number}")
+
+class PriceReportRepository(Repository):
+    def __init__(self, db_session):
+        super().__init__(db_session, PriceReport)
+        
+    def insert_price_report(self, header_data, report_table_data):
+        facility = header_data.get("Line 2", "").split(": ", 1)[-1]
+        organization = header_data.get("Line 3", "").split(": ", 1)[-1]
+        pulled_date = header_data.get("Line 4", "").split("from ", 1)[-1].split(" to ")[0]
+        run_date = header_data.get("Line 5", "").split(": ", 1)[-1]
+        for report in report_table_data:
+            new_report = PriceReport(
+                facility = facility,
+                organization = organization,
+                pulled_date = pulled_date,
+                run_date = run_date,
+                fac_org = report.get("FAC_ORG"),
+                spc_nr = report.get("SPC_NR"),
+                spc_dsc = report.get("SPC_DSC"),
+                act_cat_nm = report.get("ACT_CAT_NM"),
+                prs_sts_cd = report.get("PRS_STS_CD"),
+                prc_eff_dt = report.get("PRC_EFF_DT"),
+                prc_dis_dt = report.get("PRC_DIS_DT"),
+                prc_cur_cd = report.get("PRC_CUR_CD"),
+                tot_amt = report.get("TOT_AMT"),
+                lbr_amt = report.get("LBR_AMT"),
+                pkt_nr = report.get("PKT_NR"),
+                pkt_nm = report.get("PKT_NM"),
+            )
+            self.session.add(new_report)
+        self.session.commit()
+        print(f"Inserted new price report {new_report}")

@@ -1,5 +1,6 @@
-from repositories.ccs_repository import FlightRepository, ConfigurationRepository, FlightDateRepository, SourceRepository
+from repositories.ccs_repository import FlightRepository, ConfigurationRepository, FlightDateRepository, SourceRepository, PriceReportRepository
 from services.american_airline_service import extract_data
+from services.price_report_service import price_report_data
 from datetime import datetime
 
 class FlightService:
@@ -36,3 +37,15 @@ class FlightService:
                             self.configuration_repository.insert_configuration(service_data, id_fligth)
                 except Exception as e:
                     print(f"Error processing flight data for page {page_number}: {e}")
+
+class PriceReportService:
+    def __init__(self, db_session):
+        self.price_report_repository = PriceReportRepository(db_session)
+
+    def process_price_report(self, data):
+        header_data, price_data = price_report_data(data)
+        try:
+            self.price_report_repository.insert_price_report(header_data, price_data)
+        except Exception as e:
+            print(f"Error processing price report data: {e}")
+

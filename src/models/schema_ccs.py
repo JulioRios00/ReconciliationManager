@@ -135,7 +135,7 @@ class PriceReport(Base):
     PktNr = Column(Integer, nullable=False)
     PktNm = Column(String(100), nullable=False)
 
-    def __init__(self, facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, abr_amt, pkt_nr, pkt_nm):
+    def __init__(self, facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm):
         self.Facility = facility
         self.Organization = organization
         self.PulledDate = pulled_date
@@ -149,7 +149,7 @@ class PriceReport(Base):
         self.PrcDisDt = prc_dis_dt
         self.PrcCurCd = prc_cur_cd
         self.TotAmt = tot_amt
-        self.LbrAmt = abr_amt
+        self.LbrAmt = lbr_amt
         self.PktNr = pkt_nr
         self.PktNm = pkt_nm
 
