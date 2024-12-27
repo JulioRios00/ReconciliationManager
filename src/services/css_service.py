@@ -74,4 +74,4 @@ class PriceReportService:
             raise e
         except Exception as e:
             print(f"Error deleting price report: {e}")
-            raise CustomException("An error occurred while deleting the PriceReport")
+            raise CustomException("an error occurred while deleting the PriceReport")
