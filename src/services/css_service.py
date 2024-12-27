@@ -1,7 +1,21 @@
-from repositories.ccs_repository import FlightRepository, ConfigurationRepository, FlightDateRepository, SourceRepository, PriceReportRepository
+# Standard Library Imports
+from datetime import datetime
+
+# Application-Specific Repository Layer Imports
+from repositories.ccs_repository import (
+    FlightRepository,
+    ConfigurationRepository,
+    FlightDateRepository,
+    SourceRepository,
+    PriceReportRepository
+)
+
+# Application-Specific Service Layer Imports
 from services.american_airline_service import extract_data
 from services.price_report_service import price_report_data
-from datetime import datetime
+
+# Application-Specific Common Utilities
+from common.custom_exception import CustomException
 
 class FlightService:
     def __init__(self, db_session):
@@ -44,8 +58,20 @@ class PriceReportService:
 
     def process_price_report(self, data):
         header_data, price_data = price_report_data(data)
+        facility = header_data.get("Line 2", "").split(": ", 1)[-1]
+        organization = header_data.get("Line 3", "").split(": ", 1)[-1]
+        pulled_date = header_data.get("Line 4", "").split("from ", 1)[-1].split(" to ")[0]
+        run_date = header_data.get("Line 5", "").split(": ", 1)[-1]
         try:
-            self.price_report_repository.insert_price_report(header_data, price_data)
+            self.price_report_repository.insert_price_report(facility, organization, pulled_date, run_date, price_data)
         except Exception as e:
             print(f"Error processing price report data: {e}")
 
+    def delete_price_report(self, id):
+        try:
+            return self.price_report_repository.delete_price_report(id)
+        except CustomException as e:
+            raise e
+        except Exception as e:
+            print(f"Error deleting price report: {e}")
+            raise CustomException("An error occurred while deleting the PriceReport")

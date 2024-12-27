@@ -1,15 +1,23 @@
-from flask import Flask, request, jsonify
-from common.s3 import get_file_body_by_key
-from common.error_handling import all_exception_handler, flask_parameter_validation_handler
-from services.css_service import FlightService, PriceReportService
-from flask_authorize import Authorize
-from common.conexao_banco import get_session
-from common.authorization import get_current_user
-from flask_parameter_validation import ValidateParameters, Query, Json, Route
+# Standard Library Imports
 import io
 import os
 import json
+
+# Third-Party Library Imports
+from flask import Flask, request, jsonify
+from flask_authorize import Authorize
+from flask_parameter_validation import ValidateParameters, Query, Json, Route
 import serverless_wsgi
+
+# Application-Specific Common Utilities
+from common.s3 import get_file_body_by_key
+from common.error_handling import all_exception_handler, flask_parameter_validation_handler
+from common.conexao_banco import get_session
+from common.authorization import get_current_user
+from common.custom_exception import CustomException
+
+# Application-Specific Services
+from services.css_service import FlightService, PriceReportService
 
 app = Flask(__name__)
 authorize = Authorize(current_user=get_current_user, app=app)
@@ -33,7 +41,8 @@ def upload_flight_data(file_name: str = Json() ):
         return jsonify({"message": "File processed and flights uploaded successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
+#Table priceReport
 @app.route(ROUTE_PREFIX + '/upload/price_report', methods=['POST'])
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
@@ -54,6 +63,21 @@ def upload_price_report_data(file_name: str = Json() ):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@app.route(ROUTE_PREFIX + '/delete/price_report/<string:id>', methods=['DELETE'])
+@authorize.in_group('admin')
+@ValidateParameters(flask_parameter_validation_handler)
+def delete_price_report(id: str = Route(min_str_length=30, max_str_length=60)):
+    print(f'{id=}')
+    with get_session() as session:
+        try:
+            result = PriceReportService(session).delete_price_report(id)
+            return jsonify(result), 204
+        except CustomException as e:
+            return jsonify({'error': str(e)}), 404
+        except Exception as e:
+            return jsonify({'error': 'Internal server error'}), 500
+
+
 def is_api_gateway_event(event):
     if 'httpMethod' in event.keys():
         print(1, 'httpMethod' in event.keys())

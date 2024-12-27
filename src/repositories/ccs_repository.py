@@ -3,6 +3,8 @@ from repositories.repository import Repository
 from typing import List, Dict
 #Tables
 from models.schema_ccs import Flight, Configuration, FlightDate, DataSourc, PriceReport
+# Application-Specific Common Utilities
+from common.custom_exception import CustomException
 
 class FlightRepository(Repository):
     def __init__(self, db_session):
@@ -103,11 +105,11 @@ class PriceReportRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, PriceReport)
         
-    def insert_price_report(self, header_data, report_table_data):
-        facility = header_data.get("Line 2", "").split(": ", 1)[-1]
-        organization = header_data.get("Line 3", "").split(": ", 1)[-1]
-        pulled_date = header_data.get("Line 4", "").split("from ", 1)[-1].split(" to ")[0]
-        run_date = header_data.get("Line 5", "").split(": ", 1)[-1]
+    def insert_price_report(self, facility, organization, pulled_date, run_date, report_table_data):
+        # facility = header_data.get("Line 2", "").split(": ", 1)[-1]
+        # organization = header_data.get("Line 3", "").split(": ", 1)[-1]
+        # pulled_date = header_data.get("Line 4", "").split("from ", 1)[-1].split(" to ")[0]
+        # run_date = header_data.get("Line 5", "").split(": ", 1)[-1]
         for report in report_table_data:
             new_report = PriceReport(
                 facility = facility,
@@ -130,3 +132,13 @@ class PriceReportRepository(Repository):
             self.session.add(new_report)
         self.session.commit()
         print(f"Inserted new price report {new_report}")
+
+    def delete_price_report(self, id):
+        price_report = self.session.query(PriceReport).filter(PriceReport.Id == id).first()
+        if not price_report:
+            raise CustomException(f"PriceReport with ID {id} not found")
+        
+        # Commit changes to the database
+        self.session.delete(price_report)
+        self.session.commit()
+        return {'message': f'Deleted PriceReport id {id}'}
