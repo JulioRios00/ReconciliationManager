@@ -140,7 +140,6 @@ functions:
   document_api: ${file(src/app/document_api/document_api.yml)}
   american_airline: ${file(src/app/extract_data_app/american_airline/american_airline.yml)}
   american_airline_api: ${file(src/app/extract_data_app/american_airline_api/american_airline_api.yml)}
-  price_report_api: ${file(src/app/extract_data_app/price_report_api/price_report_api.yml)}
 resources:
   - Conditions:
       EnvQa : !Equals [ "${self:custom.stage}", "qa"]
