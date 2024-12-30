@@ -78,27 +78,16 @@ def delete_price_report(id: str = Route(min_str_length=30, max_str_length=60)):
             return jsonify({'error': 'Internal server error'}), 500
 
 
-def is_api_gateway_event(event):
-    if 'httpMethod' in event.keys():
-        print(1, 'httpMethod' in event.keys())
-        return True    
-    else:
-        print(2, 'http' in event)
-        return 'http' in event
+def add_body(event):
+    if 'body' not in event:
+        event['body'] = '{}'
+        headers = event['headers']
+        headers['content-type'] = 'application/json'
+    return event
+
 
 def main(event, context):
-    print('=============================')
-    print(f'{event=}')
-    print('=============================')
-
-    if is_api_gateway_event(event):
-        print("This is an API Gateway request")
-        with app.app_context():
-            return serverless_wsgi.handle_request(app, event, context)
-    else:
-        print("This is a direct Lambda invocation")
-        api_input = json.loads(event['body'])
-        print(f'{api_input=}')
-
+    event = add_body(event)
+    return serverless_wsgi.handle_request(app, event, context)
 
 
