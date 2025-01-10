@@ -97,32 +97,6 @@ def search_price_report(id: str = Route(min_str_length=30, max_str_length=60), s
         except Exception as e:
             return jsonify({'error': 'Internal server error'}), 500
 
-# @app.route(ROUTE_PREFIX + '/search/price_report/<string:id>', methods=['GET'])
-# @authorize.in_group('admin')
-# @ValidateParameters(flask_parameter_validation_handler)
-# def search_price_report(id: str = Route(min_str_length=30, max_str_length=60), facility: str = Json(), organization: str = Json(), pulled_date: str = Json(), run_date: str = Json(), fac_org: str = Json(), spc_nr: str = Json(), spc_dsc: str = Json(), 
-#                 act_cat_nm: str = Json(), prs_sts_cd: str = Json(), prc_eff_dt: str = Json(), prc_dis_dt: str = Json(), prc_cur_cd: str = Json(), tot_amt: str = Json(), lbr_amt: str = Json(), 
-#                 pkt_nr: str = Json(), pkt_nm: str = Json()):
-#     with get_session() as session:
-#         try:
-#             result = PriceReportService(session).check_item(facility=facility, organization=organization, pulled_date=pulled_date, run_date=run_date, fac_org=fac_org, spc_nr=spc_nr, spc_dsc=spc_dsc, 
-#                 act_cat_nm=act_cat_nm, prs_sts_cd=prs_sts_cd, prc_eff_dt=prc_eff_dt, prc_dis_dt=prc_dis_dt, prc_cur_cd=prc_cur_cd, tot_amt=tot_amt, lbr_amt=lbr_amt, 
-#                 pkt_nr=pkt_nr, pkt_nm=pkt_nm)
-#             if not result:
-#                 return jsonify({"message": "No records found"}), 404
-#             print('-------------------------------------------------------')
-#             print(result)
-#             print('-------------------------------------------------------')
-#             # Serialize the result (handle both single and multiple records)
-#             if isinstance(result, list):
-#                 return jsonify([item.serialize() for item in result]), 200
-#             else:
-#                 return jsonify(result.serialize()), 200
-
-#         except CustomException as e:
-#             return jsonify({'error': str(e)}), 400
-#         except Exception as e:
-#             return jsonify({'error': 'Internal server error'}), 500
         
 def add_body(event):
     if 'body' not in event:
