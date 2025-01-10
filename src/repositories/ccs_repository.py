@@ -105,31 +105,26 @@ class PriceReportRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, PriceReport)
         
-    def insert_price_report(self, facility, organization, pulled_date, run_date, report_table_data):
-        # facility = header_data.get("Line 2", "").split(": ", 1)[-1]
-        # organization = header_data.get("Line 3", "").split(": ", 1)[-1]
-        # pulled_date = header_data.get("Line 4", "").split("from ", 1)[-1].split(" to ")[0]
-        # run_date = header_data.get("Line 5", "").split(": ", 1)[-1]
-        for report in report_table_data:
-            new_report = PriceReport(
-                facility = facility,
-                organization = organization,
-                pulled_date = pulled_date,
-                run_date = run_date,
-                fac_org = report.get("FAC_ORG"),
-                spc_nr = report.get("SPC_NR"),
-                spc_dsc = report.get("SPC_DSC"),
-                act_cat_nm = report.get("ACT_CAT_NM"),
-                prs_sts_cd = report.get("PRS_STS_CD"),
-                prc_eff_dt = report.get("PRC_EFF_DT"),
-                prc_dis_dt = report.get("PRC_DIS_DT"),
-                prc_cur_cd = report.get("PRC_CUR_CD"),
-                tot_amt = report.get("TOT_AMT"),
-                lbr_amt = report.get("LBR_AMT"),
-                pkt_nr = report.get("PKT_NR"),
-                pkt_nm = report.get("PKT_NM"),
-            )
-            self.session.add(new_report)
+    def insert_price_report(self, facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm):
+        new_report = PriceReport(
+            facility = facility,
+            organization = organization,
+            pulled_date = pulled_date,
+            run_date = run_date,
+            fac_org = fac_org,
+            spc_nr = spc_nr,
+            spc_dsc = spc_dsc,
+            act_cat_nm = act_cat_nm,
+            prs_sts_cd = prs_sts_cd,
+            prc_eff_dt = prc_eff_dt,
+            prc_dis_dt = prc_dis_dt,
+            prc_cur_cd = prc_cur_cd,
+            tot_amt = tot_amt,
+            lbr_amt = lbr_amt,
+            pkt_nr = pkt_nr,
+            pkt_nm = pkt_nm,
+        )
+        self.session.add(new_report)
         self.session.commit()
         print(f"Inserted new price report {new_report}")
 
@@ -142,3 +137,35 @@ class PriceReportRepository(Repository):
         self.session.delete(price_report)
         self.session.commit()
         return {'message': f'Deleted PriceReport id {id}'}
+
+    def check_item(self, facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, 
+                act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, 
+                pkt_nr, pkt_nm):
+        query = self.session.query(PriceReport).filter(PriceReport.Excluido == False)
+        query = query.filter(
+            PriceReport.Facility == facility,
+            PriceReport.Organization == organization,
+            PriceReport.PulledDate == pulled_date,
+            PriceReport.RunDate == run_date,
+            PriceReport.FacOrg == fac_org,
+            PriceReport.SpcNr == spc_nr,
+            PriceReport.SpcDsc == spc_dsc,
+            PriceReport.ActCatNm == act_cat_nm,
+            PriceReport.PrsStsCd == prs_sts_cd,
+            PriceReport.PrcEffDt == prc_eff_dt,
+            PriceReport.PrcDisDt == prc_dis_dt,
+            PriceReport.PrcCurCd == prc_cur_cd,
+            PriceReport.TotAmt == tot_amt,
+            PriceReport.LbrAmt == lbr_amt,
+            PriceReport.PktNr == pkt_nr,
+            PriceReport.PktNm == pkt_nm
+        )
+        
+        return query.first()
+
+
+    def get_by_id(self, id):
+        return self.session.query(PriceReport).filter(PriceReport.Id == id, PriceReport.Excluido == False).first()
+
+    def get_by_spc_dsc(self, spc_dsc):
+        return self.session.query(PriceReport).filter(PriceReport.SpcDsc.ilike(f"%{spc_dsc}%"), PriceReport.Excluido == False).all()
