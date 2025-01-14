@@ -7,6 +7,7 @@ COPY app/extract_data_app/airline_api/requirements.txt .
 RUN  pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
 COPY app/extract_data_app/airline_api/airline_api.py ${LAMBDA_TASK_ROOT}
+COPY services ${LAMBDA_TASK_ROOT}/services
 COPY common ${LAMBDA_TASK_ROOT}/common
 COPY models ${LAMBDA_TASK_ROOT}/models
 COPY enums ${LAMBDA_TASK_ROOT}/enums
