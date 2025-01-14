@@ -115,9 +115,9 @@ provider:
       american_airline:
         path: "./src"
         file: Dockerfile.amirecanairline
-      american_airline_api:
+      airline_api:
         path: "./src"
-        file: Dockerfile.amirecanairlineapi
+        file: Dockerfile.airlineapi
   tracing:
     apiGateway: true
     lambda: true
@@ -139,7 +139,8 @@ package:
 functions:
   document_api: ${file(src/app/document_api/document_api.yml)}
   american_airline: ${file(src/app/extract_data_app/american_airline/american_airline.yml)}
-  american_airline_api: ${file(src/app/extract_data_app/american_airline_api/american_airline_api.yml)}
+  airline_api: ${file(src/app/extract_data_app/airline_api/airline_api.yml)}
+
 resources:
   - Conditions:
       EnvQa : !Equals [ "${self:custom.stage}", "qa"]

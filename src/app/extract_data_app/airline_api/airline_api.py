@@ -24,13 +24,13 @@ authorize = Authorize(current_user=get_current_user, app=app)
 
 ROUTE_PREFIX = '/flights'
 
-@app.route(ROUTE_PREFIX + '/upload/american_airline', methods=['POST'])
+@app.route(ROUTE_PREFIX + '/upload/airline', methods=['POST'])
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
 def upload_flight_data(file_name: str = Json() ):
     try:
         bucket = os.getenv('MTW_BUCKET_NAME')
-        key = 'public/airline_pdf/'+file_name
+        key = 'public/airline_files/TP_006/'+file_name
         file, size = get_file_body_by_key(key, bucket)
         file_content = file.read()
         pdf_bytes = io.BytesIO(file_content)
@@ -49,7 +49,7 @@ def upload_flight_data(file_name: str = Json() ):
 def upload_price_report_data(file_name: str = Json() ):
     try:
         bucket = os.getenv('MTW_BUCKET_NAME')
-        key = 'public/price_report/'+file_name
+        key = 'public/airline_files/TP_100/'+file_name
         file, size = get_file_body_by_key(key, bucket)
         file_content = file.read()
 
@@ -67,13 +67,33 @@ def upload_price_report_data(file_name: str = Json() ):
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
 def delete_price_report(id: str = Route(min_str_length=30, max_str_length=60)):
-    print(f'{id=}')
     with get_session() as session:
         try:
             result = PriceReportService(session).delete_price_report(id)
             return jsonify(result), 204
         except CustomException as e:
             return jsonify({'error': str(e)}), 404
+        except Exception as e:
+            return jsonify({'error': 'Internal server error'}), 500
+
+@app.route(ROUTE_PREFIX + '/search/price_report/<string:id>', methods=['GET'])
+@authorize.in_group('admin')
+@ValidateParameters(flask_parameter_validation_handler)
+def search_price_report(id: str = Route(min_str_length=30, max_str_length=60), spc_dsc: str = Json()):
+    with get_session() as session:
+        try:
+            result = PriceReportService(session).search_price_report(id=id, spc_dsc=spc_dsc)
+            if not result:
+                return jsonify({"message": "No records found"}), 404
+            
+            # Serialize the result (handle both single and multiple records)
+            if isinstance(result, list):
+                return jsonify([item.serialize() for item in result]), 200
+            else:
+                return jsonify(result.serialize()), 200
+
+        except CustomException as e:
+            return jsonify({'error': str(e)}), 400
         except Exception as e:
             return jsonify({'error': 'Internal server error'}), 500
 
@@ -89,5 +109,3 @@ def add_body(event):
 def main(event, context):
     event = add_body(event)
     return serverless_wsgi.handle_request(app, event, context)
-
-

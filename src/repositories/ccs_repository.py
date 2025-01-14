@@ -10,25 +10,25 @@ class FlightRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, Flight)       
         
-    def insert_flight(self, flight_data: dict):
+    def insert_flight(self, airline_company, period, unit, cycle, vr_voo, origin, destination, departure_time, arrival_time, aircraft):
         """
         Inserts a new flight record into the Flight table.
         """
         flight = Flight(
-            empresa_aerea=flight_data.get("Empresa Aérea"),
-            periodo=flight_data.get("periodo"),
-            unidade=flight_data.get("unidade"),
-            ciclo=int(flight_data.get("ciclo", 0)),
-            vr_voo=int(flight_data.get("Vr Voo", 0)),
-            origem=flight_data.get("origem"),
-            destino=flight_data.get("destino"),
-            hora_partida=flight_data.get("hora partida"),
-            hora_chegada=flight_data.get("hora chegada"),
-            aeronave=int(flight_data.get("aeronave", 0)),
+            empresa_aerea=airline_company,
+            periodo=period,
+            unidade=unit,
+            ciclo=cycle,
+            vr_voo=vr_voo,
+            origem=origin,
+            destino=destination,
+            hora_partida=departure_time,
+            hora_chegada=arrival_time,
+            aeronave=aircraft
         )
         self.session.add(flight)
         self.session.commit()
-        print(f"Successfully inserted {flight_data} new flights into the database.")
+        print(f"Successfully inserted new flights into the database.")
         return flight.Id
 
 
@@ -57,28 +57,37 @@ class ConfigurationRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, Configuration)
 
-    def insert_configuration(self, service_data, flight_id):
-        for class_type, packets in service_data.items():
-            for packet, packet_content in packets.items():
-                destino_packet = packet_content.get("destino", "")
-                items = packet_content.get("items", [])
-                for item in items:
-                    new_config = Configuration(
-                        tipo_de_classe=class_type,
-                        pacote=packet,
-                        destino_packet=destino_packet,
-                        código_doItem=item.get("Item Code", ""),
-                        descrição=item.get("Descrição", ""),
-                        provision1=item.get("Provision_1", ""),
-                        provision2=item.get("Provision_2", ""),
-                        tipo=item.get("type", ""),
-                        svc=int(item.get("Svc", "0")),
-                        id_fligth=flight_id
-                    )
-                    self.session.add(new_config)
+    def insert_configuration(self, class_type, packet, destination_packet, item_code, discription, Provision_1, Provision_2, item_type, svc, id_fligth):
+        new_config = Configuration(
+            tipo_de_classe=class_type,
+            pacote=packet,
+            destino_packet=destination_packet,
+            código_doItem=item_code,
+            descrição=discription,
+            provision1=Provision_1,
+            provision2=Provision_2,
+            tipo=item_type,
+            svc=svc,
+            id_fligth=id_fligth
+        )
+        self.session.add(new_config)
         self.session.commit()
         print("Configuration data inserted successfully.")
 
+    def check_configuration_item(self, class_type, packet, destination_packet, item_code, discription, Provision_1, Provision_2, item_type, svc):
+        query = self.session.query(Configuration).filter(Configuration.Excluido == False)
+        query = query.filter(
+            Configuration.TipoDeClasse == class_type,
+            Configuration.pacote == packet,
+            Configuration.destinoPacket == destination_packet,
+            Configuration.CódigoDoItem == item_code,
+            Configuration.Descrição == discription,
+            Configuration.Provision1 == Provision_1,
+            Configuration.Provision2 == Provision_2,
+            Configuration.Tipo == item_type,
+            Configuration.Svc == svc
+        )
+        return query.first()
 class FlightDateRepository(Repository):
     
     def __init__(self, db_session):
@@ -105,31 +114,26 @@ class PriceReportRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, PriceReport)
         
-    def insert_price_report(self, facility, organization, pulled_date, run_date, report_table_data):
-        # facility = header_data.get("Line 2", "").split(": ", 1)[-1]
-        # organization = header_data.get("Line 3", "").split(": ", 1)[-1]
-        # pulled_date = header_data.get("Line 4", "").split("from ", 1)[-1].split(" to ")[0]
-        # run_date = header_data.get("Line 5", "").split(": ", 1)[-1]
-        for report in report_table_data:
-            new_report = PriceReport(
-                facility = facility,
-                organization = organization,
-                pulled_date = pulled_date,
-                run_date = run_date,
-                fac_org = report.get("FAC_ORG"),
-                spc_nr = report.get("SPC_NR"),
-                spc_dsc = report.get("SPC_DSC"),
-                act_cat_nm = report.get("ACT_CAT_NM"),
-                prs_sts_cd = report.get("PRS_STS_CD"),
-                prc_eff_dt = report.get("PRC_EFF_DT"),
-                prc_dis_dt = report.get("PRC_DIS_DT"),
-                prc_cur_cd = report.get("PRC_CUR_CD"),
-                tot_amt = report.get("TOT_AMT"),
-                lbr_amt = report.get("LBR_AMT"),
-                pkt_nr = report.get("PKT_NR"),
-                pkt_nm = report.get("PKT_NM"),
-            )
-            self.session.add(new_report)
+    def insert_price_report(self, facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm):
+        new_report = PriceReport(
+            facility = facility,
+            organization = organization,
+            pulled_date = pulled_date,
+            run_date = run_date,
+            fac_org = fac_org,
+            spc_nr = spc_nr,
+            spc_dsc = spc_dsc,
+            act_cat_nm = act_cat_nm,
+            prs_sts_cd = prs_sts_cd,
+            prc_eff_dt = prc_eff_dt,
+            prc_dis_dt = prc_dis_dt,
+            prc_cur_cd = prc_cur_cd,
+            tot_amt = tot_amt,
+            lbr_amt = lbr_amt,
+            pkt_nr = pkt_nr,
+            pkt_nm = pkt_nm,
+        )
+        self.session.add(new_report)
         self.session.commit()
         print(f"Inserted new price report {new_report}")
 
@@ -142,3 +146,33 @@ class PriceReportRepository(Repository):
         self.session.delete(price_report)
         self.session.commit()
         return {'message': f'Deleted PriceReport id {id}'}
+
+    def check_item(self, facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, 
+                act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, 
+                pkt_nr, pkt_nm):
+        query = self.session.query(PriceReport).filter(PriceReport.Excluido == False)
+        query = query.filter(
+            PriceReport.Facility == facility,
+            PriceReport.Organization == organization,
+            PriceReport.PulledDate == pulled_date,
+            PriceReport.RunDate == run_date,
+            PriceReport.FacOrg == fac_org,
+            PriceReport.SpcNr == spc_nr,
+            PriceReport.SpcDsc == spc_dsc,
+            PriceReport.ActCatNm == act_cat_nm,
+            PriceReport.PrsStsCd == prs_sts_cd,
+            PriceReport.PrcEffDt == prc_eff_dt,
+            PriceReport.PrcDisDt == prc_dis_dt,
+            PriceReport.PrcCurCd == prc_cur_cd,
+            PriceReport.TotAmt == tot_amt,
+            PriceReport.LbrAmt == lbr_amt,
+            PriceReport.PktNr == pkt_nr,
+            PriceReport.PktNm == pkt_nm
+        )
+        return query.first()
+
+    def get_by_id(self, id):
+        return self.session.query(PriceReport).filter(PriceReport.Id == id, PriceReport.Excluido == False).first()
+
+    def get_by_spc_dsc(self, spc_dsc):
+        return self.session.query(PriceReport).filter(PriceReport.SpcDsc.ilike(f"%{spc_dsc}%"), PriceReport.Excluido == False).all()
