@@ -24,7 +24,7 @@ authorize = Authorize(current_user=get_current_user, app=app)
 
 ROUTE_PREFIX = '/flights'
 
-@app.route(ROUTE_PREFIX + '/upload/american_airline', methods=['POST'])
+@app.route(ROUTE_PREFIX + '/upload/airline', methods=['POST'])
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
 def upload_flight_data(file_name: str = Json() ):

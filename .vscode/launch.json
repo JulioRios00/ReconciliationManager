@@ -146,11 +146,11 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
-      "name": "american_airline_api.main (python3.8)",
+      "name": "airline_api.main (python3.8)",
       "invokeTarget": {
           "target": "code",
           "projectRoot": "${workspaceFolder}/src",
-          "lambdaHandler": "app/extract_data_app/american_airline_api/american_airline_api.main"
+          "lambdaHandler": "app/extract_data_app/airline_api/airline_api.main"
         },
       "lambda": {
           "memoryMb": 3000,
@@ -195,7 +195,7 @@
                     }
                   ],
                   "resource": "/{proxy+}",
-                  "path": "/flights/upload/american_airline",
+                  "path": "/flights/upload/airline",
                   "httpMethod": "POST",
                   "queryStringParameters": {
                   },
@@ -376,7 +376,7 @@
       "invokeTarget": {
           "target": "code",
           "projectRoot": "${workspaceFolder}/src",
-          "lambdaHandler": "app/extract_data_app/american_airline_api/american_airline_api.main"
+          "lambdaHandler": "app/extract_data_app/airline_api/airline_api.main"
         },
       "lambda": {
           "memoryMb": 3000,
