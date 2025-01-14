@@ -11,7 +11,7 @@ from repositories.ccs_repository import (
 )
 
 # Application-Specific Service Layer Imports
-from services.american_airline_service import extract_data
+from services.airline_service import extract_data
 from services.price_report_service import price_report_data
 
 # Application-Specific Common Utilities

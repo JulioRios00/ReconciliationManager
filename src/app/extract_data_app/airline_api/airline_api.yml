@@ -15,9 +15,9 @@ iamRoleStatements:
 events:
   - httpApi:
       method: '*'
-      path: '/legal_base/{proxy+}'
+      path: '/flights/{proxy+}'
       authorizer: 
         name: CognitoAuthorizer
   - httpApi:
       method: 'OPTIONS'
-      path: '/legal_base/{proxy+}'
+      path: '/flights/{proxy+}'

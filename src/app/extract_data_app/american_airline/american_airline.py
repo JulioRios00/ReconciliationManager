@@ -4,7 +4,7 @@ from services.css_service import FlightService
 from flask_authorize import Authorize
 from common.conexao_banco import get_session
 import io
-from services.american_airline_service import extract_data
+from services.airline_service import extract_data
 
 app = Flask(__name__)
 

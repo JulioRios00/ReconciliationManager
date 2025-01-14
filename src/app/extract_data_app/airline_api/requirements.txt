@@ -11,3 +11,4 @@ PyJWT
 sqlalchemy-pagination
 aws-psycopg2
 SQLAlchemy
+
