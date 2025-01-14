@@ -10,25 +10,25 @@ class FlightRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, Flight)       
         
-    def insert_flight(self, flight_data: dict):
+    def insert_flight(self, airline_company, period, unit, cycle, vr_voo, origin, destination, departure_time, arrival_time, aircraft):
         """
         Inserts a new flight record into the Flight table.
         """
         flight = Flight(
-            empresa_aerea=flight_data.get("Empresa Aérea"),
-            periodo=flight_data.get("periodo"),
-            unidade=flight_data.get("unidade"),
-            ciclo=int(flight_data.get("ciclo", 0)),
-            vr_voo=int(flight_data.get("Vr Voo", 0)),
-            origem=flight_data.get("origem"),
-            destino=flight_data.get("destino"),
-            hora_partida=flight_data.get("hora partida"),
-            hora_chegada=flight_data.get("hora chegada"),
-            aeronave=int(flight_data.get("aeronave", 0)),
+            empresa_aerea=airline_company,
+            periodo=period,
+            unidade=unit,
+            ciclo=cycle,
+            vr_voo=vr_voo,
+            origem=origin,
+            destino=destination,
+            hora_partida=departure_time,
+            hora_chegada=arrival_time,
+            aeronave=aircraft
         )
         self.session.add(flight)
         self.session.commit()
-        print(f"Successfully inserted {flight_data} new flights into the database.")
+        print(f"Successfully inserted new flights into the database.")
         return flight.Id
 
 
@@ -57,28 +57,37 @@ class ConfigurationRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, Configuration)
 
-    def insert_configuration(self, service_data, flight_id):
-        for class_type, packets in service_data.items():
-            for packet, packet_content in packets.items():
-                destino_packet = packet_content.get("destino", "")
-                items = packet_content.get("items", [])
-                for item in items:
-                    new_config = Configuration(
-                        tipo_de_classe=class_type,
-                        pacote=packet,
-                        destino_packet=destino_packet,
-                        código_doItem=item.get("Item Code", ""),
-                        descrição=item.get("Descrição", ""),
-                        provision1=item.get("Provision_1", ""),
-                        provision2=item.get("Provision_2", ""),
-                        tipo=item.get("type", ""),
-                        svc=int(item.get("Svc", "0")),
-                        id_fligth=flight_id
-                    )
-                    self.session.add(new_config)
+    def insert_configuration(self, class_type, packet, destination_packet, item_code, discription, Provision_1, Provision_2, item_type, svc, id_fligth):
+        new_config = Configuration(
+            tipo_de_classe=class_type,
+            pacote=packet,
+            destino_packet=destination_packet,
+            código_doItem=item_code,
+            descrição=discription,
+            provision1=Provision_1,
+            provision2=Provision_2,
+            tipo=item_type,
+            svc=svc,
+            id_fligth=id_fligth
+        )
+        self.session.add(new_config)
         self.session.commit()
         print("Configuration data inserted successfully.")
 
+    def check_configuration_item(self, class_type, packet, destination_packet, item_code, discription, Provision_1, Provision_2, item_type, svc):
+        query = self.session.query(Configuration).filter(Configuration.Excluido == False)
+        query = query.filter(
+            Configuration.TipoDeClasse == class_type,
+            Configuration.pacote == packet,
+            Configuration.destinoPacket == destination_packet,
+            Configuration.CódigoDoItem == item_code,
+            Configuration.Descrição == discription,
+            Configuration.Provision1 == Provision_1,
+            Configuration.Provision2 == Provision_2,
+            Configuration.Tipo == item_type,
+            Configuration.Svc == svc
+        )
+        return query.first()
 class FlightDateRepository(Repository):
     
     def __init__(self, db_session):
@@ -160,9 +169,7 @@ class PriceReportRepository(Repository):
             PriceReport.PktNr == pkt_nr,
             PriceReport.PktNm == pkt_nm
         )
-        
         return query.first()
-
 
     def get_by_id(self, id):
         return self.session.query(PriceReport).filter(PriceReport.Id == id, PriceReport.Excluido == False).first()

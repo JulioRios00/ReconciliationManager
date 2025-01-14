@@ -24,13 +24,13 @@ authorize = Authorize(current_user=get_current_user, app=app)
 
 ROUTE_PREFIX = '/flights'
 
-@app.route(ROUTE_PREFIX + '/upload/american_airline', methods=['POST'])
+@app.route(ROUTE_PREFIX + '/upload/airline', methods=['POST'])
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
 def upload_flight_data(file_name: str = Json() ):
     try:
         bucket = os.getenv('MTW_BUCKET_NAME')
-        key = 'public/airline_pdf/'+file_name
+        key = 'public/airline_files/TP_006/'+file_name
         file, size = get_file_body_by_key(key, bucket)
         file_content = file.read()
         pdf_bytes = io.BytesIO(file_content)
@@ -49,7 +49,7 @@ def upload_flight_data(file_name: str = Json() ):
 def upload_price_report_data(file_name: str = Json() ):
     try:
         bucket = os.getenv('MTW_BUCKET_NAME')
-        key = 'public/price_report/'+file_name
+        key = 'public/airline_files/TP_100/'+file_name
         file, size = get_file_body_by_key(key, bucket)
         file_content = file.read()
 
@@ -97,7 +97,7 @@ def search_price_report(id: str = Route(min_str_length=30, max_str_length=60), s
         except Exception as e:
             return jsonify({'error': 'Internal server error'}), 500
 
-        
+
 def add_body(event):
     if 'body' not in event:
         event['body'] = '{}'
@@ -109,5 +109,3 @@ def add_body(event):
 def main(event, context):
     event = add_body(event)
     return serverless_wsgi.handle_request(app, event, context)
-
-

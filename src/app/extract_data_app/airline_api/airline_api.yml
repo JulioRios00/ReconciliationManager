@@ -1,5 +1,5 @@
-image: american_airline_api
-description: american airline api
+image: airline_api
+description: airline api
 memorySize: 1024
 timeout: 900
 iamRoleStatementsInherit: true
