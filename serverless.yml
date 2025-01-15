@@ -112,9 +112,12 @@ provider:
       document_api:
         path: "./src"
         file: Dockerfile.documentapi
-      american_airline:
+      analyze_flight_file:
         path: "./src"
-        file: Dockerfile.amirecanairline
+        file: Dockerfile.flightfile
+      analyze_price_report:
+        path: "./src"
+        file: Dockerfile.pricereport
       airline_api:
         path: "./src"
         file: Dockerfile.airlineapi
@@ -138,9 +141,9 @@ package:
 
 functions:
   document_api: ${file(src/app/document_api/document_api.yml)}
-  american_airline: ${file(src/app/extract_data_app/american_airline/american_airline.yml)}
+  analyze_flight_file: ${file(src/app/extract_data_app/analyze_flight_file/analyze_tp_006.yml)}
   airline_api: ${file(src/app/extract_data_app/airline_api/airline_api.yml)}
-
+  analyze_price_report: ${file(src/app/extract_data_app/analyze_price_report/analyze_tp_100.yml)}
 resources:
   - Conditions:
       EnvQa : !Equals [ "${self:custom.stage}", "qa"]

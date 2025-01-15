@@ -1,0 +1,4 @@
+image: analyze_price_report
+description: analyze price report
+memorySize: 1024
+timeout: 900

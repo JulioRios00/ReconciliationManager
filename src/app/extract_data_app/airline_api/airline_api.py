@@ -30,9 +30,8 @@ ROUTE_PREFIX = '/flights'
 @ValidateParameters(flask_parameter_validation_handler)
 def upload_flight_data(file_name: str = Json() ):
     try:
-        bucket = os.getenv('MTW_BUCKET_NAME')
         key = 'public/airline_files/TP_006/'+file_name
-        payload = {'bucket':bucket, 'key':key}
+        payload = {'key':key}
         invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-american_airline', payload)
         return jsonify({"message": "File processed and flights uploaded successfully"}), 201
     except Exception as e:
@@ -45,18 +44,10 @@ def upload_flight_data(file_name: str = Json() ):
 def upload_price_report_data(file_name: str = Json() ):
     print('file_name____', file_name)
     try:
-        bucket = os.getenv('MTW_BUCKET_NAME')
         key = 'public/airline_files/TP_100/'+file_name
-        file, size = get_file_body_by_key(key, bucket)
-        file_content = file.read()
-
-        if not file_content:  # Check if the file is empty
-            print("Error: The file file is empty.")
-
-        with get_session() as session:
-            price_report_service = PriceReportService(session)
-            price_report_service.process_price_report(file_content)
-        return jsonify({"message": "File processed and price report data uploaded successfully"}), 201    
+        payload = {'key':key}
+        invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-american_airline', payload)
+        return jsonify({"message": "File processed and flights uploaded successfully"}), 201    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     

@@ -88,30 +88,40 @@ class PriceReportService:
             organization = header_data.get("Line 3", "").split(": ", 1)[-1]
             pulled_date = header_data.get("Line 4", "").split("from ", 1)[-1].split(" to ")[0]
             run_date = header_data.get("Line 5", "").split(": ", 1)[-1]
-            for report in price_data:
-                facility = facility
-                organization = organization
-                pulled_date = pulled_date
-                run_date = run_date
-                fac_org = report.get("FAC_ORG")
-                spc_nr = report.get("SPC_NR")
-                spc_dsc = report.get("SPC_DSC")
-                act_cat_nm = report.get("ACT_CAT_NM")
-                prs_sts_cd = report.get("PRS_STS_CD")
-                prc_eff_dt = report.get("PRC_EFF_DT")
-                prc_dis_dt = report.get("PRC_DIS_DT")
-                prc_cur_cd = report.get("PRC_CUR_CD")
-                tot_amt = report.get("TOT_AMT")
-                lbr_amt = report.get("LBR_AMT")
-                pkt_nr = report.get("PKT_NR")
-                pkt_nm = report.get("PKT_NM")
-
-                if not self.check_item(facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm):
-                    self.price_report_repository.insert_price_report(facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm)
-                else:
-                    print(f"Item already exists: {report}")
+            self.price_report_repository.insert_packeg_ackeg_price_report(facility, organization, pulled_date, run_date, price_data)
         except Exception as e:
             print(f"Error processing price report data: {e}")
+        # try:
+        #     header_data, price_data = price_report_data(data)
+        #     facility = header_data.get("Line 2", "").split(": ", 1)[-1]
+        #     organization = header_data.get("Line 3", "").split(": ", 1)[-1]
+        #     pulled_date = header_data.get("Line 4", "").split("from ", 1)[-1].split(" to ")[0]
+        #     run_date = header_data.get("Line 5", "").split(": ", 1)[-1]
+        #     for report in price_data:
+        #         facility = facility
+        #         organization = organization
+        #         pulled_date = pulled_date
+        #         run_date = run_date
+        #         fac_org = report.get("FAC_ORG")
+        #         spc_nr = report.get("SPC_NR")
+        #         spc_dsc = report.get("SPC_DSC")
+        #         act_cat_nm = report.get("ACT_CAT_NM")
+        #         prs_sts_cd = report.get("PRS_STS_CD")
+        #         prc_eff_dt = report.get("PRC_EFF_DT")
+        #         prc_dis_dt = report.get("PRC_DIS_DT")
+        #         prc_cur_cd = report.get("PRC_CUR_CD")
+        #         tot_amt = report.get("TOT_AMT")
+        #         lbr_amt = report.get("LBR_AMT")
+        #         pkt_nr = report.get("PKT_NR")
+        #         pkt_nm = report.get("PKT_NM")
+        #         self.price_report_repository.insert_price_report(facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm)
+
+                # if not self.check_item(facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm):
+                #     self.price_report_repository.insert_price_report(facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm)
+                # else:
+                #     print(f"Item already exists: {report}")
+        # except Exception as e:
+        #     print(f"Error processing price report data: {e}")
 
     def delete_price_report(self, id):
         try:
