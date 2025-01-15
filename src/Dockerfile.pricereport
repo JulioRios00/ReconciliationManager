@@ -6,7 +6,7 @@ FROM public.ecr.aws/lambda/python:3.8
 COPY app/extract_data_app/analyze_price_report/requirements.txt .
 RUN  pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-COPY app/extract_data_app/analyze_price_report/analyze_tp_100.py ${LAMBDA_TASK_ROOT}
+COPY app/extract_data_app/analyze_price_report/analyz_tp_100.py ${LAMBDA_TASK_ROOT}
 COPY services ${LAMBDA_TASK_ROOT}/services
 COPY common ${LAMBDA_TASK_ROOT}/common
 COPY models ${LAMBDA_TASK_ROOT}/models
