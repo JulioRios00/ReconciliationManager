@@ -15,6 +15,7 @@ from common.error_handling import all_exception_handler, flask_parameter_validat
 from common.conexao_banco import get_session
 from common.authorization import get_current_user
 from common.custom_exception import CustomException
+# from common.lambda_boto import invoke_lambda_async
 
 # Application-Specific Services
 from services.css_service import FlightService, PriceReportService
@@ -31,6 +32,9 @@ def upload_flight_data(file_name: str = Json() ):
     try:
         bucket = os.getenv('MTW_BUCKET_NAME')
         key = 'public/airline_files/TP_006/'+file_name
+        # payload = {'bucket':bucket, 'key':key}
+        # invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-american_airline', payload)
+
         file, size = get_file_body_by_key(key, bucket)
         file_content = file.read()
         pdf_bytes = io.BytesIO(file_content)

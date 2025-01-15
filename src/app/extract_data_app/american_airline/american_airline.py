@@ -22,12 +22,10 @@ def main(event, context):
     extracted_data = extract_data(pdf_bytes, bucket)
     print("...........")
 
-    # try:
-    #     with get_session() as session:
-    #         flight_service = FlightService(session)
-    #         flight_service.process_pdf_and_store(pdf_bytes, bucket)
-    #         print("===== Done =====")
-    #     return jsonify({"message": "File processed and flights uploaded successfully"}), 201
-    # except Exception as e:
-    #     return jsonify({"error": str(e)}), 500
-    
+    # file, size = get_file_body_by_key(event['key'], event['bucket'])
+    # file_content = file.read()
+    # pdf_bytes = io.BytesIO(file_content)
+    # with get_session() as session:
+    #     flight_service = FlightService(session)
+    #     flight_service.process_pdf_and_store(pdf_bytes, event['bucket'], event['key'])
+    # return jsonify({"message": "File processed and flights uploaded successfully"}), 201
