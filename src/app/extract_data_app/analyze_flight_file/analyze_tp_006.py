@@ -17,5 +17,3 @@ def main(event, context):
     with get_session() as session:
         flight_service = FlightService(session)
         flight_service.process_pdf_and_store(pdf_bytes, bucket, event['key'])
-
-    

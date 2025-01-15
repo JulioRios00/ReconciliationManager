@@ -16,5 +16,3 @@ def main(event, context):
     with get_session() as session:
         price_report_service = PriceReportService(session)
         price_report_service.process_price_report(file_content)
-
-    
