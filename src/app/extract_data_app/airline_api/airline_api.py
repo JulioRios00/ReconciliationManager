@@ -34,7 +34,6 @@ def upload_flight_data(file_name: str = Json() ):
         file, size = get_file_body_by_key(key, bucket)
         file_content = file.read()
         pdf_bytes = io.BytesIO(file_content)
-
         with get_session() as session:
             flight_service = FlightService(session)
             flight_service.process_pdf_and_store(pdf_bytes, bucket, file_name)
@@ -47,6 +46,7 @@ def upload_flight_data(file_name: str = Json() ):
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
 def upload_price_report_data(file_name: str = Json() ):
+    print('file_name____', file_name)
     try:
         bucket = os.getenv('MTW_BUCKET_NAME')
         key = 'public/airline_files/TP_100/'+file_name

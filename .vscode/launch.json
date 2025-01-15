@@ -157,7 +157,7 @@
           "runtime": "python3.8",
           "payload": {
               "json": {
-                  "body": "{\"file_name\":\"TP006_AA_859_GIGC1Outubro.pdf\"}",
+                  "body": "{\"file_name\":\"Arion - 20059578000120-TP006_AA_859_GIGC1Outubro.pdf\"}",
                   "Records": [
                     {
                         "eventVersion": "2.0",
