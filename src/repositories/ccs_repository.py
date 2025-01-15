@@ -138,24 +138,24 @@ class PriceReportRepository(Repository):
         print(f"Inserted new price report {new_report}")
 
     def insert_packeg_ackeg_price_report(self, facility, organization, pulled_date, run_date, report_table_data):
-         for report in report_table_data:
+        for report in report_table_data:
             new_report = PriceReport(
-                facility = facility,
-                organization = organization,
-                pulled_date = pulled_date,
-                run_date = run_date,
-                fac_org = report.get("FAC_ORG"),
-                spc_nr = report.get("SPC_NR"),
-                spc_dsc = report.get("SPC_DSC"),
-                act_cat_nm = report.get("ACT_CAT_NM"),
-                prs_sts_cd = report.get("PRS_STS_CD"),
-                prc_eff_dt = report.get("PRC_EFF_DT"),
-                prc_dis_dt = report.get("PRC_DIS_DT"),
-                prc_cur_cd = report.get("PRC_CUR_CD"),
-                tot_amt = report.get("TOT_AMT"),
-                lbr_amt = report.get("LBR_AMT"),
-                pkt_nr = report.get("PKT_NR"),
-                pkt_nm = report.get("PKT_NM"),
+                facility=facility,
+                organization=organization,
+                pulled_date=pulled_date,
+                run_date=run_date,
+                fac_org=report.get("FAC_ORG"),
+                spc_nr=report.get("SPC_NR"),
+                spc_dsc=report.get("SPC_DSC"),
+                act_cat_nm=report.get("ACT_CAT_NM"),
+                prs_sts_cd=report.get("PRS_STS_CD"),
+                prc_eff_dt=report.get("PRC_EFF_DT"),
+                prc_dis_dt=report.get("PRC_DIS_DT"),
+                prc_cur_cd=report.get("PRC_CUR_CD"),
+                tot_amt=report.get("TOT_AMT"),
+                lbr_amt=report.get("LBR_AMT"),
+                pkt_nr=report.get("PKT_NR"),
+                pkt_nm=report.get("PKT_NM"),
             )
             self.session.add(new_report)
         self.session.commit()
