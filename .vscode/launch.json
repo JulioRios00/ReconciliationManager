@@ -87,11 +87,11 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
-      "name": "airline.main (python3.8)",
+      "name": "analyze_flight_file.main (python3.8)",
       "invokeTarget": {
         "target": "code",
         "projectRoot": "${workspaceFolder}/src",
-        "lambdaHandler": "app/extract_data_app/american_airline/american_airline.main"
+        "lambdaHandler": "app/extract_data_app/analyze_flight_file/analyze_tp_006.main"
       },
       "lambda": {
         "runtime": "python3.8",
@@ -126,7 +126,66 @@
                           "arn": "arn:{partition}:s3:::mybucket"
                       },
                       "object": {
-                          "key": "public/test_pdf/TP006_AA_859_GIGC1Outubro.pdf",
+                          "key": "public",
+                          "size": 1024,
+                          "eTag": "0123456789abcdef0123456789abcdef",
+                          "sequencer": "0A1B2C3D4E5F678901"
+                      }
+                  }
+              }
+            ]
+          }
+        },
+        "environmentVariables": {
+          "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185"
+        }
+      }
+    },
+
+
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "analyze_price_report.main (python3.8)",
+      "invokeTarget": {
+        "target": "code",
+        "projectRoot": "${workspaceFolder}/src",
+        "lambdaHandler": "app/extract_data_app/analyze_price_report/analyze_tp_100.main"
+      },
+      "lambda": {
+        "runtime": "python3.8",
+        "payload": {
+          "json": {
+            "body": "{\"days\": [\"2024-07-01\"]}",
+            "Records": [
+              {
+                  "eventVersion": "2.0",
+                  "eventSource": "aws:s3",
+                  "awsRegion": "{region}",
+                  "eventTime": "1970-01-01T00:00:00Z",
+                  "eventName": "ObjectCreated:Put",
+                  "userIdentity": {
+                      "principalId": "EXAMPLE"
+                  },
+                  "requestParameters": {
+                      "sourceIPAddress": "127.0.0.1"
+                  },
+                  "responseElements": {
+                      "x-amz-request-id": "EXAMPLE123456789",
+                      "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
+                  },
+                  "s3": {
+                      "s3SchemaVersion": "1.0",
+                      "configurationId": "testConfigRule",
+                      "bucket": {
+                          "name": "mtw-elementar-dev-018061303185",
+                          "ownerIdentity": {
+                              "principalId": "EXAMPLE"
+                          },
+                          "arn": "arn:{partition}:s3:::mybucket"
+                      },
+                      "object": {
+                          "key": "public",
                           "size": 1024,
                           "eTag": "0123456789abcdef0123456789abcdef",
                           "sequencer": "0A1B2C3D4E5F678901"
