@@ -31,8 +31,8 @@ ROUTE_PREFIX = '/flights'
 def upload_flight_data(file_name: str = Json() ):
     try:
         key = 'public/airline_files/TP_006/'+file_name
-        payload = {'key':key}
-        invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-american_airline', payload)
+        # payload = {'key':key}
+        # invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-american_airline', payload)
         return jsonify({"message": "File processed and flights uploaded successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -45,8 +45,8 @@ def upload_price_report_data(file_name: str = Json() ):
     print('file_name____', file_name)
     try:
         key = 'public/airline_files/TP_100/'+file_name
-        payload = {'key':key, 'file_name':file_name}
-        invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-american_airline', payload)
+        # payload = {'key':key, 'file_name':file_name}
+        # invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-american_airline', payload)
         return jsonify({"message": "File processed and flights uploaded successfully"}), 201    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
