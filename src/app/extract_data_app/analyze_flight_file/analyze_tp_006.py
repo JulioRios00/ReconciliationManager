@@ -6,7 +6,7 @@ import os
 import io
 
 def main(event, context):
-    file, size = get_file_body_by_key(event['key'], event['bucket'], event['file_name'])
+    file, size = get_file_body_by_key(event['key'], event['bucket'])
     file_content = file.read()
 
     if not file_content:
