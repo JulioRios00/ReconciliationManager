@@ -6,6 +6,7 @@ custom:
 
 params:
   dev:
+    MTW_BUCKET_NAME: mtw-elementar-dev-018061303185
     REFINADO_BUCKET_NAME: mtw-refinado-dev
     ELEMENTAR_SECRETS_MANAGER_ARN: arn:aws:secretsmanager:us-east-1:018061303185:secret:dev/elementarapp/postgresql-gCV4D2
     EC2_SCHEDULE_ENABLED: false
@@ -20,6 +21,7 @@ params:
       - 3jau7sgvhq5p5b8jisofb6q44q
     FRONTEND_URL: https://dev.makethefuture.tech
   qa:
+    MTW_BUCKET_NAME: mtw-elementar-dev-018061303185
     REFINADO_BUCKET_NAME: mtw-refinado-qa
     ELEMENTAR_SECRETS_MANAGER_ARN: arn:aws:secretsmanager:us-east-1:836450907988:secret:qa/elementarapp/postgresql-9JvHvI
     EC2_SCHEDULE_ENABLED: true
@@ -34,6 +36,7 @@ params:
       - 73vrpleruhe0t51o5s7q6cg421
     FRONTEND_URL: https://qa.makethefuture.tech
   prod:
+    MTW_BUCKET_NAME: mtw-elementar-dev-018061303185
     REFINADO_BUCKET_NAME: mtw-refinado
     ELEMENTAR_SECRETS_MANAGER_ARN: arn:aws:secretsmanager:us-east-1:123642328289:secret:prod/elementarapp/postgresql-31ElMk
     EC2_SCHEDULE_ENABLED: true
@@ -69,6 +72,7 @@ provider:
     slv_costcenter: makeTheWay
     slv_app: ccs
   environment:
+    MTW_BUCKET_NAME: ${param:MTW_BUCKET_NAME}
     EMAIL_PASSWORD: ndwbonthulvwdaxp
     ENV: ${self:custom.stage}
     ACCOUNT_ID: ${aws:accountId}
