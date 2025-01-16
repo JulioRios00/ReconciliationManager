@@ -44,6 +44,7 @@ def upload_flight_data(file_name: str = Json() ):
 @ValidateParameters(flask_parameter_validation_handler)
 def upload_price_report_data(file_name: str = Json() ):
     try:
+        bucket = os.getenv('MTW_BUCKET_NAME')
         key = 'public/airline_files/TP_100/'+file_name
         payload = {'bucket':bucket, 'key':key}
         invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-analyze_price_report', payload)

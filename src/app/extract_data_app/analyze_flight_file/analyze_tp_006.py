@@ -6,6 +6,7 @@ import os
 import io
 
 def main(event, context):
+    print("Event:", event)
     file, size = get_file_body_by_key(event['key'], event['bucket'])
     file_content = file.read()
 
