@@ -6,8 +6,7 @@ import os
 import io
 
 def main(event, context):
-    print("Event:", event)
-    file, size = get_file_body_by_key(event['key'], event['bucket'])
+    file, size = get_file_body_by_key(event['key'], event['bucket'], event['file_name'])
     file_content = file.read()
 
     if not file_content:
@@ -16,4 +15,4 @@ def main(event, context):
     pdf_bytes = io.BytesIO(file_content)
     with get_session() as session:
         flight_service = FlightService(session)
-        flight_service.process_pdf_and_store(pdf_bytes, event['bucket'], event['key'])
+        flight_service.process_pdf_and_store(pdf_bytes, event['bucket'], event['file_name'])
