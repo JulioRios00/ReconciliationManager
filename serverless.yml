@@ -1,626 +1,160 @@
-{
-  "configurations": [
-    {
-      "type": "aws-sam",
-      "request": "direct-invoke",
-      "name": "document_api.main (python3.8)",
-      "invokeTarget": {
-        "target": "code",
-        "projectRoot": "${workspaceFolder}/src",
-        "lambdaHandler": "app/document_api/document_api.main"
-      },
-      "lambda": {
-        "runtime": "python3.8",
-        "payload": {
-          "json": {
-            "body": "{\"id_documento\":\"9c5b3719-a739-4566-ae24-01f13565473f\", \"key\":\"public/dlm/76575675675676/Requisição de mudança/reproc_nota5.csv\"}",
-            //"body": "{\"document_id\":\"9c5b3719-a739-4566-ae24-01f13565473f\", \"document_type_id\":\"85ca3454-38af-45d5-aae4-f50d13038ba8\",\"tag_id\":\"5fdf040e-a8ab-4996-875d-1f300ca4628c\",\"validation\":true}",
-          // "body": "{\"id_palavra_chave\":\"1f7c7408-075f-40fc-8221-2e8dff2c9263\", \"id_documento\":\"1b0e451b-d5e9-446e-bd1a-9d81fa2dae46\"}",
-          // "body": "{\"key\":\"public/dlm/76575675675676/change requests/novo_documento.csv\", \"type_document_id\":\"3f0343b5-e8ae-4a22-ba79-e930319b825a\"}",
-          // "body": "{\"id_documento\":\"c596f703-092e-4edf-8707-90d0f940dc79\", \"id_anexo\":\"531530aa-86e0-47e3-829a-5ab50be26123\"}",
-           // "body": "{\"list_emails\":[\"gabriel@maketheway.tech\", \"gabrielomperim@gmail.com\", \"gabrielolimartins@icloud.com\"], \"email_subject\": \"TesteSubject\", \"email_body\": \"TesteBody\" }",
-            "resource": "/{proxy+}",
-            "path": "/document/list/files",
-            "httpMethod": "GET",
-            "queryStringParameters": {
-              "document_type_id":"bd90c2b4-7174-4816-8db8-590cbebc1f29"
-            },
-            "pathParameters": {
-              "proxy": ""
-            },
-            "stageVariables": {
-              "baz": "qux"
-            },
-            "headers": {
-              "Authorization": "Bearer eyJraWQiOiJ1QUU5c2NXOWo4a09wT1FkK0pjUzRDTlVMcVhiNGg0WUF6cXk0Y2c1dE1ZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjNGI4ODQwOC1mMDMxLTcwMTMtMDQ2Ny1iMTI0YjBlYTNjNTIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KUndROXk0SmciLCJjbGllbnRfaWQiOiI1dmxpbG90a3I5bXRkcHZiNDdmanY5ZmQ3MyIsIm9yaWdpbl9qdGkiOiJiMzFlZjlkYi1hMjNmLTQ4MDgtYmZhNC04YjBkMWQ4MjA4N2YiLCJldmVudF9pZCI6Ijg0ZmViNTgzLTI3MWUtNDlmYi05MDNmLTNiMzNjYWY1ZTEzMyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MjEzMDkxNzIsImV4cCI6MTcyMTMyNTUxNywiaWF0IjoxNzIxMzIxOTE3LCJqdGkiOiJhODQ4MzFjZi1kZTA2LTQ3NDctYTAyOS04OTgyODIzM2E5MzUiLCJ1c2VybmFtZSI6ImM0Yjg4NDA4LWYwMzEtNzAxMy0wNDY3LWIxMjRiMGVhM2M1MiJ9.e2HVshTdy1ExtUYpgSxaRPGbjbncapHdgOPUdeebE1GqMWFxNQya9RCdxyB3yjxDp_L6ZeJiw9lgkSNeNqZ06rpmWxmXAkTmfWOCt3m9Hx4SieATFArDyiVssze2gNYm4tL1uYWQgL7Qop5RzPKWn_XrhgJ_dm8a-Sao98sSbhLYinI9JTGXJ8Yfg3irTcJSSVf1xvhUup4DvKX4aJU8WckyVYUo0J9qnCmS8dkt_IstIvnWoxtJLVt-UA_v0IFt5miowWqAzsali3okyOxOyQ4-7rBlnFrN0ZjiQEU4uDyG2vBC18g0QruGRgiNU1CHa4LqZ548sor2LCXLabYbHQ",
-              "Content-Type": "application/json",
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-              "Accept-Encoding": "gzip, deflate, sdch",
-              "Accept-Language": "pt,en-US,en;q=0.8",
-              "Cache-Control": "max-age=0",
-              "CloudFront-Forwarded-Proto": "https",
-              "CloudFront-Is-Desktop-Viewer": "true",
-              "CloudFront-Is-Mobile-Viewer": "false",
-              "CloudFront-Is-SmartTV-Viewer": "false",
-              "CloudFront-Is-Tablet-Viewer": "false",
-              "CloudFront-Viewer-Country": "US",
-              "Host": "1234567890.execute-api.{dns_suffix}",
-              "Upgrade-Insecure-Requests": "1",
-              "User-Agent": "Custom User Agent String",
-              "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
-              "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
-              "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
-              "X-Forwarded-Port": "443",
-              "X-Forwarded-Proto": "https"
-            },
-            "requestContext": {
-              "accountId": "123456789012",
-              "resourceId": "123456",
-              "stage": "prod",
-              "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
-              "identity": {
-                "cognitoIdentityPoolId": null,
-                "accountId": null,
-                "cognitoIdentityId": null,
-                "caller": null,
-                "apiKey": null,
-                "sourceIp": "127.0.0.1",
-                "cognitoAuthenticationType": null,
-                "cognitoAuthenticationProvider": null,
-                "userArn": null,
-                "userAgent": "Custom User Agent String",
-                "user": null
-              },
-              "resourcePath": "/{proxy+}",
-              "httpMethod": "GET",
-              "apiId": "1234567890"
-            },
-            "isBase64Encoded": false
-          }
-        },
-        "environmentVariables": {
-          "EMAIL_PASSWORD": "ndwbonthulvwdaxp",
-          "FRONTEND_URL": "https://dev.makethefuture.tech"
-        }
-      }
-    },
-    {
-      "type": "aws-sam",
-      "request": "direct-invoke",
-      "name": "analyze_flight_file.main (python3.8)",
-      "invokeTarget": {
-        "target": "code",
-        "projectRoot": "${workspaceFolder}/src",
-        "lambdaHandler": "app/extract_data_app/analyze_flight_file/analyze_tp_006.main"
-      },
-      "lambda": {
-        "runtime": "python3.8",
-        "payload": {
-          "json": {
-            "body": "{\"days\": [\"2024-07-01\"]}",
-            "Records": [
-              {
-                  "eventVersion": "2.0",
-                  "eventSource": "aws:s3",
-                  "awsRegion": "{region}",
-                  "eventTime": "1970-01-01T00:00:00Z",
-                  "eventName": "ObjectCreated:Put",
-                  "userIdentity": {
-                      "principalId": "EXAMPLE"
-                  },
-                  "requestParameters": {
-                      "sourceIPAddress": "127.0.0.1"
-                  },
-                  "responseElements": {
-                      "x-amz-request-id": "EXAMPLE123456789",
-                      "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
-                  },
-                  "s3": {
-                      "s3SchemaVersion": "1.0",
-                      "configurationId": "testConfigRule",
-                      "bucket": {
-                          "name": "mtw-elementar-dev-018061303185",
-                          "ownerIdentity": {
-                              "principalId": "EXAMPLE"
-                          },
-                          "arn": "arn:{partition}:s3:::mybucket"
-                      },
-                      "object": {
-                          "key": "public",
-                          "size": 1024,
-                          "eTag": "0123456789abcdef0123456789abcdef",
-                          "sequencer": "0A1B2C3D4E5F678901"
-                      }
-                  }
-              }
-            ]
-          }
-        },
-        "environmentVariables": {
-          "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185"
-        }
-      }
-    },
+service: serverless-ccs
 
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
 
-    {
-      "type": "aws-sam",
-      "request": "direct-invoke",
-      "name": "analyze_price_report.main (python3.8)",
-      "invokeTarget": {
-        "target": "code",
-        "projectRoot": "${workspaceFolder}/src",
-        "lambdaHandler": "app/extract_data_app/analyze_price_report/analyze_tp_100.main"
-      },
-      "lambda": {
-        "runtime": "python3.8",
-        "payload": {
-          "json": {
-            "body": "{\"days\": [\"2024-07-01\"]}",
-            "Records": [
-              {
-                  "eventVersion": "2.0",
-                  "eventSource": "aws:s3",
-                  "awsRegion": "{region}",
-                  "eventTime": "1970-01-01T00:00:00Z",
-                  "eventName": "ObjectCreated:Put",
-                  "userIdentity": {
-                      "principalId": "EXAMPLE"
-                  },
-                  "requestParameters": {
-                      "sourceIPAddress": "127.0.0.1"
-                  },
-                  "responseElements": {
-                      "x-amz-request-id": "EXAMPLE123456789",
-                      "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
-                  },
-                  "s3": {
-                      "s3SchemaVersion": "1.0",
-                      "configurationId": "testConfigRule",
-                      "bucket": {
-                          "name": "mtw-elementar-dev-018061303185",
-                          "ownerIdentity": {
-                              "principalId": "EXAMPLE"
-                          },
-                          "arn": "arn:{partition}:s3:::mybucket"
-                      },
-                      "object": {
-                          "key": "public",
-                          "size": 1024,
-                          "eTag": "0123456789abcdef0123456789abcdef",
-                          "sequencer": "0A1B2C3D4E5F678901"
-                      }
-                  }
-              }
-            ]
-          }
-        },
-        "environmentVariables": {
-          "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185"
-        }
-      }
-    },
+params:
+  dev:
+    MTW_BUCKET_NAME: mtw-elementar-dev-018061303185
+    REFINADO_BUCKET_NAME: mtw-refinado-dev
+    ELEMENTAR_SECRETS_MANAGER_ARN: arn:aws:secretsmanager:us-east-1:018061303185:secret:dev/elementarapp/postgresql-gCV4D2
+    EC2_SCHEDULE_ENABLED: false
+    VPCID: vpc-03dac6c8184066691
+    SUBNETIDS:
+      - subnet-0f422697b93f26468
+      - subnet-0f7b4d6469d48d3e2
+      - subnet-066989fc5c38653f5
+    ISSUERURL: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_JRwQ9y4Jg
+    AUDIENCE:
+      - 5vlilotkr9mtdpvb47fjv9fd73
+      - 3jau7sgvhq5p5b8jisofb6q44q
+    FRONTEND_URL: https://dev.makethefuture.tech
+  qa:
+    MTW_BUCKET_NAME: mtw-elementar-dev-018061303185
+    REFINADO_BUCKET_NAME: mtw-refinado-qa
+    ELEMENTAR_SECRETS_MANAGER_ARN: arn:aws:secretsmanager:us-east-1:836450907988:secret:qa/elementarapp/postgresql-9JvHvI
+    EC2_SCHEDULE_ENABLED: true
+    VPCID: vpc-0f99334641d2742ad
+    SUBNETIDS:
+      - subnet-06ca06fff01bd0072
+      - subnet-0dee63a9f84fc8025
+      - subnet-0b5208e68482bae8b
+    ISSUERURL: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_QOe2Jmpv0
+    AUDIENCE:
+      - 3922dnengp42j32svasveio6s
+      - 73vrpleruhe0t51o5s7q6cg421
+    FRONTEND_URL: https://qa.makethefuture.tech
+  prod:
+    MTW_BUCKET_NAME: mtw-elementar-dev-018061303185
+    REFINADO_BUCKET_NAME: mtw-refinado
+    ELEMENTAR_SECRETS_MANAGER_ARN: arn:aws:secretsmanager:us-east-1:123642328289:secret:prod/elementarapp/postgresql-31ElMk
+    EC2_SCHEDULE_ENABLED: true
+    VPCID: vpc-05a05692560fcbf00
+    SUBNETIDS:
+      - subnet-04dabd8732bb73e14
+      - subnet-0fe1305f8b7cca960
+      - subnet-0098eeb6a89e0c1fa
+    ISSUERURL: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_7IIETToot
+    AUDIENCE:
+      - 5f76vi9glpqrvnni8khe981nth
+      - 5r07k8oorvtg4rd43raggbqvj8
+    FRONTEND_URL: https://www.makethefuture.tech
 
+provider:
+  name: aws
+  region: us-east-1
+  stage: dev
+  apiGateway:
+    apiKeys:
+      - ${self:custom.stage}-myFreeKey
+    usagePlan:
+      quota:
+        limit: 5000
+        offset: 2
+        period: MONTH
+      throttle:
+        burstLimit: 200
+        rateLimit: 100
+  stackTags:
+    service: ${self:service}-${self:custom.stage}
+    slv_env: ${self:custom.stage}
+    slv_costcenter: makeTheWay
+    slv_app: ccs
+  environment:
+    MTW_BUCKET_NAME: ${param:MTW_BUCKET_NAME}
+    EMAIL_PASSWORD: ndwbonthulvwdaxp
+    ENV: ${self:custom.stage}
+    ACCOUNT_ID: ${aws:accountId}
+    LOG_LEVEL: INFO
+    ENVIRONMENT: ${self:custom.stage}
+    FRONTEND_URL: ${param:FRONTEND_URL}
+    ELEMENTAR_SECRETS_MANAGER_ARN: ${param:ELEMENTAR_SECRETS_MANAGER_ARN}
+    ELEMENTAR_BUCKET_NAME: mtw-elementar-${self:custom.stage}-${aws:accountId}
+    MAKE_THE_PRICE_BUCKET_NAME: mtw-make-the-price-${self:custom.stage}-${aws:accountId}
+    REFINADO_BUCKET_NAME: ${param:REFINADO_BUCKET_NAME}
+    
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+            - secretsmanager:DescribeSecret
+          Resource:
+            - ${param:ELEMENTAR_SECRETS_MANAGER_ARN}
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource:
+            - '*'
 
-    {
-      "type": "aws-sam",
-      "request": "direct-invoke",
-      "name": "airline_api.main (python3.8)",
-      "invokeTarget": {
-          "target": "code",
-          "projectRoot": "${workspaceFolder}/src",
-          "lambdaHandler": "app/extract_data_app/airline_api/airline_api.main"
-        },
-      "lambda": {
-          "memoryMb": 3000,
-          "runtime": "python3.8",
-          "payload": {
-            "json": {
-              "body": "{\"file_name\":\"Arion - 20059578000120-TP006_AA_859_GIGC1Outubro.pdf\"}",
-              "resource": "/{proxy+}",
-              "path": "/flights/upload/airline",
-              "httpMethod": "POST",
-              "queryStringParameters": {
-                "document_type_id":"bd90c2b4-7174-4816-8db8-590cbebc1f29"
-              },
-              "pathParameters": {
-                "proxy": ""
-              },
-              "stageVariables": {
-                "baz": "qux"
-              },
-              "headers": {
-                "Authorization": "Bearer eyJraWQiOiJ1QUU5c2NXOWo4a09wT1FkK0pjUzRDTlVMcVhiNGg0WUF6cXk0Y2c1dE1ZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjNGI4ODQwOC1mMDMxLTcwMTMtMDQ2Ny1iMTI0YjBlYTNjNTIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KUndROXk0SmciLCJjbGllbnRfaWQiOiI1dmxpbG90a3I5bXRkcHZiNDdmanY5ZmQ3MyIsIm9yaWdpbl9qdGkiOiJiMzFlZjlkYi1hMjNmLTQ4MDgtYmZhNC04YjBkMWQ4MjA4N2YiLCJldmVudF9pZCI6Ijg0ZmViNTgzLTI3MWUtNDlmYi05MDNmLTNiMzNjYWY1ZTEzMyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MjEzMDkxNzIsImV4cCI6MTcyMTMyNTUxNywiaWF0IjoxNzIxMzIxOTE3LCJqdGkiOiJhODQ4MzFjZi1kZTA2LTQ3NDctYTAyOS04OTgyODIzM2E5MzUiLCJ1c2VybmFtZSI6ImM0Yjg4NDA4LWYwMzEtNzAxMy0wNDY3LWIxMjRiMGVhM2M1MiJ9.e2HVshTdy1ExtUYpgSxaRPGbjbncapHdgOPUdeebE1GqMWFxNQya9RCdxyB3yjxDp_L6ZeJiw9lgkSNeNqZ06rpmWxmXAkTmfWOCt3m9Hx4SieATFArDyiVssze2gNYm4tL1uYWQgL7Qop5RzPKWn_XrhgJ_dm8a-Sao98sSbhLYinI9JTGXJ8Yfg3irTcJSSVf1xvhUup4DvKX4aJU8WckyVYUo0J9qnCmS8dkt_IstIvnWoxtJLVt-UA_v0IFt5miowWqAzsali3okyOxOyQ4-7rBlnFrN0ZjiQEU4uDyG2vBC18g0QruGRgiNU1CHa4LqZ548sor2LCXLabYbHQ",
-                "Content-Type": "application/json",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                "Accept-Encoding": "gzip, deflate, sdch",
-                "Accept-Language": "pt,en-US,en;q=0.8",
-                "Cache-Control": "max-age=0",
-                "CloudFront-Forwarded-Proto": "https",
-                "CloudFront-Is-Desktop-Viewer": "true",
-                "CloudFront-Is-Mobile-Viewer": "false",
-                "CloudFront-Is-SmartTV-Viewer": "false",
-                "CloudFront-Is-Tablet-Viewer": "false",
-                "CloudFront-Viewer-Country": "US",
-                "Host": "1234567890.execute-api.{dns_suffix}",
-                "Upgrade-Insecure-Requests": "1",
-                "User-Agent": "Custom User Agent String",
-                "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
-                "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
-                "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
-                "X-Forwarded-Port": "443",
-                "X-Forwarded-Proto": "https"
-              },
-              "requestContext": {
-                "accountId": "123456789012",
-                "resourceId": "123456",
-                "stage": "prod",
-                "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
-                "identity": {
-                  "cognitoIdentityPoolId": null,
-                  "accountId": null,
-                  "cognitoIdentityId": null,
-                  "caller": null,
-                  "apiKey": null,
-                  "sourceIp": "127.0.0.1",
-                  "cognitoAuthenticationType": null,
-                  "cognitoAuthenticationProvider": null,
-                  "userArn": null,
-                  "userAgent": "Custom User Agent String",
-                  "user": null
-                },
-                "resourcePath": "/{proxy+}",
-                "httpMethod": "GET",
-                "apiId": "1234567890"
-              },
-              "isBase64Encoded": false
-          }
-          },
-          "environmentVariables": {
-            "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185"
-          }
-      }
-    },
+  vpc:
+    securityGroupIds:
+      - Ref: LambdaSecurityGroup
+    subnetIds: ${param:SUBNETIDS}
+  httpApi:
+    cors: true
+    authorizers:
+        CognitoAuthorizer:
+          type: jwt
+          identitySource: $request.header.Authorization
+          issuerUrl: ${param:ISSUERURL}
+          audience: ${param:AUDIENCE}
+  ecr:
+    images:
+      document_api:
+        path: "./src"
+        file: Dockerfile.documentapi
+      analyze_flight_file:
+        path: "./src"
+        file: Dockerfile.flightfile
+      analyze_price_report:
+        path: "./src"
+        file: Dockerfile.pricereport
+      airline_api:
+        path: "./src"
+        file: Dockerfile.airlineapi
+  tracing:
+    apiGateway: true
+    lambda: true
+  logRetentionInDays: 30
+  
+package:
+  individually: true
+  patterns:
+    - '!__pycache__/**'
+    - '!node_modules/**'
+    - '!.aws-sam/**'
+    - '!Pipfile'
+    - '!Pipfile.lock'
+    - '!package.json'
+    - '!package-lock.json'
+    - '!README.md'
+    - '!.venv/**'
 
-    {
-      "type": "aws-sam",
-      "request": "direct-invoke",
-      "name": "price_report_api.main (python3.8)",
-      "invokeTarget": {
-          "target": "code",
-          "projectRoot": "${workspaceFolder}/src",
-          "lambdaHandler": "app/extract_data_app/airline_api/airline_api.main"
-        },
-      "lambda": {
-          "memoryMb": 3000,
-          "runtime": "python3.8",
-          "payload": {
-              "json": {
-                  "body": "{\"file_name\":\"TP100_BA_120_GIGC1.CSV\"}",
-                  "Records": [
-                    {
-                        "eventVersion": "2.0",
-                        "eventSource": "aws:s3",
-                        "awsRegion": "{region}",
-                        "eventTime": "1970-01-01T00:00:00Z",
-                        "eventName": "ObjectCreated:Put",
-                        "userIdentity": {
-                            "principalId": "EXAMPLE"
-                        },
-                        "requestParameters": {
-                            "sourceIPAddress": "127.0.0.1"
-                        },
-                        "responseElements": {
-                            "x-amz-request-id": "EXAMPLE123456789",
-                            "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
-                        },
-                        "s3": {
-                            "s3SchemaVersion": "1.0",
-                            "configurationId": "testConfigRule",
-                            "bucket": {
-                                "name": "mtw-elementar-dev-018061303185",
-                                "ownerIdentity": {
-                                    "principalId": "EXAMPLE"
-                                },
-                                "arn": "arn:{partition}:s3:::mybucket"
-                            },
-                            "object": {
-                                "key": "public/price_report/TP100_BA_120_GIGC1.CSV",
-                                "size": 1024,
-                                "eTag": "0123456789abcdef0123456789abcdef",
-                                "sequencer": "0A1B2C3D4E5F678901"
-                            }
-                        }
-                    }
-                  ],
-                  "resource": "/{proxy+}",
-                  "path": "/flights/upload/price_report",
-                  "httpMethod": "POST",
-                  "queryStringParameters": {
-                  },
-                  "pathParameters": {},
-                  "stageVariables": {
-                      "baz": "qux"
-                  },
-                  "headers": {
-                      "Authorization": "eyJraWQiOiJ1QUU5c2NXOWo4a09wT1FkK0pjUzRDTlVMcVhiNGg0WUF6cXk0Y2c1dE1ZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjNGI4ODQwOC1mMDMxLTcwMTMtMDQ2Ny1iMTI0YjBlYTNjNTIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KUndROXk0SmciLCJjbGllbnRfaWQiOiI1dmxpbG90a3I5bXRkcHZiNDdmanY5ZmQ3MyIsIm9yaWdpbl9qdGkiOiIxZWFmOGEwOS1hMTc5LTQxMmYtYTgwOS04NGIzZDk4YWY3MjUiLCJldmVudF9pZCI6IjhhOTE0ZDdkLWY1ZDMtNGRhYy1hODE4LThjOWFiNzg0YzBhYiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MjAyMDMwNTYsImV4cCI6MTcyMDIwNjY1NiwiaWF0IjoxNzIwMjAzMDU2LCJqdGkiOiJlZjRhOTBlYi0wMzk0LTQxM2EtOTZjNi0zODE2MTFmNTY4MjkiLCJ1c2VybmFtZSI6ImM0Yjg4NDA4LWYwMzEtNzAxMy0wNDY3LWIxMjRiMGVhM2M1MiJ9.jJLsixoNiyKj-8dsp2QFKc4lZcSHVcJpWY4cNXDYVUvEar_ujQz0IhlMwT52MIOEbtSZU18Q9YHvz4X6wTGHiO_j2M6hURHTopb8Jbdi1kO8504g4HRd27hBgrPBEaZZBXTccmMbZjRreSLvD94ZrdKXsTt4xQ2dNWIBl0T5CXd4onHdM-qlLxdbH39EsW0RaNaj4wYNEI57ZgTTXQ6AA2JJ8YzMkDszyQL_iD3osM6q7iBNPWNtxFG-kgaYvS69-Bp0ZZjT27ngR80QHnK9_Di8HCk4k6vIsagyxu4ggCNREIVyIcgHuUnJOMsQrBD0vGnTcLysQdFtAM6NLkG_0w",
-                      "Content-Type": "application/json",
-                      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,/;q=0.8",
-                      "Accept-Encoding": "gzip, deflate, sdch",
-                      "Accept-Language": "en",
-                      "Cache-Control": "max-age=0",
-                      "CloudFront-Forwarded-Proto": "https",
-                      "CloudFront-Is-Desktop-Viewer": "true",
-                      "CloudFront-Is-Mobile-Viewer": "false",
-                      "CloudFront-Is-SmartTV-Viewer": "false",
-                      "CloudFront-Is-Tablet-Viewer": "false",
-                      "CloudFront-Viewer-Country": "US",
-                      "Host": "1234567890.execute-api.{dns_suffix}",
-                      "Upgrade-Insecure-Requests": "1",
-                      "User-Agent": "Custom User Agent String",
-                      "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
-                      "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
-                      "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
-                      "X-Forwarded-Port": "443",
-                      "X-Forwarded-Proto": "https"
-                  },
-                  "requestContext": {
-                      "accountId": "123456789012",
-                      "resourceId": "123456",
-                      "stage": "prod",
-                      "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
-                      "identity": {
-                          "cognitoIdentityPoolId": null,
-                          "accountId": null,
-                          "cognitoIdentityId": null,
-                          "caller": null,
-                          "apiKey": null,
-                          "sourceIp": "127.0.0.1",
-                          "cognitoAuthenticationType": null,
-                          "cognitoAuthenticationProvider": null,
-                          "userArn": null,
-                          "userAgent": "Custom User Agent String",
-                          "user": null
-                      },
-                      "resourcePath": "/{proxy+}",
-                      "httpMethod": "POST",
-                      "apiId": "1234567890"
-                  },
-                  "isBase64Encoded": false
-              }
-          },
-          "environmentVariables": {
-            "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185"
-          }
-      }
-    },
+functions:
+  document_api: ${file(src/app/document_api/document_api.yml)}
+  analyze_flight_file: ${file(src/app/extract_data_app/analyze_flight_file/analyze_tp_006.yml)}
+  airline_api: ${file(src/app/extract_data_app/airline_api/airline_api.yml)}
+  analyze_price_report: ${file(src/app/extract_data_app/analyze_price_report/analyze_tp_100.yml)}
+resources:
+  - Conditions:
+      EnvQa : !Equals [ "${self:custom.stage}", "qa"]
+      EnvProd : !Equals [ "${self:custom.stage}", "prod"]
+      CreateResource: !Or [Condition: "EnvQa", Condition: "EnvProd"]
+  - ${file(resources/vpc/vpc.yml)}
 
-    {
-      "type": "aws-sam",
-      "request": "direct-invoke",
-      "name": "delete_price_report_api.main (python3.8)",
-      "invokeTarget": {
-          "target": "code",
-          "projectRoot": "${workspaceFolder}/src",
-          "lambdaHandler": "app/extract_data_app/airline_api/airline_api.main"
-        },
-      "lambda": {
-          "memoryMb": 3000,
-          "runtime": "python3.8",
-          "payload": {
-              "json": {
-                  "body": "{\"file_name\":\"TP100_BA_120_GIGC1.CSV\"}",
-                  "Records": [
-                    {
-                        "eventVersion": "2.0",
-                        "eventSource": "aws:s3",
-                        "awsRegion": "{region}",
-                        "eventTime": "1970-01-01T00:00:00Z",
-                        "eventName": "ObjectCreated:Put",
-                        "userIdentity": {
-                            "principalId": "EXAMPLE"
-                        },
-                        "requestParameters": {
-                            "sourceIPAddress": "127.0.0.1"
-                        },
-                        "responseElements": {
-                            "x-amz-request-id": "EXAMPLE123456789",
-                            "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
-                        },
-                        "s3": {
-                            "s3SchemaVersion": "1.0",
-                            "configurationId": "testConfigRule",
-                            "bucket": {
-                                "name": "mtw-elementar-dev-018061303185",
-                                "ownerIdentity": {
-                                    "principalId": "EXAMPLE"
-                                },
-                                "arn": "arn:{partition}:s3:::mybucket"
-                            },
-                            "object": {
-                                "key": "public/price_report/TP100_BA_120_GIGC1.CSV",
-                                "size": 1024,
-                                "eTag": "0123456789abcdef0123456789abcdef",
-                                "sequencer": "0A1B2C3D4E5F678901"
-                            }
-                        }
-                    }
-                  ],
-                  "resource": "/{proxy+}",
-                  "path": "/flights/delete/price_report/129e57a2-2e87-4f31-836b-a2c3a10cdc62",
-                  "httpMethod": "DELETE",
-                  "queryStringParameters": {
-                  },
-                  "pathParameters": {
-                    "id": "129e57a2-2e87-4f31-836b-a2c3a10cdc62"
-                  },
-                  "stageVariables": {
-                      "baz": "qux"
-                  },
-                  "headers": {
-                      "Authorization": "eyJraWQiOiJ1QUU5c2NXOWo4a09wT1FkK0pjUzRDTlVMcVhiNGg0WUF6cXk0Y2c1dE1ZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjNGI4ODQwOC1mMDMxLTcwMTMtMDQ2Ny1iMTI0YjBlYTNjNTIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KUndROXk0SmciLCJjbGllbnRfaWQiOiI1dmxpbG90a3I5bXRkcHZiNDdmanY5ZmQ3MyIsIm9yaWdpbl9qdGkiOiIxZWFmOGEwOS1hMTc5LTQxMmYtYTgwOS04NGIzZDk4YWY3MjUiLCJldmVudF9pZCI6IjhhOTE0ZDdkLWY1ZDMtNGRhYy1hODE4LThjOWFiNzg0YzBhYiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MjAyMDMwNTYsImV4cCI6MTcyMDIwNjY1NiwiaWF0IjoxNzIwMjAzMDU2LCJqdGkiOiJlZjRhOTBlYi0wMzk0LTQxM2EtOTZjNi0zODE2MTFmNTY4MjkiLCJ1c2VybmFtZSI6ImM0Yjg4NDA4LWYwMzEtNzAxMy0wNDY3LWIxMjRiMGVhM2M1MiJ9.jJLsixoNiyKj-8dsp2QFKc4lZcSHVcJpWY4cNXDYVUvEar_ujQz0IhlMwT52MIOEbtSZU18Q9YHvz4X6wTGHiO_j2M6hURHTopb8Jbdi1kO8504g4HRd27hBgrPBEaZZBXTccmMbZjRreSLvD94ZrdKXsTt4xQ2dNWIBl0T5CXd4onHdM-qlLxdbH39EsW0RaNaj4wYNEI57ZgTTXQ6AA2JJ8YzMkDszyQL_iD3osM6q7iBNPWNtxFG-kgaYvS69-Bp0ZZjT27ngR80QHnK9_Di8HCk4k6vIsagyxu4ggCNREIVyIcgHuUnJOMsQrBD0vGnTcLysQdFtAM6NLkG_0w",
-                      "Content-Type": "application/json",
-                      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,/;q=0.8",
-                      "Accept-Encoding": "gzip, deflate, sdch",
-                      "Accept-Language": "en",
-                      "Cache-Control": "max-age=0",
-                      "CloudFront-Forwarded-Proto": "https",
-                      "CloudFront-Is-Desktop-Viewer": "true",
-                      "CloudFront-Is-Mobile-Viewer": "false",
-                      "CloudFront-Is-SmartTV-Viewer": "false",
-                      "CloudFront-Is-Tablet-Viewer": "false",
-                      "CloudFront-Viewer-Country": "US",
-                      "Host": "1234567890.execute-api.{dns_suffix}",
-                      "Upgrade-Insecure-Requests": "1",
-                      "User-Agent": "Custom User Agent String",
-                      "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
-                      "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
-                      "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
-                      "X-Forwarded-Port": "443",
-                      "X-Forwarded-Proto": "https"
-                  },
-                  "requestContext": {
-                      "accountId": "123456789012",
-                      "resourceId": "123456",
-                      "stage": "prod",
-                      "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
-                      "identity": {
-                          "cognitoIdentityPoolId": null,
-                          "accountId": null,
-                          "cognitoIdentityId": null,
-                          "caller": null,
-                          "apiKey": null,
-                          "sourceIp": "127.0.0.1",
-                          "cognitoAuthenticationType": null,
-                          "cognitoAuthenticationProvider": null,
-                          "userArn": null,
-                          "userAgent": "Custom User Agent String",
-                          "user": null
-                      },
-                      "resourcePath": "/{proxy+}",
-                      "httpMethod": "DELETE",
-                      "apiId": "1234567890"
-                  },
-                  "isBase64Encoded": false
-              }
-          },
-          "environmentVariables": {
-            "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185"
-          }
-      }
-    },
-    {
-      "type": "aws-sam",
-      "request": "direct-invoke",
-      "name": "search_price_report_api.main (python3.8)",
-      "invokeTarget": {
-          "target": "code",
-          "projectRoot": "${workspaceFolder}/src",
-          "lambdaHandler": "app/extract_data_app/airline_api/airline_api.main"
-        },
-      "lambda": {
-          "memoryMb": 3000,
-          "runtime": "python3.8",
-          "payload": {
-              "json": {
-                  "body": "{\"facility\":\"GC1\",\"organization\":\"120\",\"pulled_date\":\"2021-01-01\",\"run_date\":\"2024-09-05 06:20:18\",\"fac_org\":\"GIGC10000000120\",\"spc_nr\":\"10469\",\"spc_dsc\":\"CHG G 74C Terminator Charge\",\"act_cat_nm\":\"CHARGES-Handling Charges\",\"prs_sts_cd\":\"CURRENT\",\"prc_eff_dt\":\"2018-05-01\",\"prc_dis_dt\":\"2099-12-31\",\"prc_cur_cd\":\"BRL\",\"tot_amt\":\"266.190\",\"lbr_amt\":\"266.190\",\"pkt_nr\":\"925\",\"pkt_nm\":\"G FLT TERMINATOR CHARGE\"}",
-                  "Records": [
-                    {
-                        "eventVersion": "2.0",
-                        "eventSource": "aws:s3",
-                        "awsRegion": "{region}",
-                        "eventTime": "1970-01-01T00:00:00Z",
-                        "eventName": "ObjectCreated:Put",
-                        "userIdentity": {
-                            "principalId": "EXAMPLE"
-                        },
-                        "requestParameters": {
-                            "sourceIPAddress": "127.0.0.1"
-                        },
-                        "responseElements": {
-                            "x-amz-request-id": "EXAMPLE123456789",
-                            "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
-                        },
-                        "s3": {
-                            "s3SchemaVersion": "1.0",
-                            "configurationId": "testConfigRule",
-                            "bucket": {
-                                "name": "mtw-elementar-dev-018061303185",
-                                "ownerIdentity": {
-                                    "principalId": "EXAMPLE"
-                                },
-                                "arn": "arn:{partition}:s3:::mybucket"
-                            },
-                            "object": {
-                                "size": 1024,
-                                "eTag": "0123456789abcdef0123456789abcdef",
-                                "sequencer": "0A1B2C3D4E5F678901"
-                            }
-                        }
-                    }
-                  ],
-                  "resource": "/{proxy+}",
-                  "path": "/flights/search/price_report/ec529fab-a6aa-43b5-81b1-e98afd2ab794",
-                  "httpMethod": "GET",
-                  "queryStringParameters": {
-                  },
-                  "pathParameters": {
-                    "id": "129e57a2-2e87-4f31-836b-a2c3a10cdc62"
-                  },
-                  "stageVariables": {
-                      "baz": "qux"
-                  },
-                  "headers": {
-                      "Authorization": "eyJraWQiOiJ1QUU5c2NXOWo4a09wT1FkK0pjUzRDTlVMcVhiNGg0WUF6cXk0Y2c1dE1ZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjNGI4ODQwOC1mMDMxLTcwMTMtMDQ2Ny1iMTI0YjBlYTNjNTIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KUndROXk0SmciLCJjbGllbnRfaWQiOiI1dmxpbG90a3I5bXRkcHZiNDdmanY5ZmQ3MyIsIm9yaWdpbl9qdGkiOiIxZWFmOGEwOS1hMTc5LTQxMmYtYTgwOS04NGIzZDk4YWY3MjUiLCJldmVudF9pZCI6IjhhOTE0ZDdkLWY1ZDMtNGRhYy1hODE4LThjOWFiNzg0YzBhYiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MjAyMDMwNTYsImV4cCI6MTcyMDIwNjY1NiwiaWF0IjoxNzIwMjAzMDU2LCJqdGkiOiJlZjRhOTBlYi0wMzk0LTQxM2EtOTZjNi0zODE2MTFmNTY4MjkiLCJ1c2VybmFtZSI6ImM0Yjg4NDA4LWYwMzEtNzAxMy0wNDY3LWIxMjRiMGVhM2M1MiJ9.jJLsixoNiyKj-8dsp2QFKc4lZcSHVcJpWY4cNXDYVUvEar_ujQz0IhlMwT52MIOEbtSZU18Q9YHvz4X6wTGHiO_j2M6hURHTopb8Jbdi1kO8504g4HRd27hBgrPBEaZZBXTccmMbZjRreSLvD94ZrdKXsTt4xQ2dNWIBl0T5CXd4onHdM-qlLxdbH39EsW0RaNaj4wYNEI57ZgTTXQ6AA2JJ8YzMkDszyQL_iD3osM6q7iBNPWNtxFG-kgaYvS69-Bp0ZZjT27ngR80QHnK9_Di8HCk4k6vIsagyxu4ggCNREIVyIcgHuUnJOMsQrBD0vGnTcLysQdFtAM6NLkG_0w",
-                      "Content-Type": "application/json",
-                      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,/;q=0.8",
-                      "Accept-Encoding": "gzip, deflate, sdch",
-                      "Accept-Language": "en",
-                      "Cache-Control": "max-age=0",
-                      "CloudFront-Forwarded-Proto": "https",
-                      "CloudFront-Is-Desktop-Viewer": "true",
-                      "CloudFront-Is-Mobile-Viewer": "false",
-                      "CloudFront-Is-SmartTV-Viewer": "false",
-                      "CloudFront-Is-Tablet-Viewer": "false",
-                      "CloudFront-Viewer-Country": "US",
-                      "Host": "1234567890.execute-api.{dns_suffix}",
-                      "Upgrade-Insecure-Requests": "1",
-                      "User-Agent": "Custom User Agent String",
-                      "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
-                      "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
-                      "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
-                      "X-Forwarded-Port": "443",
-                      "X-Forwarded-Proto": "https"
-                  },
-                  "requestContext": {
-                      "accountId": "123456789012",
-                      "resourceId": "123456",
-                      "stage": "prod",
-                      "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
-                      "identity": {
-                          "cognitoIdentityPoolId": null,
-                          "accountId": null,
-                          "cognitoIdentityId": null,
-                          "caller": null,
-                          "apiKey": null,
-                          "sourceIp": "127.0.0.1",
-                          "cognitoAuthenticationType": null,
-                          "cognitoAuthenticationProvider": null,
-                          "userArn": null,
-                          "userAgent": "Custom User Agent String",
-                          "user": null
-                      },
-                      "resourcePath": "/{proxy+}",
-                      "httpMethod": "GET",
-                      "apiId": "1234567890"
-                  },
-                  "isBase64Encoded": false
-              }
-          },
-          "environmentVariables": {
-            "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185"
-          }
-      }
-    },
-  ]
-}
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-plugin-resource-tagging
