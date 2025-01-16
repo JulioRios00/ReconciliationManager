@@ -7,6 +7,7 @@ import io
 
 def main(event, context):
     bucket = os.getenv('MTW_BUCKET_NAME')
+    print(event['key'])
     file, size = get_file_body_by_key(event['key'], bucket)
     file_content = file.read()
 
