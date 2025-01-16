@@ -2,3 +2,13 @@ image: analyze_price_report
 description: analyze price report
 memorySize: 1024
 timeout: 900
+iamRoleStatementsInherit: true
+iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - s3:ListBucket*
+    Resource: "arn:aws:s3:::mtw-make-the-price-${self:custom.stage}-${aws:accountId}"
+  - Effect: "Allow"
+    Action:
+      - s3:*Object
+    Resource: "arn:aws:s3:::mtw-make-the-price-${self:custom.stage}-${aws:accountId}/*"
