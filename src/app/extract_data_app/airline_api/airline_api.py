@@ -42,7 +42,6 @@ def upload_flight_data(file_name: str = Json() ):
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
 def upload_price_report_data(file_name: str = Json() ):
-    print('file_name____', file_name)
     try:
         key = 'public/airline_files/TP_100/'+file_name
         payload = {'key':key, 'file_name':file_name}
