@@ -32,7 +32,7 @@ def upload_flight_data(file_name: str = Json() ):
     try:
         bucket = os.getenv('MTW_BUCKET_NAME')
         key = 'public/airline_files/TP_006/'+file_name
-        payload = {'bucket':bucket, 'key':key}
+        payload = {'bucket':bucket, 'key':key, 'file_name':file_name}
         invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-analyze_flight_file', payload)
         return jsonify({"message": "File processed and flights uploaded successfully"}), 201
     except Exception as e:

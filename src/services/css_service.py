@@ -25,7 +25,7 @@ class FlightService:
         self.data_source_repository = SourceRepository(db_session)
 
 
-    def process_pdf_and_store(self, pdf_file, bucket, key):
+    def process_pdf_and_store(self, pdf_file, bucket, file_name):
         try:
             extracted_data = extract_data(pdf_file, bucket)
             # flights_to_insert = []
@@ -48,7 +48,7 @@ class FlightService:
                     aircraft=int(flight_data.get("aeronave", 0)),
                     id_fligth = self.flight_repository.insert_flight(airline_company, period, unit, cycle, vr_voo, origin, destination, departure_time, arrival_time, aircraft)
                     if id_fligth:
-                        self.data_source_repository.insert_data_source(key, page_number, id_fligth)
+                        self.data_source_repository.insert_data_source(file_name, page_number, id_fligth)
                         date_strs = flight_data.get("datas", "").split(", ")
                         for date_str in date_strs:
                             try:
