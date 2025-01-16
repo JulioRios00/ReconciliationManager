@@ -2,3 +2,13 @@ image: analyze_flight_file
 description: analyze flight file 
 memorySize: 1024
 timeout: 900
+iamRoleStatementsInherit: true
+events:
+  - httpApi:
+      method: '*'
+      path: '/flights/{proxy+}'
+      authorizer: 
+        name: CognitoAuthorizer
+  - httpApi:
+      method: 'OPTIONS'
+      path: '/flights/{proxy+}'
