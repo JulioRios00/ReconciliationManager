@@ -2,4 +2,3 @@ image: analyze_flight_file
 description: analyze flight file 
 memorySize: 1024
 timeout: 900
-iamRoleStatementsInherit: true
