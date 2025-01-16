@@ -30,8 +30,9 @@ ROUTE_PREFIX = '/flights'
 @ValidateParameters(flask_parameter_validation_handler)
 def upload_flight_data(file_name: str = Json() ):
     try:
+        bucket = os.getenv('MTW_BUCKET_NAME')
         key = 'public/airline_files/TP_006/'+file_name
-        payload = {'key':key}
+        payload = {'bucket':bucket, 'key':key}
         invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-analyze_flight_file', payload)
         return jsonify({"message": "File processed and flights uploaded successfully"}), 201
     except Exception as e:
@@ -44,7 +45,7 @@ def upload_flight_data(file_name: str = Json() ):
 def upload_price_report_data(file_name: str = Json() ):
     try:
         key = 'public/airline_files/TP_100/'+file_name
-        payload = {'key':key}
+        payload = {'bucket':bucket, 'key':key}
         invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-analyze_price_report', payload)
         return jsonify({"message": "File processed and flights uploaded successfully"}), 201    
     except Exception as e:
