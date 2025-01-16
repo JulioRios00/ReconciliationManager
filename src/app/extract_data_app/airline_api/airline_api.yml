@@ -7,11 +7,11 @@ iamRoleStatements:
   - Effect: "Allow"
     Action:
       - s3:ListBucket*
-    Resource: "arn:aws:s3:::mtw-make-the-price-${self:custom.stage}-${aws:accountId}"
+    Resource: "arn:aws:s3:::mtw-elementar-dev-018061303185/public/airline_files/*"
   - Effect: "Allow"
     Action:
       - s3:*Object
-    Resource: "arn:aws:s3:::mtw-make-the-price-${self:custom.stage}-${aws:accountId}/*"
+    Resource: "arn:aws:s3:::mtw-elementar-dev-018061303185/public/airline_files/*"
 events:
   - httpApi:
       method: '*'
