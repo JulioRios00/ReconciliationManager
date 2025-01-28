@@ -1,5 +1,5 @@
-image: analyze_price_report
-description: analyze price report
+image: analyze_invoice
+description: analyze invoice
 memorySize: 1024
 timeout: 900
 iamRoleStatementsInherit: true
