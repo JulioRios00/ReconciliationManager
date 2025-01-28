@@ -181,3 +181,94 @@ class DataSourc(Base):
     def serialize(self):
         return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
     
+class InvoiceHistory(Base):
+
+    __tablename__ = 'InvoiceHistory'
+    __table_args__ = {'schema': 'ccs'}
+
+    Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    DataCriacao = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    DataAtualizacao = Column(TIMESTAMP)
+    Ativo = Column(Boolean, nullable=False, default=True)
+    Excluido = Column(Boolean, nullable=False, default=False)
+    IdUsuarioAlteracao = Column(UUID(as_uuid=True), ForeignKey('User.Id'))
+    UsuarioAlteracao = relationship(User)
+    BrdFac = Column(String(20), nullable=False)
+    BrdFltDt = Column(Date, nullable=False)
+    BrdFltNr = Column(Integer, nullable=False)
+    OpCd = Column(Integer, nullable=False)
+    SrvDptStaCd = Column(String(10), nullable=False)
+    SrvArrStaCd = Column(String(10), nullable=False)
+    SrvFltNr = Column(Integer, nullable=False)
+    SrvFltDt = Column(Date, nullable=False)
+    Cos = Column(String(10), nullable=False)
+    Psg = Column(Integer, nullable=False)
+    Meal = Column(Integer, nullable=False)
+    Tray = Column(Integer, nullable=False)
+    Total = Column(DECIMAL(10, 2), nullable=True)
+    Paid = Column(DECIMAL(10, 2), nullable=False)
+    Variance = Column(DECIMAL(10, 2), nullable=False)
+    GrandTotal = Column(DECIMAL(10, 2), nullable=False)
+    OvdInd = Column(String(10), nullable=True)
+    IvcPcsDt = Column(Date, nullable=False)
+    IvcDbsDt = Column(Date, nullable=False)
+    Org = Column(Integer, nullable=False)
+    IvcSeqNr = Column(Integer, nullable=False)
+    IvcCreDt = Column(Date, nullable=False)
+    Comments = Column(String(255), nullable=False)
+    LineSeqNr = Column(Integer, nullable=False)
+    Item = Column(Integer, nullable=False)
+    ActAmt = Column(DECIMAL(10, 2), nullable=False)
+    ActQty = Column(Integer, nullable=False)
+    SchAmt = Column(DECIMAL(10, 2), nullable=False)
+    SchQty = Column(Integer, nullable=False)
+    ActLbrAmt = Column(DECIMAL(10, 2), nullable=False)
+    SchLbrAmt = Column(DECIMAL(10, 2), nullable=False)
+    ItemDesc = Column(String(200), nullable=False)
+    PktTyp = Column(String(40), nullable=True)
+    PktNr = Column(Integer, nullable=True)
+    PktNm = Column(String(50), nullable=True)
+    PktVar = Column(Integer, nullable=True)
+    CourceName = Column(String(255), nullable=True)
+
+    def __init__(self, brd_fac, brd_flt_dt, brd_flt_nr, op_cd, srv_dpt_sta_cd, srv_arr_sta_cd, srv_flt_nr, srv_flt_dt, cos, psg, meal, tray, total, paid, variance, grand_total, ovd_ind, ivc_pcs_dt, ivc_dbs_dt, org, ivc_seq_nr, ivc_cre_dt, comments, line_seq_nr, item, act_amt, act_qty, sch_amt, sch_qty, act_lbr_amt, sch_lbr_amt, item_desc, pkt_typ=None, pkt_nr=None, pkt_nm=None, pkt_var=None, file_name=None):
+        self.BrdFac = brd_fac
+        self.BrdFltDt = brd_flt_dt
+        self.BrdFltNr = brd_flt_nr
+        self.OpCd = op_cd
+        self.SrvDptStaCd = srv_dpt_sta_cd
+        self.SrvArrStaCd = srv_arr_sta_cd
+        self.SrvFltNr = srv_flt_nr
+        self.SrvFltDt = srv_flt_dt
+        self.Cos = cos
+        self.Psg = psg
+        self.Meal = meal
+        self.Tray = tray
+        self.Total = total
+        self.Paid = paid
+        self.Variance = variance
+        self.GrandTotal = grand_total
+        self.OvdInd = ovd_ind
+        self.IvcPcsDt = ivc_pcs_dt
+        self.IvcDbsDt = ivc_dbs_dt
+        self.Org = org
+        self.IvcSeqNr = ivc_seq_nr
+        self.IvcCreDt = ivc_cre_dt
+        self.Comments = comments
+        self.LineSeqNr = line_seq_nr
+        self.Item = item
+        self.ActAmt = act_amt
+        self.ActQty = act_qty
+        self.SchAmt = sch_amt
+        self.SchQty = sch_qty
+        self.ActLbrAmt = act_lbr_amt
+        self.SchLbrAmt = sch_lbr_amt
+        self.ItemDesc = item_desc
+        self.PktTyp = pkt_typ
+        self.PktNr = pkt_nr
+        self.PktNm = pkt_nm
+        self.PktVar = pkt_var
+        self.CourceName = file_name
+
+    def serialize(self):
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
