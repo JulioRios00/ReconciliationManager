@@ -122,6 +122,9 @@ provider:
       analyze_price_report:
         path: "./src"
         file: Dockerfile.pricereport
+      analyze_invoices:
+        path: "./src"
+        file: Dockerfile.invoices
       airline_api:
         path: "./src"
         file: Dockerfile.airlineapi
@@ -148,6 +151,7 @@ functions:
   analyze_flight_file: ${file(src/app/extract_data_app/analyze_flight_file/analyze_tp_006.yml)}
   airline_api: ${file(src/app/extract_data_app/airline_api/airline_api.yml)}
   analyze_price_report: ${file(src/app/extract_data_app/analyze_price_report/analyze_tp_100.yml)}
+  analyze_invoice: ${file(app/extract_data_app/analyze_invoice/analyze_invoice.yml)}
 resources:
   - Conditions:
       EnvQa : !Equals [ "${self:custom.stage}", "qa"]
