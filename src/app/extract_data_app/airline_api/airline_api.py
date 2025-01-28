@@ -25,6 +25,7 @@ authorize = Authorize(current_user=get_current_user, app=app)
 
 ROUTE_PREFIX = '/flights'
 
+#Table Flight
 @app.route(ROUTE_PREFIX + '/upload/airline', methods=['POST'])
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
@@ -37,6 +38,7 @@ def upload_flight_data(file_name: str = Json() ):
         return jsonify({"message": "File processed and flights uploaded successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 #Table priceReport
 @app.route(ROUTE_PREFIX + '/upload/price_report', methods=['POST'])
@@ -51,7 +53,23 @@ def upload_price_report_data(file_name: str = Json() ):
         return jsonify({"message": "File processed and flights uploaded successfully"}), 201    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+#Table InvoiceHistory
+@app.route(ROUTE_PREFIX + '/upload/invoice', methods=['POST'])
+@authorize.in_group('admin')
+@ValidateParameters(flask_parameter_validation_handler)
+def upload_invoice_data(file_name: str = Json() ):
+    try:
+        bucket = os.getenv('MTW_BUCKET_NAME')
+        key = 'public/airline_files/Histórico De Faturas/'+file_name
+        payload = {'bucket':bucket, 'key':key, 'file_name':file_name}
+        invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-analyze_invoice', payload)
+        return jsonify({"message": "File processed and flights uploaded successfully"}), 201    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     
+
 @app.route(ROUTE_PREFIX + '/delete/price_report/<string:id>', methods=['DELETE'])
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
