@@ -122,9 +122,9 @@ provider:
       analyze_price_report:
         path: "./src"
         file: Dockerfile.pricereport
-      analyze_invoices:
+      analyze_invoice:
         path: "./src"
-        file: Dockerfile.invoices
+        file: Dockerfile.invoice
       airline_api:
         path: "./src"
         file: Dockerfile.airlineapi
