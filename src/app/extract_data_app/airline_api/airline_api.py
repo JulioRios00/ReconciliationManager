@@ -18,13 +18,14 @@ from common.custom_exception import CustomException
 from common.lambda_boto import invoke_lambda_async
 
 # Application-Specific Services
-from services.css_service import FlightService, PriceReportService
+from services.css_service import FlightService, PriceReportService, InvoiceService
 
 app = Flask(__name__)
 authorize = Authorize(current_user=get_current_user, app=app)
 
 ROUTE_PREFIX = '/flights'
 
+#Table Flight
 @app.route(ROUTE_PREFIX + '/upload/airline', methods=['POST'])
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
@@ -46,12 +47,28 @@ def upload_price_report_data(file_name: str = Json() ):
     try:
         bucket = os.getenv('MTW_BUCKET_NAME')
         key = 'public/airline_files/TP_100/'+file_name
-        payload = {'bucket':bucket, 'key':key}
+        payload = {'bucket':bucket, 'key':key, 'file_name':file_name}
         invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-analyze_price_report', payload)
-        return jsonify({"message": "File processed and flights uploaded successfully"}), 201    
+        return jsonify({"message": "File processed and report uploaded successfully"}), 201    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+#Table InvoiceHistory
+@app.route(ROUTE_PREFIX + '/upload/invoice', methods=['POST'])
+@authorize.in_group('admin')
+@ValidateParameters(flask_parameter_validation_handler)
+def upload_invoice_data(file_name: str = Json() ):
+    try:
+        bucket = os.getenv('MTW_BUCKET_NAME')
+        key = 'public/airline_files/Histórico De Faturas/'+file_name
+        payload = {'bucket':bucket, 'key':key, 'file_name':file_name}
+        invoke_lambda_async('arn:aws:lambda:us-east-1:018061303185:function:serverless-ccs-dev-analyze_invoice', payload)
+        return jsonify({"message": "File processed and invoices uploaded successfully"}), 201    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+
 @app.route(ROUTE_PREFIX + '/delete/price_report/<string:id>', methods=['DELETE'])
 @authorize.in_group('admin')
 @ValidateParameters(flask_parameter_validation_handler)
@@ -59,11 +76,26 @@ def delete_price_report(id: str = Route(min_str_length=30, max_str_length=60)):
     with get_session() as session:
         try:
             result = PriceReportService(session).delete_price_report(id)
-            return jsonify(result), 204
+            return jsonify(result), 200
         except CustomException as e:
             return jsonify({'error': str(e)}), 404
         except Exception as e:
             return jsonify({'error': 'Internal server error'}), 500
+
+
+@app.route(ROUTE_PREFIX + '/delete/invoice', methods=['DELETE'])
+@authorize.in_group('admin')
+@ValidateParameters(flask_parameter_validation_handler)
+def delete_inovice(file_name: str = Json()):
+    with get_session() as session:
+        try:
+            result = InvoiceService(session).delete_invoice_file(file_name)
+            return jsonify(result), 200
+        except CustomException as e:
+            return jsonify({'error': str(e)}), 404
+        except Exception as e:
+            return jsonify({'error': 'Internal server error'}), 500
+        
 
 @app.route(ROUTE_PREFIX + '/search/price_report/<string:id>', methods=['GET'])
 @authorize.in_group('admin')

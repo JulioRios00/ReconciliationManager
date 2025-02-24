@@ -134,8 +134,10 @@ class PriceReport(Base):
     LbrAmt = Column(DECIMAL, nullable=False)
     PktNr = Column(Integer, nullable=False)
     PktNm = Column(String(100), nullable=False)
+    SourceFile = Column(String(255), nullable=True)
 
-    def __init__(self, facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm):
+
+    def __init__(self, facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm, source_file):
         self.Facility = facility
         self.Organization = organization
         self.PulledDate = pulled_date
@@ -152,6 +154,7 @@ class PriceReport(Base):
         self.LbrAmt = lbr_amt
         self.PktNr = pkt_nr
         self.PktNm = pkt_nm
+        self.SourceFile = source_file
 
     def serialize(self):
         return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
@@ -183,8 +186,8 @@ class DataSourc(Base):
     
 class InvoiceHistory(Base):
 
-    tablename = 'InvoiceHistory'
-    table_args = {'schema': 'ccs'}
+    __tablename__ = 'InvoiceHistory'
+    __table_args__ = {'schema': 'ccs'}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     DataCriacao = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
@@ -193,45 +196,45 @@ class InvoiceHistory(Base):
     Excluido = Column(Boolean, nullable=False, default=False)
     IdUsuarioAlteracao = Column(UUID(as_uuid=True), ForeignKey('User.Id'))
     UsuarioAlteracao = relationship(User)
-    BrdFac = Column(String(20), nullable=False)
-    BrdFltDt = Column(Date, nullable=False)
-    BrdFltNr = Column(Integer, nullable=False)
-    OpCd = Column(Integer, nullable=False)
-    SrvDptStaCd = Column(String(10), nullable=False)
-    SrvArrStaCd = Column(String(10), nullable=False)
-    SrvFltNr = Column(Integer, nullable=False)
-    SrvFltDt = Column(Date, nullable=False)
-    Cos = Column(String(10), nullable=False)
-    Psg = Column(Integer, nullable=False)
-    Meal = Column(Integer, nullable=False)
-    Tray = Column(Integer, nullable=False)
-    Total = Column(Integer, nullable=True)
-    Paid = Column(DECIMAL(10, 2), nullable=False)
-    Variance = Column(DECIMAL(10, 2), nullable=False)
-    GrandTotal = Column(DECIMAL(10, 2), nullable=False)
+    BrdFac = Column(String(20), nullable=True)
+    BrdFltDt = Column(Date, nullable=True)
+    BrdFltNr = Column(Integer, nullable=True)
+    OpCd = Column(Integer, nullable=True)
+    SrvDptStaCd = Column(String(10), nullable=True)
+    SrvArrStaCd = Column(String(10), nullable=True)
+    SrvFltNr = Column(Integer, nullable=True)
+    SrvFltDt = Column(Date, nullable=True)
+    Cos = Column(String(10), nullable=True)
+    Psg = Column(Integer, nullable=True)
+    Meal = Column(Integer, nullable=True)
+    Tray = Column(Integer, nullable=True)
+    Total = Column(DECIMAL(10, 2), nullable=True)
+    Paid = Column(DECIMAL(10, 2), nullable=True)
+    Variance = Column(DECIMAL(10, 2), nullable=True)
+    GrandTotal = Column(DECIMAL(10, 2), nullable=True)
     OvdInd = Column(String(10), nullable=True)
-    IvcPcsDt = Column(Date, nullable=False)
-    IvcDbsDt = Column(Date, nullable=False)
-    Org = Column(Integer, nullable=False)
-    IvcSeqNr = Column(Integer, nullable=False)
-    IvcCreDt = Column(Date, nullable=False)
-    Comments = Column(String(255), nullable=False)
-    LineSeqNr = Column(Integer, nullable=False)
-    Item = Column(Integer, nullable=False)
-    ActAmt = Column(Integer, nullable=False)
-    ActQty = Column(Integer, nullable=False)
-    SchAmt = Column(Integer, nullable=False)
-    SchQty = Column(Integer, nullable=False)
-    ActLbrAmt = Column(Integer, nullable=False)
-    SchLbrAmt = Column(Integer, nullable=False)
-    ItemDesc = Column(String(200), nullable=False)
+    IvcPcsDt = Column(Date, nullable=True)
+    IvcDbsDt = Column(Date, nullable=True)
+    Org = Column(Integer, nullable=True)
+    IvcSeqNr = Column(Integer, nullable=True)
+    IvcCreDt = Column(Date, nullable=True)
+    Comments = Column(String(255), nullable=True)
+    LineSeqNr = Column(Integer, nullable=True)
+    Item = Column(Integer, nullable=True)
+    ActAmt = Column(DECIMAL(10, 2), nullable=True)
+    ActQty = Column(Integer, nullable=True)
+    SchAmt = Column(DECIMAL(10, 2), nullable=True)
+    SchQty = Column(Integer, nullable=True)
+    ActLbrAmt = Column(DECIMAL(10, 2), nullable=True)
+    SchLbrAmt = Column(DECIMAL(10, 2), nullable=True)
+    ItemDesc = Column(String(200), nullable=True)
     PktTyp = Column(String(40), nullable=True)
     PktNr = Column(Integer, nullable=True)
     PktNm = Column(String(50), nullable=True)
     PktVar = Column(Integer, nullable=True)
-    CourceName = Column(String(255), nullable=True)
+    SourceName = Column(String(255), nullable=True)
 
-    def init(self, brd_fac, brd_flt_dt, brd_flt_nr, op_cd, srv_dpt_sta_cd, srv_arr_sta_cd, srv_flt_nr, srv_flt_dt, cos, psg, meal, tray, total, paid, variance, grand_total, ovd_ind, ivc_pcs_dt, ivc_dbs_dt, org, ivc_seq_nr, ivc_cre_dt, comments, line_seq_nr, item, act_amt, act_qty, sch_amt, sch_qty, act_lbr_amt, sch_lbr_amt, item_desc, pkt_typ=None, pkt_nr=None, pkt_nm=None, pkt_var=None, file_name=None):
+    def __init__(self, brd_fac, brd_flt_dt, brd_flt_nr, op_cd, srv_dpt_sta_cd, srv_arr_sta_cd, srv_flt_nr, srv_flt_dt, cos, psg, meal, tray, total, paid, variance, grand_total, ovd_ind, ivc_pcs_dt, ivc_dbs_dt, org, ivc_seq_nr, ivc_cre_dt, comments, line_seq_nr, item, act_amt, act_qty, sch_amt, sch_qty, act_lbr_amt, sch_lbr_amt, item_desc, pkt_typ=None, pkt_nr=None, pkt_nm=None, pkt_var=None, file_name=None):
         self.BrdFac = brd_fac
         self.BrdFltDt = brd_flt_dt
         self.BrdFltNr = brd_flt_nr
@@ -268,7 +271,7 @@ class InvoiceHistory(Base):
         self.PktNr = pkt_nr
         self.PktNm = pkt_nm
         self.PktVar = pkt_var
-        self.CourceName = file_name
+        self.SourceName = file_name
 
     def serialize(self):
-        return {c.name: str(getattr(self, c.name)) for c in self.table.columns}
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}

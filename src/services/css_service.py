@@ -7,12 +7,14 @@ from repositories.ccs_repository import (
     ConfigurationRepository,
     FlightDateRepository,
     SourceRepository,
-    PriceReportRepository
+    PriceReportRepository,
+    InvoiceRepository
 )
 
 # Application-Specific Service Layer Imports
 from services.airline_service import extract_data
 from services.price_report_service import price_report_data
+from services.invoices_service import analyze_invoices_data
 
 # Application-Specific Common Utilities
 from common.custom_exception import CustomException
@@ -152,3 +154,23 @@ class PriceReportService:
                 pkt_nr, pkt_nm)
         except Exception as e:
             print(f"Error find price report: {e}")
+
+class InvoiceService:
+    def __init__(self, db_session):
+        self.invoice_repository = InvoiceRepository(db_session)
+
+    def process_invoice(self, data, filename):
+        try:
+            invoice_data = analyze_invoices_data(data)
+            self.invoice_repository.insert_packeg_invoice(invoice_data, filename)
+        except Exception as e:
+            print(f"Error processing invoice data: {e}")
+
+    def delete_invoice_file(self, filename):
+        try:
+            return self.invoice_repository.delete_invoices(filename)
+        except CustomException as e:
+            raise e
+        except Exception as e:
+            print(f"Error deleting invoice: {e}")
+            raise CustomException("an error occurred while deleting the invoice history")

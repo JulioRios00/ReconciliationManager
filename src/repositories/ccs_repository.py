@@ -1,8 +1,10 @@
 #Repositories
 from repositories.repository import Repository
 from typing import List, Dict
+from decimal import Decimal
+from datetime import datetime
 #Tables
-from models.schema_ccs import Flight, Configuration, FlightDate, DataSourc, PriceReport
+from models.schema_ccs import Flight, Configuration, FlightDate, DataSourc, PriceReport, InvoiceHistory
 # Application-Specific Common Utilities
 from common.custom_exception import CustomException
 
@@ -162,12 +164,12 @@ class PriceReportRepository(Repository):
         print(f"Inserted price reports")
 
     def delete_price_report(self, id):
-        price_report = self.session.query(PriceReport).filter(PriceReport.Id == id).first()
-        if not price_report:
+        price_reports = self.session.query(PriceReport).filter(PriceReport.Id == id).first()
+        if not price_reports:
             raise CustomException(f"PriceReport with ID {id} not found")
-        
         # Commit changes to the database
-        self.session.delete(price_report)
+        for report in price_reports:
+            report.Excluido = True
         self.session.commit()
         return {'message': f'Deleted PriceReport id {id}'}
 
@@ -200,3 +202,64 @@ class PriceReportRepository(Repository):
 
     def get_by_spc_dsc(self, spc_dsc):
         return self.session.query(PriceReport).filter(PriceReport.SpcDsc.ilike(f"%{spc_dsc}%"), PriceReport.Excluido == False).all()
+    
+class InvoiceRepository(Repository):
+    def __init__(self, db_session):
+        super().__init__(db_session, InvoiceHistory)
+
+    def insert_packeg_invoice(self, invoice_data, FileName):
+        for invoice in invoice_data:
+            new_invoice = InvoiceHistory(
+                brd_fac = invoice.get("Brd Fac"),
+                brd_flt_dt = datetime.strptime(invoice.get("Brd Flt Dt"), "%Y-%m-%d") if invoice.get("Brd Flt Dt") else None,
+                brd_flt_nr = int(invoice.get("Brd Flt Nr")) if invoice.get("Brd Flt Nr") else 0,
+                op_cd = int(invoice.get("Op Cd")) if invoice.get("Op Cd") else 0,
+                srv_dpt_sta_cd = invoice.get("Srv Dpt Sta Cd"),
+                srv_arr_sta_cd = invoice.get("Srv Arr Sta Cd"),
+                srv_flt_nr = int(invoice.get("Srv Flt Nr")) if invoice.get("Srv Flt Nr") else 0,
+                srv_flt_dt = datetime.strptime(invoice.get("Srv Flt Dt"), "%Y-%m-%d") if invoice.get("Srv Flt Dt") else None,
+                cos = invoice.get("Cos"),
+                psg = int(invoice.get("Psg")) if invoice.get("Psg") else 0,
+                meal = int(invoice.get("Meal")) if invoice.get("Meal") else 0,
+                tray = int(invoice.get("Tray")) if invoice.get("Tray") else 0,
+                total = Decimal(invoice.get("Total").replace(',', '')) if invoice.get("Total") else 0.00,
+                paid = Decimal(invoice.get('Paid').replace(',', '')) if invoice.get('Paid') else 0.00,
+                variance = Decimal(invoice.get("Variance").replace(',', '')) if invoice.get("Variance") else 0.00,
+                grand_total = Decimal(invoice.get("Grand Total").replace(',', '')) if invoice.get("Grand Total") else 0.00,
+                ovd_ind = invoice.get("Ovd Ind"),
+                ivc_pcs_dt = datetime.strptime(invoice.get("Ivc Pcs Dt"), "%Y-%m-%d") if invoice.get("Ivc Pcs Dt") else None,
+                ivc_dbs_dt = datetime.strptime(invoice.get("Ivc Dbs Dt"), "%Y-%m-%d") if invoice.get("Ivc Dbs Dt") else None,
+                org = int(invoice.get("Org")) if invoice.get("Org") else 0,
+                ivc_seq_nr = int(invoice.get("Ivc Seq Nr")) if invoice.get("Ivc Seq Nr") else 0,
+                ivc_cre_dt = datetime.strptime(invoice.get("Ivc Cre Dt"), "%Y-%m-%d") if invoice.get("Ivc Cre Dt") else None,
+                comments = invoice.get("Comments"),
+                line_seq_nr = int(invoice.get("Line Seq Nr")) if invoice.get("Line Seq Nr") else None,
+                item = int(invoice.get("Item")) if invoice.get("Item") else 0,
+                act_amt = Decimal(invoice.get("Act Amt").replace(',', '')) if invoice.get("Act Amt") else 0.00,
+                act_qty = int(invoice.get("Act Qty")) if invoice.get("Act Qty") else 0,
+                sch_amt = Decimal(invoice.get("Sch Amt").replace(',', '')) if invoice.get("Sch Amt") else 0.00,
+                sch_qty = int(invoice.get("Sch Qty")) if invoice.get("Sch Qty") else 0,
+                act_lbr_amt = Decimal(invoice.get("Act Lbr Amt").replace(',', '')) if invoice.get("Act Lbr Amt") else 0.00,
+                sch_lbr_amt = Decimal(invoice.get("Sch Lbr Amt").replace(',', '')) if invoice.get("Sch Lbr Amt") else 0.00,
+                item_desc = invoice.get("Item Desc"),
+                pkt_typ = invoice.get("Pkt Typ"),
+                pkt_nr = int(invoice.get("Pkt Nr")) if invoice.get("Pkt Nr") else 0,
+                pkt_nm = invoice.get("Pkt Nm"),
+                pkt_var = int(invoice.get("Pkt Var")) if invoice.get("Pkt Var") else 0,
+                file_name = FileName
+            )
+            self.session.add(new_invoice)
+        self.session.commit()
+        print(f"Inserted successfully invoice data")
+
+    def delete_invoices(self, filename):
+        invoices = self.session.query(InvoiceHistory).filter(InvoiceHistory.SourceName == filename).all()
+        if not invoices:
+            raise CustomException(f"invoice for {filename} not found")
+        
+        # Commit changes to the database
+        for invoice in invoices:
+            print(invoice)
+            invoice.Excluido = True
+        self.session.commit()
+        return {'message': f'Deleted all {filename} invoices.'}
