@@ -53,6 +53,20 @@ def upload_price_report_data(file_name: str = Json() ):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+    
+@app.route(ROUTE_PREFIX + '/delete/price_report/<string:id>', methods=['DELETE'])
+@authorize.in_group('admin')
+@ValidateParameters(flask_parameter_validation_handler)
+def delete_price_report(id: str = Route(min_str_length=30, max_str_length=60)):
+    with get_session() as session:
+        try:
+            result = PriceReportService(session).delete_price_report(id)
+            return jsonify(result), 200
+        except CustomException as e:
+            return jsonify({'error': str(e)}), 404
+        except Exception as e:
+            return jsonify({'error': 'Internal server error'}), 500
+
 
 #Table InvoiceHistory
 @app.route(ROUTE_PREFIX + '/upload/invoice', methods=['POST'])
@@ -67,20 +81,6 @@ def upload_invoice_data(file_name: str = Json() ):
         return jsonify({"message": "File processed and invoices uploaded successfully"}), 201    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-
-@app.route(ROUTE_PREFIX + '/delete/price_report/<string:id>', methods=['DELETE'])
-@authorize.in_group('admin')
-@ValidateParameters(flask_parameter_validation_handler)
-def delete_price_report(id: str = Route(min_str_length=30, max_str_length=60)):
-    with get_session() as session:
-        try:
-            result = PriceReportService(session).delete_price_report(id)
-            return jsonify(result), 200
-        except CustomException as e:
-            return jsonify({'error': str(e)}), 404
-        except Exception as e:
-            return jsonify({'error': 'Internal server error'}), 500
 
 
 @app.route(ROUTE_PREFIX + '/delete/invoice', methods=['DELETE'])
