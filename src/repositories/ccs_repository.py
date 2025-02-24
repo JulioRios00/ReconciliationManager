@@ -139,7 +139,7 @@ class PriceReportRepository(Repository):
         self.session.commit()
         print(f"Inserted new price report {new_report}")
 
-    def insert_packeg_price_report(self, facility, organization, pulled_date, run_date, report_table_data):
+    def insert_packeg_ackeg_price_report(self, facility, organization, pulled_date, run_date, report_table_data):
         for report in report_table_data:
             new_report = PriceReport(
                 facility=facility,
@@ -164,12 +164,12 @@ class PriceReportRepository(Repository):
         print(f"Inserted price reports")
 
     def delete_price_report(self, id):
-        price_report = self.session.query(PriceReport).filter(PriceReport.Id == id).first()
-        if not price_report:
+        price_reports = self.session.query(PriceReport).filter(PriceReport.Id == id).first()
+        if not price_reports:
             raise CustomException(f"PriceReport with ID {id} not found")
-        
         # Commit changes to the database
-        self.session.delete(price_report)
+        for report in price_reports:
+            report.Excluido = True
         self.session.commit()
         return {'message': f'Deleted PriceReport id {id}'}
 
@@ -251,3 +251,15 @@ class InvoiceRepository(Repository):
             self.session.add(new_invoice)
         self.session.commit()
         print(f"Inserted successfully invoice data")
+
+    def delete_invoices(self, filename):
+        invoices = self.session.query(InvoiceHistory).filter(InvoiceHistory.SourceName == filename).all()
+        if not invoices:
+            raise CustomException(f"invoice for {filename} not found")
+        
+        # Commit changes to the database
+        for invoice in invoices:
+            print(invoice)
+            invoice.Excluido = True
+        self.session.commit()
+        return {'message': f'Deleted all {filename} invoices.'}

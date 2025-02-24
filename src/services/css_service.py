@@ -90,7 +90,7 @@ class PriceReportService:
             organization = header_data.get("Line 3", "").split(": ", 1)[-1]
             pulled_date = header_data.get("Line 4", "").split("from ", 1)[-1].split(" to ")[0]
             run_date = header_data.get("Line 5", "").split(": ", 1)[-1]
-            self.price_report_repository.insert_packeg_price_report(facility, organization, pulled_date, run_date, price_data)
+            self.price_report_repository.insert_packeg_ackeg_price_report(facility, organization, pulled_date, run_date, price_data)
         except Exception as e:
             print(f"Error processing price report data: {e}")
         # try:
@@ -164,4 +164,13 @@ class InvoiceService:
             invoice_data = analyze_invoices_data(data)
             self.invoice_repository.insert_packeg_invoice(invoice_data, filename)
         except Exception as e:
-            print(f"Error processing price report data: {e}")
+            print(f"Error processing invoice data: {e}")
+
+    def delete_invoice_file(self, filename):
+        try:
+            return self.invoice_repository.delete_invoices(filename)
+        except CustomException as e:
+            raise e
+        except Exception as e:
+            print(f"Error deleting invoice: {e}")
+            raise CustomException("an error occurred while deleting the invoice history")

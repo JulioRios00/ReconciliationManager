@@ -134,8 +134,10 @@ class PriceReport(Base):
     LbrAmt = Column(DECIMAL, nullable=False)
     PktNr = Column(Integer, nullable=False)
     PktNm = Column(String(100), nullable=False)
+    SourceFile = Column(String(255), nullable=True)
 
-    def __init__(self, facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm):
+
+    def __init__(self, facility, organization, pulled_date, run_date, fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd, prc_eff_dt, prc_dis_dt, prc_cur_cd, tot_amt, lbr_amt, pkt_nr, pkt_nm, source_file):
         self.Facility = facility
         self.Organization = organization
         self.PulledDate = pulled_date
@@ -152,6 +154,7 @@ class PriceReport(Base):
         self.LbrAmt = lbr_amt
         self.PktNr = pkt_nr
         self.PktNm = pkt_nm
+        self.SourceFile = source_file
 
     def serialize(self):
         return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
@@ -229,7 +232,7 @@ class InvoiceHistory(Base):
     PktNr = Column(Integer, nullable=True)
     PktNm = Column(String(50), nullable=True)
     PktVar = Column(Integer, nullable=True)
-    CourceName = Column(String(255), nullable=True)
+    SourceName = Column(String(255), nullable=True)
 
     def __init__(self, brd_fac, brd_flt_dt, brd_flt_nr, op_cd, srv_dpt_sta_cd, srv_arr_sta_cd, srv_flt_nr, srv_flt_dt, cos, psg, meal, tray, total, paid, variance, grand_total, ovd_ind, ivc_pcs_dt, ivc_dbs_dt, org, ivc_seq_nr, ivc_cre_dt, comments, line_seq_nr, item, act_amt, act_qty, sch_amt, sch_qty, act_lbr_amt, sch_lbr_amt, item_desc, pkt_typ=None, pkt_nr=None, pkt_nm=None, pkt_var=None, file_name=None):
         self.BrdFac = brd_fac
@@ -268,7 +271,7 @@ class InvoiceHistory(Base):
         self.PktNr = pkt_nr
         self.PktNm = pkt_nm
         self.PktVar = pkt_var
-        self.CourceName = file_name
+        self.SourceName = file_name
 
     def serialize(self):
         return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}

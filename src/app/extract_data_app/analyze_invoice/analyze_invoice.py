@@ -6,9 +6,6 @@ import os
 import io
 
 def main(event, context):
-    # key = event['Records'][0]['s3']['object']['key']
-    # bucket = event['Records'][0]['s3']['bucket']['name']
-    # file, size = get_file_body_by_key(key, bucket)
     file, size = get_file_body_by_key(event['key'], event['bucket'])
     file_content = file.read()
 

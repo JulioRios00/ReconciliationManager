@@ -244,7 +244,7 @@
                           "arn": "arn:{partition}:s3:::mybucket"
                       },
                       "object": {
-                          "key": "public/airline_files/Histórico De Faturas/Arion - 20059578000120-Invoices__1_.csv",
+                          "key": "public/airline_files/Histórico De Faturas/Arion - 20059578000120-reproc_nota5.csv",
                           "size": 1024,
                           "eTag": "0123456789abcdef0123456789abcdef",
                           "sequencer": "0A1B2C3D4E5F678901"
@@ -458,7 +458,7 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
-      "name": "invoice_api.main (python3.8)",
+      "name": "upload_invoice_api.main (python3.8)",
       "invokeTarget": {
           "target": "code",
           "projectRoot": "${workspaceFolder}/src",
@@ -469,7 +469,7 @@
           "runtime": "python3.8",
           "payload": {
             "json": {
-              "body": "{\"file_name\":\"Arion - 20059578000120-Invoices__1_.csv\"}",
+              "body": "{\"file_name\":\"Arion - 20059578000120-Invoices.csv\"}",
               "resource": "/{proxy+}",
               "path": "/flights/upload/invoice",
               "httpMethod": "POST",
@@ -550,7 +550,7 @@
           "runtime": "python3.8",
           "payload": {
               "json": {
-                  "body": "{\"file_name\":\"TP100_BA_120_GIGC1.CSV\"}",
+                  "body": "{\"file_name\":\"Arion - 20059578000120-reproc_nota5.csv\"}",
                   "Records": [
                     {
                         "eventVersion": "2.0",
@@ -588,7 +588,7 @@
                     }
                   ],
                   "resource": "/{proxy+}",
-                  "path": "/flights/delete/price_report/129e57a2-2e87-4f31-836b-a2c3a10cdc62",
+                  "path": "/flights/delete/price_report",
                   "httpMethod": "DELETE",
                   "queryStringParameters": {
                   },
@@ -650,6 +650,123 @@
           }
       }
     },
+    
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "delete_invoice_api.main (python3.8)",
+      "invokeTarget": {
+          "target": "code",
+          "projectRoot": "${workspaceFolder}/src",
+          "lambdaHandler": "app/extract_data_app/airline_api/airline_api.main"
+        },
+      "lambda": {
+          "memoryMb": 3000,
+          "runtime": "python3.8",
+          "payload": {
+              "json": {
+                  "body": "{\"file_name\":\"Arion - 20059578000120-reproc_nota5.csv\"}",
+                  "Records": [
+                    {
+                        "eventVersion": "2.0",
+                        "eventSource": "aws:s3",
+                        "awsRegion": "{region}",
+                        "eventTime": "1970-01-01T00:00:00Z",
+                        "eventName": "ObjectCreated:Put",
+                        "userIdentity": {
+                            "principalId": "EXAMPLE"
+                        },
+                        "requestParameters": {
+                            "sourceIPAddress": "127.0.0.1"
+                        },
+                        "responseElements": {
+                            "x-amz-request-id": "EXAMPLE123456789",
+                            "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
+                        },
+                        "s3": {
+                            "s3SchemaVersion": "1.0",
+                            "configurationId": "testConfigRule",
+                            "bucket": {
+                                "name": "mtw-elementar-dev-018061303185",
+                                "ownerIdentity": {
+                                    "principalId": "EXAMPLE"
+                                },
+                                "arn": "arn:{partition}:s3:::mybucket"
+                            },
+                            "object": {
+                                "key": "public/price_report/TP100_BA_120_GIGC1.CSV",
+                                "size": 1024,
+                                "eTag": "0123456789abcdef0123456789abcdef",
+                                "sequencer": "0A1B2C3D4E5F678901"
+                            }
+                        }
+                    }
+                  ],
+                  "resource": "/{proxy+}",
+                  "path": "/flights/delete/inovice",
+                  "httpMethod": "DELETE",
+                  "queryStringParameters": {
+                  },
+                  "pathParameters": {
+                    "id": "129e57a2-2e87-4f31-836b-a2c3a10cdc62"
+                  },
+                  "stageVariables": {
+                      "baz": "qux"
+                  },
+                  "headers": {
+                      "Authorization": "eyJraWQiOiJ1QUU5c2NXOWo4a09wT1FkK0pjUzRDTlVMcVhiNGg0WUF6cXk0Y2c1dE1ZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjNGI4ODQwOC1mMDMxLTcwMTMtMDQ2Ny1iMTI0YjBlYTNjNTIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KUndROXk0SmciLCJjbGllbnRfaWQiOiI1dmxpbG90a3I5bXRkcHZiNDdmanY5ZmQ3MyIsIm9yaWdpbl9qdGkiOiIxZWFmOGEwOS1hMTc5LTQxMmYtYTgwOS04NGIzZDk4YWY3MjUiLCJldmVudF9pZCI6IjhhOTE0ZDdkLWY1ZDMtNGRhYy1hODE4LThjOWFiNzg0YzBhYiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MjAyMDMwNTYsImV4cCI6MTcyMDIwNjY1NiwiaWF0IjoxNzIwMjAzMDU2LCJqdGkiOiJlZjRhOTBlYi0wMzk0LTQxM2EtOTZjNi0zODE2MTFmNTY4MjkiLCJ1c2VybmFtZSI6ImM0Yjg4NDA4LWYwMzEtNzAxMy0wNDY3LWIxMjRiMGVhM2M1MiJ9.jJLsixoNiyKj-8dsp2QFKc4lZcSHVcJpWY4cNXDYVUvEar_ujQz0IhlMwT52MIOEbtSZU18Q9YHvz4X6wTGHiO_j2M6hURHTopb8Jbdi1kO8504g4HRd27hBgrPBEaZZBXTccmMbZjRreSLvD94ZrdKXsTt4xQ2dNWIBl0T5CXd4onHdM-qlLxdbH39EsW0RaNaj4wYNEI57ZgTTXQ6AA2JJ8YzMkDszyQL_iD3osM6q7iBNPWNtxFG-kgaYvS69-Bp0ZZjT27ngR80QHnK9_Di8HCk4k6vIsagyxu4ggCNREIVyIcgHuUnJOMsQrBD0vGnTcLysQdFtAM6NLkG_0w",
+                      "Content-Type": "application/json",
+                      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,/;q=0.8",
+                      "Accept-Encoding": "gzip, deflate, sdch",
+                      "Accept-Language": "en",
+                      "Cache-Control": "max-age=0",
+                      "CloudFront-Forwarded-Proto": "https",
+                      "CloudFront-Is-Desktop-Viewer": "true",
+                      "CloudFront-Is-Mobile-Viewer": "false",
+                      "CloudFront-Is-SmartTV-Viewer": "false",
+                      "CloudFront-Is-Tablet-Viewer": "false",
+                      "CloudFront-Viewer-Country": "US",
+                      "Host": "1234567890.execute-api.{dns_suffix}",
+                      "Upgrade-Insecure-Requests": "1",
+                      "User-Agent": "Custom User Agent String",
+                      "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
+                      "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
+                      "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
+                      "X-Forwarded-Port": "443",
+                      "X-Forwarded-Proto": "https"
+                  },
+                  "requestContext": {
+                      "accountId": "123456789012",
+                      "resourceId": "123456",
+                      "stage": "prod",
+                      "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+                      "identity": {
+                          "cognitoIdentityPoolId": null,
+                          "accountId": null,
+                          "cognitoIdentityId": null,
+                          "caller": null,
+                          "apiKey": null,
+                          "sourceIp": "127.0.0.1",
+                          "cognitoAuthenticationType": null,
+                          "cognitoAuthenticationProvider": null,
+                          "userArn": null,
+                          "userAgent": "Custom User Agent String",
+                          "user": null
+                      },
+                      "resourcePath": "/{proxy+}",
+                      "httpMethod": "DELETE",
+                      "apiId": "1234567890"
+                  },
+                  "isBase64Encoded": false
+              }
+          },
+          "environmentVariables": {
+            "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185"
+          }
+      }
+    },
+
+
     {
       "type": "aws-sam",
       "request": "direct-invoke",
