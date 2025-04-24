@@ -50,6 +50,7 @@ env.yml
 .env
 src/venv
 .venv
+venv/
 
 # Jetbrains IDEs
 .idea
