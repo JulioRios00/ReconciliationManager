@@ -339,6 +339,7 @@ class InvoiceHistory(Base):
     ReconStatus = Column(String(20))
     BillingReference = Column(String(100))
     ImportedAt = Column(DateTime)
+    
 
     def __init__(
         self, brd_fac, brd_flt_dt, brd_flt_nr, op_cd, srv_dpt_sta_cd,
