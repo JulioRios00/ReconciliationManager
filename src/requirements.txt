@@ -11,8 +11,6 @@ aws-psycopg2
 SQLAlchemy
 coverage
 pytest
-HTMLParser
-flask-swagger
 requests
 PyPDF2
 PyMuPDF
