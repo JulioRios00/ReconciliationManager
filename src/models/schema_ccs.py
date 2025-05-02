@@ -399,7 +399,7 @@ class InvoiceHistory(Base):
             for c in self.__table__.columns
         }
 
-
+# billing inflair
 class BillingRecon(Base):
     __tablename__ = 'BillingRecon'
     __table_args__ = {'schema': 'mtw_analise'}
@@ -460,7 +460,7 @@ class BillingRecon(Base):
             for c in self.__table__.columns
         }
 
-
+# billing_promeus
 class ErpInvoiceReport(Base):
     __tablename__ = 'ErpInvoiceReport'
     __table_args__ = {'schema': 'mtw_analise'}

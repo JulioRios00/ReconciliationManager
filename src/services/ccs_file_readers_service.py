@@ -207,3 +207,41 @@ def pricing_read_promeus_with_flight_classes(file_path: str) -> List[Dict[str, A
     # No longer grouping by class
     # save_json(records, "pricing_promeus.json")
     return records
+
+
+def billing_inflair_recon_report(file_path: str) -> List[Dict[str, Any]]:
+    """
+    This method reads the Inflair Airline Billing Recon Report CSV file and returns
+    an array of objects and saves a JSON file.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the CSV file
+
+    Returns
+    -------
+    List[Dict[str, Any]]
+        List of records from the CSV file
+    """
+    df = pd.read_csv(file_path)
+
+    df.columns = (
+        [col.strip() if isinstance(col, str) else col for col in df.columns]
+    )
+
+    for col in df.select_dtypes(include=["datetime64"]).columns:
+        df[col] = df[col].apply(format_date)
+
+    for col in df.select_dtypes(include=["object"]).columns:
+        df[col] = df[col].apply(
+            lambda x: x.strip() if isinstance(x, str) else x
+        )
+
+    df = df.replace({np.nan: None})
+
+    data = df.to_dict(orient="records")
+
+    save_json(data, "billing_inflair_recon.json")
+
+    return data

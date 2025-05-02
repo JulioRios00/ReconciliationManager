@@ -7,14 +7,14 @@ import tempfile
 from io import StringIO
 from common.s3 import get_file_body_by_key
 from services.ccs_file_readers_service import (
-    billing_inflair_invoice_report,
+    billing_inflair_recon_report,
     billing_promeus_invoice_report,
     pricing_read_inflair,
     pricing_read_promeus_with_flight_classes
 )
 
 READER_FUNCTIONS = {
-    'save_billing_inflair_to_db': billing_inflair_invoice_report,
+    'save_billing_inflair_to_db': billing_inflair_recon_report,
     'save_billing_promeus_to_db': billing_promeus_invoice_report,
     'save_pricing_inflair_to_db': pricing_read_inflair,
     'save_pricing_promeus_to_db': pricing_read_promeus_with_flight_classes
