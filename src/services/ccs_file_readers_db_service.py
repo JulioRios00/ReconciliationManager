@@ -9,7 +9,7 @@ from services.ccs_file_readers_service import (
     pricing_read_inflair,
     pricing_read_promeus_with_flight_classes
 )
-from src.models.schema_ccs import (
+from models.schema_ccs import (
     Flight, PriceReport, DataSource, InvoiceHistory
 )
 

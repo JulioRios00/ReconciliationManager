@@ -149,7 +149,7 @@ class Configuration(Base):
             c.name: str(getattr(self, c.name))
             for c in self.__table__.columns
         }
- 
+
 
 class FlightDate(Base):
     __tablename__ = 'FlightDate'
@@ -339,7 +339,6 @@ class InvoiceHistory(Base):
     ReconStatus = Column(String(20))
     BillingReference = Column(String(100))
     ImportedAt = Column(DateTime)
-    
 
     def __init__(
         self, brd_fac, brd_flt_dt, brd_flt_nr, op_cd, srv_dpt_sta_cd,
@@ -393,6 +392,143 @@ class InvoiceHistory(Base):
         self.ReconStatus = recon_status
         self.BillingReference = billing_reference
         self.ImportedAt = imported_at
+
+    def serialize(self):
+        return {
+            c.name: str(getattr(self, c.name))
+            for c in self.__table__.columns
+        }
+
+
+class BillingRecon(Base):
+    __tablename__ = 'BillingRecon'
+    __table_args__ = {'schema': 'mtw_analise'}
+
+    Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    DataCriacao = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP")
+    )
+    DataAtualizacao = Column(TIMESTAMP)
+    Ativo = Column(Boolean, nullable=False, default=True)
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+    Facility = Column(String)
+    FltDate = Column(Date)
+    FltNo = Column(String)
+    FltInv = Column(String)
+    Class = Column(String)
+    ItemGroup = Column(String)
+    Itemcode = Column(String)
+    ItemDesc = Column(String)
+    AlBillCode = Column(String)
+    AlBillDesc = Column(String)
+    BillCatg = Column(String)
+    Unit = Column(String)
+    Pax = Column(String)
+    Qty = Column(String)
+    UnitPrice = Column(String)
+    TotalAmount = Column(String)
+
+    def __init__(
+        self, facility=None, flt_date=None, flt_no=None, flt_inv=None,
+        class_=None, item_group=None, itemcode=None, item_desc=None,
+        al_bill_code=None, al_bill_desc=None, bill_catg=None, unit=None,
+        pax=None, qty=None, unit_price=None, total_amount=None
+    ):
+        self.Facility = facility
+        self.FltDate = flt_date
+        self.FltNo = flt_no
+        self.FltInv = flt_inv
+        self.Class = class_
+        self.ItemGroup = item_group
+        self.Itemcode = itemcode
+        self.ItemDesc = item_desc
+        self.AlBillCode = al_bill_code
+        self.AlBillDesc = al_bill_desc
+        self.BillCatg = bill_catg
+        self.Unit = unit
+        self.Pax = pax
+        self.Qty = qty
+        self.UnitPrice = unit_price
+        self.TotalAmount = total_amount
+
+    def serialize(self):
+        return {
+            c.name: str(getattr(self, c.name))
+            for c in self.__table__.columns
+        }
+
+
+class ErpInvoiceReport(Base):
+    __tablename__ = 'ErpInvoiceReport'
+    __table_args__ = {'schema': 'mtw_analise'}
+
+    Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    DataCriacao = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP")
+    )
+    DataAtualizacao = Column(TIMESTAMP)
+    Ativo = Column(Boolean, nullable=False, default=True)
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+    Supplier = Column(String)
+    FlightDate = Column(Date)
+    FlightNo = Column(String)
+    Dep = Column(String)
+    Arr = Column(String)
+    Class = Column(String)
+    InvoicedPax = Column(String)
+    ServiceCode = Column(String)
+    SupplierCode = Column(String)
+    ServiceDescription = Column(String)
+    Aircraft = Column(String)
+    Qty = Column(Integer)
+    UnitPrice = Column(DECIMAL(15, 2))
+    SubTotal = Column(DECIMAL(15, 2))
+    Tax = Column(DECIMAL(15, 2))
+    TotalIncTax = Column(DECIMAL(15, 2))
+    Currency = Column(String)
+    ItemStatus = Column(String)
+    InvoiceStatus = Column(String)
+    InvoiceDate = Column(Date)
+    PaidDate = Column(Date)
+    FlightNoRed = Column(String)
+
+    def __init__(
+        self, supplier=None, flight_date=None, flight_no=None, dep=None,
+        arr=None, class_=None, invoiced_pax=None, service_code=None,
+        supplier_code=None, service_description=None, aircraft=None,
+        qty=None, unit_price=None, sub_total=None, tax=None,
+        total_inc_tax=None, currency=None, item_status=None,
+        invoice_status=None, invoice_date=None, paid_date=None,
+        flight_no_red=None
+    ):
+        self.Supplier = supplier
+        self.FlightDate = flight_date
+        self.FlightNo = flight_no
+        self.Dep = dep
+        self.Arr = arr
+        self.Class = class_
+        self.InvoicedPax = invoiced_pax
+        self.ServiceCode = service_code
+        self.SupplierCode = supplier_code
+        self.ServiceDescription = service_description
+        self.Aircraft = aircraft
+        self.Qty = qty
+        self.UnitPrice = unit_price
+        self.SubTotal = sub_total
+        self.Tax = tax
+        self.TotalIncTax = total_inc_tax
+        self.Currency = currency
+        self.ItemStatus = item_status
+        self.InvoiceStatus = invoice_status
+        self.InvoiceDate = invoice_date
+        self.PaidDate = paid_date
+        self.FlightNoRed = flight_no_red
 
     def serialize(self):
         return {

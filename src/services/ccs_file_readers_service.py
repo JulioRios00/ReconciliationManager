@@ -84,7 +84,7 @@ def billing_inflair_invoice_report(file_path: str) -> List[Dict[str, Any]]:
 
     data = df.to_dict(orient="records")
 
-    save_json(data, "billing_inflair.json")
+    # save_json(data, "billing_inflair.json")
 
     return data
 
@@ -114,7 +114,7 @@ def billing_promeus_invoice_report(file_path: str) -> pd.DataFrame:
 
     data = df.to_dict(orient="records")
 
-    save_json(data, "billing_promeus.json")
+    # save_json(data, "billing_promeus.json")
 
     return data
 
@@ -150,13 +150,11 @@ def pricing_read_inflair(file_path: str) -> List[Dict[str, Any]]:
     df = df.replace({np.nan: None})
 
     result = df.to_dict(orient="records")
-    save_json(result, "pricing_inflair.json")
+    # save_json(result, "pricing_inflair.json")
     return result
 
 
-def pricing_read_promeus_with_flight_classes(
-    file_path: str
-) -> Dict[str, List[Dict[str, Any]]]:
+def pricing_read_promeus_with_flight_classes(file_path: str) -> List[Dict[str, Any]]:
     df = pd.read_excel(
         file_path,
         sheet_name="Price History Report",
@@ -166,6 +164,7 @@ def pricing_read_promeus_with_flight_classes(
 
     records = []
     current_class = None
+    header_processed = False
 
     for index, row in df.iterrows():
         first_col = row[0]
@@ -183,7 +182,12 @@ def pricing_read_promeus_with_flight_classes(
         ):
             current_class = first_col.strip()
             continue
-
+        if (
+            not header_processed and
+            isinstance(service_code, str) and
+                service_code == "Service Code"):
+            header_processed = True
+            continue
         if (
             not pd.isna(service_code)
             and not pd.isna(description)
@@ -200,7 +204,6 @@ def pricing_read_promeus_with_flight_classes(
                 }
             )
 
-    grouped_records = group_data_by_class(records)
-
-    save_json(grouped_records, "pricing_promeus.json")
-    return grouped_records
+    # No longer grouping by class
+    # save_json(records, "pricing_promeus.json")
+    return records

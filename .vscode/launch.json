@@ -923,7 +923,8 @@
 								  "arn": "arn:{partition}:s3:::mybucket"
 							  },
 							  "object": {
-								  "key": "public/airline_files/Airline Billing History/TRANSPORTADORA ORLANDO LTDA - 01698119000142-Inflair_-_VS_Flight___Airline_Billing_Report_List_of_Flight_Invoices_JAN_2025.csv.xlsx",
+								  "processorFunction": "save_pricing_promeus_to_db",
+								  "key":"public/airline_files/GCG Price Report/TRANSPORTADORA ORLANDO LTDA - 01698119000142-Promeus_-_Price_History_Report_January_2025.xlsx",
 								  "size": 1024,
 								  "eTag": "0123456789abcdef0123456789abcdef",
 								  "sequencer": "0A1B2C3D4E5F678901"

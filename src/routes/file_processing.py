@@ -5,7 +5,7 @@ import boto3
 import tempfile
 import os
 from src.database import get_db
-from src.services.ccs_file_readers_db.service import (
+from services.ccs_file_readers_db_service import (
     save_billing_inflair_to_db,
     save_billing_promeus_to_db,
     save_pricing_inflair_to_db,
