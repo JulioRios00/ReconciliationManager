@@ -402,7 +402,7 @@ class InvoiceHistory(Base):
 
 class BillingRecon(Base):
     __tablename__ = 'BillingRecon'
-    __table_args__ = {'schema': 'mtw_analise'}
+    __table_args__ = {'schema': 'ccs'}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     DataCriacao = Column(
@@ -463,7 +463,7 @@ class BillingRecon(Base):
 
 class ErpInvoiceReport(Base):
     __tablename__ = 'ErpInvoiceReport'
-    __table_args__ = {'schema': 'mtw_analise'}
+    __table_args__ = {'schema': 'ccs'}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     DataCriacao = Column(
