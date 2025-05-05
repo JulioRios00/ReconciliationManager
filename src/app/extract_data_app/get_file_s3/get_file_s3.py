@@ -6,18 +6,14 @@ import sys
 import tempfile
 from io import StringIO
 from common.s3 import get_file_body_by_key
-from services.ccs_file_readers_service import (
-    billing_inflair_recon_report,
-    billing_promeus_invoice_report,
-    pricing_read_inflair,
-    pricing_read_promeus_with_flight_classes
-)
+from services.ccs_file_readers_service import FileReadersService
+from common.conexao_banco import get_session
 
 READER_FUNCTIONS = {
-    'save_billing_inflair_to_db': billing_inflair_recon_report,
-    'save_billing_promeus_to_db': billing_promeus_invoice_report,
-    'save_pricing_inflair_to_db': pricing_read_inflair,
-    'save_pricing_promeus_to_db': pricing_read_promeus_with_flight_classes
+    'save_billing_inflair_to_db': 'billing_inflair_recon_report',
+    'save_billing_promeus_to_db': 'billing_promeus_invoice_report',
+    'save_pricing_inflair_to_db': 'pricing_read_inflair',
+    'save_pricing_promeus_to_db': 'pricing_read_promeus_with_flight_classes'
 }
 
 
@@ -26,17 +22,22 @@ def main(event, context):
     key = event['Records'][0]['s3']['object']['key']
     bucket = event['Records'][0]['s3']['bucket']['name']
     processor_function_name = (
-        event['Records'][0]['s3']['object']['processorFunction']
+        event['Records'][0]['s3']['object'].get('processorFunction')
     )
 
-    reader_function = READER_FUNCTIONS.get(processor_function_name)
-    if not reader_function:
+    if not processor_function_name:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': 'No processor function specified'})
+        }
+    
+    reader_method_name = READER_FUNCTIONS.get(processor_function_name)
+    if not reader_method_name:
         return {
             'statusCode': 400,
             'body': json.dumps(
-                {'error': f'Unknown reader function: '
-                          f'{processor_function_name}'}
-                )
+                {'error': f'Unknown reader function:{processor_function_name}'}
+            )
         }
 
     file, size = get_file_body_by_key(key, bucket)
@@ -49,7 +50,12 @@ def main(event, context):
         temp_file.write(file_content)
 
     try:
-        data = reader_function(temp_file_path)
+        with get_session() as session:
+            file_reader_service = FileReadersService(session)
+
+            reader_method = getattr(file_reader_service, reader_method_name)
+
+            data = reader_method(temp_file_path)
 
         os.unlink(temp_file_path)
 
