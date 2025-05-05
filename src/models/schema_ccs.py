@@ -213,7 +213,7 @@ class PriceReport(Base):
     LbrAmt = Column(DECIMAL(10, 2))
     PktNr = Column(Integer)
     PktNm = Column(String(100))
-    SourceFile = Column(String(255), nullable=False)
+    SourceFile = Column(String(255), nullable=True)
 
     def __init__(self, facility, organization, pulled_date, run_date,
                  fac_org, spc_nr, spc_dsc, act_cat_nm, prs_sts_cd,
