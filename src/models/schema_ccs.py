@@ -400,7 +400,6 @@ class InvoiceHistory(Base):
         }
 
 
-# billing inflair
 class BillingRecon(Base):
     __tablename__ = 'BillingRecon'
     __table_args__ = {'schema': 'mtw_analise'}
@@ -460,9 +459,8 @@ class BillingRecon(Base):
             c.name: str(getattr(self, c.name))
             for c in self.__table__.columns
         }
-        
-        
-# billing_promeus
+
+
 class ErpInvoiceReport(Base):
     __tablename__ = 'ErpInvoiceReport'
     __table_args__ = {'schema': 'mtw_analise'}
@@ -531,6 +529,143 @@ class ErpInvoiceReport(Base):
         self.InvoiceDate = invoice_date
         self.PaidDate = paid_date
         self.FlightNoRed = flight_no_red
+
+    def serialize(self):
+        return {
+            c.name: str(getattr(self, c.name))
+            for c in self.__table__.columns
+        }
+
+
+class Reconciliation(Base):
+    __tablename__ = 'Reconciliation'
+    __table_args__ = {'schema': 'ccs'}
+
+    Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    DataCriacao = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP")
+    )
+    DataAtualizacao = Column(TIMESTAMP)
+    Ativo = Column(Boolean, nullable=False, default=True)
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+    # Air (ERP) fields
+    AirSupplier = Column(String)
+    AirFlightDate = Column(Date)
+    AirFlightNo = Column(String)
+    AirDep = Column(String)
+    AirArr = Column(String)
+    AirClass = Column(String)
+    AirInvoicedPax = Column(String)
+    AirServiceCode = Column(String)
+    AirSupplierCode = Column(String)
+    AirServiceDescription = Column(String)
+    AirAircraft = Column(String)
+    AirQty = Column(Integer)
+    AirUnitPrice = Column(DECIMAL(15, 2))
+    AirSubTotal = Column(DECIMAL(15, 2))
+    AirTax = Column(DECIMAL(15, 2))
+    AirTotalIncTax = Column(DECIMAL(15, 2))
+    AirCurrency = Column(String)
+    AirItemStatus = Column(String)
+    AirInvoiceStatus = Column(String)
+    AirInvoiceDate = Column(Date)
+    AirPaidDate = Column(Date)
+    AirFlightNoRed = Column(String)
+
+    # Cat (Caterer) fields
+    CatFacility = Column(String)
+    CatFltDate = Column(Date)
+    CatFltNo = Column(String)
+    CatFltInv = Column(String)
+    CatClass = Column(String)
+    CatItemGroup = Column(String)
+    CatItemcode = Column(String)
+    CatItemDesc = Column(String)
+    CatAlBillCode = Column(String)
+    CatAlBillDesc = Column(String)
+    CatBillCatg = Column(String)
+    CatUnit = Column(String)
+    CatPax = Column(Integer)
+    CatQty = Column(Integer)
+    CatUnitPrice = Column(DECIMAL(15, 2))
+    CatTotalAmount = Column(DECIMAL(15, 2))
+
+    # Reconciliation flags and differences
+    Air = Column(String(3))
+    Cat = Column(String(3))
+    DifQty = Column(String(3))
+    DifPrice = Column(String(3))
+    AmountDif = Column(DECIMAL(15, 2))
+    QtyDif = Column(Integer)
+
+    def __init__(
+        self, air_supplier=None, air_flight_date=None, air_flight_no=None,
+        air_dep=None, air_arr=None, air_class=None, air_invoiced_pax=None,
+        air_service_code=None, air_supplier_code=None,
+        air_service_description=None, air_aircraft=None,
+        air_qty=None, air_unit_price=None, air_sub_total=None, air_tax=None,
+        air_total_inc_tax=None, air_currency=None, air_item_status=None,
+        air_invoice_status=None, air_invoice_date=None, air_paid_date=None,
+        air_flight_no_red=None, cat_facility=None, cat_flt_date=None,
+        cat_flt_no=None, cat_flt_inv=None, cat_class=None, cat_item_group=None,
+        cat_itemcode=None, cat_item_desc=None, cat_al_bill_code=None,
+        cat_al_bill_desc=None, cat_bill_catg=None, cat_unit=None,
+        cat_pax=None, cat_qty=None, cat_unit_price=None,
+        cat_total_amount=None, air=None, cat=None,
+        dif_qty=None, dif_price=None, amount_dif=None, qty_dif=None
+    ):
+        # Air (ERP) fields
+        self.AirSupplier = air_supplier
+        self.AirFlightDate = air_flight_date
+        self.AirFlightNo = air_flight_no
+        self.AirDep = air_dep
+        self.AirArr = air_arr
+        self.AirClass = air_class
+        self.AirInvoicedPax = air_invoiced_pax
+        self.AirServiceCode = air_service_code
+        self.AirSupplierCode = air_supplier_code
+        self.AirServiceDescription = air_service_description
+        self.AirAircraft = air_aircraft
+        self.AirQty = air_qty
+        self.AirUnitPrice = air_unit_price
+        self.AirSubTotal = air_sub_total
+        self.AirTax = air_tax
+        self.AirTotalIncTax = air_total_inc_tax
+        self.AirCurrency = air_currency
+        self.AirItemStatus = air_item_status
+        self.AirInvoiceStatus = air_invoice_status
+        self.AirInvoiceDate = air_invoice_date
+        self.AirPaidDate = air_paid_date
+        self.AirFlightNoRed = air_flight_no_red
+
+        # Cat (Caterer) fields
+        self.CatFacility = cat_facility
+        self.CatFltDate = cat_flt_date
+        self.CatFltNo = cat_flt_no
+        self.CatFltInv = cat_flt_inv
+        self.CatClass = cat_class
+        self.CatItemGroup = cat_item_group
+        self.CatItemcode = cat_itemcode
+        self.CatItemDesc = cat_item_desc
+        self.CatAlBillCode = cat_al_bill_code
+        self.CatAlBillDesc = cat_al_bill_desc
+        self.CatBillCatg = cat_bill_catg
+        self.CatUnit = cat_unit
+        self.CatPax = cat_pax
+        self.CatQty = cat_qty
+        self.CatUnitPrice = cat_unit_price
+        self.CatTotalAmount = cat_total_amount
+
+        # Reconciliation flags and differences
+        self.Air = air
+        self.Cat = cat
+        self.DifQty = dif_qty
+        self.DifPrice = dif_price
+        self.AmountDif = amount_dif
+        self.QtyDif = qty_dif
 
     def serialize(self):
         return {
