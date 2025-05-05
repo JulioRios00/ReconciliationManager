@@ -104,11 +104,45 @@ def billing_promeus_invoice_report(file_path: str) -> pd.DataFrame:
     df.dropna(axis=1, how="all", inplace=True)
     df.reset_index(drop=True, inplace=True)
 
+    column_mapping = {
+        "SUPPLIER": "Supplier",
+        "FLIGHT DATE": "FlightDate",
+        "FLIGHT NO.": "FlightNo",
+        "DEP": "Dep",
+        "ARR": "Arr",
+        "CLASS": "Class",
+        "INVOICED PAX": "InvoicedPax",
+        "SERVICE CODE": "ServiceCode",
+        "SUPPLIER CODE": "SupplierCode",
+        "SERVICE DESCRIPTION": "ServiceDescription",
+        "AIRCRAFT": "Aircraft",
+        "QTY": "Qty",
+        "UNIT PRICE": "UnitPrice",
+        "SUBTOTAL": "SubTotal",
+        "TAX": "Tax",
+        "TOTAL INC TAX": "TotalIncTax",
+        "CURRENCY": "Currency",
+        "ITEM STATUS": "ItemStatus",
+        "INVOICE STATUS": "InvoiceStatus",
+        "INVOICE DATE": "InvoiceDate",
+        "PAID DATE": "PaidDate"
+    }
+
+    df = df.rename(columns=column_mapping)
+    
+    if "FlightNo" in df.columns:
+        df["FlightNoRed"] = df["FlightNo"].apply(
+            lambda x: ''.join(char for char in str(x) if char.isdigit()) if x else None
+        )
+
     for col in df.select_dtypes(include=["datetime64"]).columns:
         df[col] = df[col].apply(format_date)
 
     for col in df.select_dtypes(include=["object"]).columns:
         df[col] = df[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
+
+    if "InvoicedPax" in df.columns:
+        df["InvoicedPax"] = df["InvoicedPax"].astype(str)
 
     df = df.replace({np.nan: None})
 
@@ -117,41 +151,6 @@ def billing_promeus_invoice_report(file_path: str) -> pd.DataFrame:
     # save_json(data, "billing_promeus.json")
 
     return data
-
-
-def pricing_read_inflair(file_path: str) -> List[Dict[str, Any]]:
-    df = pd.read_excel(file_path, skiprows=8)
-
-    df.columns = [
-        "id",
-        "airline_code",
-        "item_code",
-        "start_date",
-        "end_date",
-        "cost_center",
-        "unit",
-        "price",
-        "currency",
-        "created_date",
-        "created_time",
-        "created_by",
-        "type_of_change",
-        "statement_period"
-    ]
-
-    df = df[df["item_code"].notna()]
-    df = df[~df["id"].astype(str).str.match(r"^-+$", na=False)]
-
-    df["price"] = pd.to_numeric(df["price"], errors="coerce").round(3)
-    df["start_date"] = df["start_date"].apply(format_date)
-    df["end_date"] = df["end_date"].apply(format_date)
-    df["created_date"] = df["created_date"].apply(format_date)
-
-    df = df.replace({np.nan: None})
-
-    result = df.to_dict(orient="records")
-    # save_json(result, "pricing_inflair.json")
-    return result
 
 
 def pricing_read_promeus_with_flight_classes(file_path: str) -> List[Dict[str, Any]]:
@@ -209,6 +208,41 @@ def pricing_read_promeus_with_flight_classes(file_path: str) -> List[Dict[str, A
     return records
 
 
+def pricing_read_inflair(file_path: str) -> List[Dict[str, Any]]:
+    df = pd.read_excel(file_path, skiprows=8)
+
+    df.columns = [
+        "id",
+        "airline_code",
+        "item_code",
+        "start_date",
+        "end_date",
+        "cost_center",
+        "unit",
+        "price",
+        "currency",
+        "created_date",
+        "created_time",
+        "created_by",
+        "type_of_change",
+        "statement_period"
+    ]
+
+    df = df[df["item_code"].notna()]
+    df = df[~df["id"].astype(str).str.match(r"^-+$", na=False)]
+
+    df["price"] = pd.to_numeric(df["price"], errors="coerce").round(3)
+    df["start_date"] = df["start_date"].apply(format_date)
+    df["end_date"] = df["end_date"].apply(format_date)
+    df["created_date"] = df["created_date"].apply(format_date)
+
+    df = df.replace({np.nan: None})
+
+    result = df.to_dict(orient="records")
+    save_json(result, "pricing_inflair.json")
+    return result
+
+
 def billing_inflair_recon_report(file_path: str) -> List[Dict[str, Any]]:
     """
     This method reads the Inflair Airline Billing Recon Report CSV file and returns
@@ -230,6 +264,33 @@ def billing_inflair_recon_report(file_path: str) -> List[Dict[str, Any]]:
         [col.strip() if isinstance(col, str) else col for col in df.columns]
     )
 
+    column_mapping = {
+        'Facility': 'Facility',
+        'FltDate': 'FltDate',
+        'FltNo': 'FltNo',
+        'Fl Inv': 'FltInv',
+        'Class': 'Class',
+        'Ite Group': 'ItemGroup',
+        'Ite code': 'Itemcode',
+        'Ite Desc': 'ItemDesc',
+        'AlBillCode': 'AlBillCode',
+        'AlBillDesc': 'AlBillDesc',
+        'BillCatg': 'BillCatg',
+        'Unit': 'Unit',
+        'Pax': 'Pax',
+        'Qty': 'Qty',
+        'UnitPrice': 'UnitPrice',
+        'TotalAmount': 'TotalAmount'
+    }
+    
+    df = df.rename(columns=column_mapping)
+
+    # Format FltNo to add leading zero for numbers less than 100
+    if 'FltNo' in df.columns:
+        df['FltNo'] = df['FltNo'].apply(
+            lambda x: f"0{x}" if isinstance(x, (int, float)) and x < 100 else x
+        )
+
     for col in df.select_dtypes(include=["datetime64"]).columns:
         df[col] = df[col].apply(format_date)
 
@@ -238,10 +299,14 @@ def billing_inflair_recon_report(file_path: str) -> List[Dict[str, Any]]:
             lambda x: x.strip() if isinstance(x, str) else x
         )
 
+    for col in ['Pax', 'Qty', 'UnitPrice', 'TotalAmount']:
+        if col in df.columns:
+            df[col] = df[col].astype(str)
+
     df = df.replace({np.nan: None})
 
     data = df.to_dict(orient="records")
 
-    save_json(data, "billing_inflair_recon.json")
+    # save_json(data, "billing_inflair_recon.json")
 
     return data
