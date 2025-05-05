@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from common.s3 import get_file_body_by_key
-from services.css_service import InvoiceService
+from services.ccs_service import InvoiceService
 from common.conexao_banco import get_session
 import os
 import io

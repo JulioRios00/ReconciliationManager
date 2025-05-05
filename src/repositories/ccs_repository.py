@@ -4,7 +4,16 @@ from typing import List, Dict
 from decimal import Decimal
 from datetime import datetime
 #Tables
-from models.schema_ccs import Flight, Configuration, FlightDate, DataSourc, PriceReport, InvoiceHistory
+from models.schema_ccs import (
+    Flight,
+    Configuration,
+    FlightDate,
+    DataSource,
+    PriceReport,
+    InvoiceHistory,
+    BillingRecon,
+    ErpInvoiceReport
+)
 # Application-Specific Common Utilities
 from common.custom_exception import CustomException
 
@@ -104,10 +113,10 @@ class FlightDateRepository(Repository):
 class SourceRepository(Repository):
     
     def __init__(self, db_session):
-        super().__init__(db_session, DataSourc)
+        super().__init__(db_session, DataSource)
 
     def insert_data_source(self, file_name, page_number, id_fligth):
-        data_source = DataSourc(source = file_name, page = page_number, id_fligth = id_fligth)
+        data_source = DataSource(source = file_name, page = page_number, id_fligth = id_fligth)
         self.session.add(data_source)
         self.session.commit()
         print(f"Inserted data source for flight ID {id_fligth} from source {file_name} on page {page_number}")
@@ -263,3 +272,167 @@ class InvoiceRepository(Repository):
             invoice.Excluido = True
         self.session.commit()
         return {'message': f'Deleted all {filename} invoices.'}
+
+
+class BillingReconRepository(Repository):
+    def __init__(self, db_session):
+        super().__init__(db_session, BillingRecon)
+  
+    def insert_billing_recon(
+        self, facility=None, flt_date=None, flt_no=None, flt_inv=None,
+        class_=None, item_group=None, itemcode=None, item_desc=None,
+        al_bill_code=None, al_bill_desc=None, bill_catg=None, unit=None,
+        pax=None, qty=None, unit_price=None, total_amount=None
+    ):
+        billing_recon = BillingRecon(
+            facility=facility, 
+            flt_date=flt_date, 
+            flt_no=flt_no, 
+            flt_inv=flt_inv,
+            class_=class_, 
+            item_group=item_group, 
+            itemcode=itemcode, 
+            item_desc=item_desc,
+            al_bill_code=al_bill_code, 
+            al_bill_desc=al_bill_desc, 
+            bill_catg=bill_catg, 
+            unit=unit,
+            pax=pax, 
+            qty=qty, 
+            unit_price=unit_price, 
+            total_amount=total_amount
+        )
+        self.session.add(billing_recon)
+        self.session.commit()
+        print(f"Inserted billing reconciliation record for flight {flt_no}")
+        return billing_recon.Id
+
+    def insert_packeg_billing_recon(self, billing_data, filename=None):
+        for record in billing_data:
+            billing_recon = BillingRecon(
+                facility=record.get('Facility'),
+                flt_date=record.get('FltDate'),
+                flt_no=record.get('FltNo'),
+                flt_inv=record.get('FltInv'),
+                class_=record.get('Class'),
+                item_group=record.get('ItemGroup'),
+                itemcode=record.get('Itemcode'),
+                item_desc=record.get('ItemDesc'),
+                al_bill_code=record.get('AlBillCode'),
+                al_bill_desc=record.get('AlBillDesc'),
+                bill_catg=record.get('BillCatg'),
+                unit=record.get('Unit'),
+                pax=record.get('Pax'),
+                qty=record.get('Qty'),
+                unit_price=record.get('UnitPrice'),
+                total_amount=record.get('TotalAmount')
+            )
+            self.session.add(billing_recon)
+        self.session.commit()
+        print(f"Inserted {len(billing_data)} billing reconciliation records")
+        return True
+
+    def delete_billing_recon(self, id):
+        billing_recon = self.session.query(BillingRecon).filter(BillingRecon.Id == id).first()
+        if not billing_recon:
+            raise CustomException(f"BillingRecon with ID {id} not found")
+        
+        billing_recon.Excluido = True
+        self.session.commit()
+        return {'message': f'Deleted BillingRecon id {id}'}
+
+    def get_by_id(self, id):
+        return self.session.query(BillingRecon).filter(BillingRecon.Id == id, BillingRecon.Excluido == False).first()
+
+    def get_by_flight_no(self, flight_no):
+        return self.session.query(BillingRecon).filter(BillingRecon.FltNo == flight_no, BillingRecon.Excluido == False).all()
+
+
+class ErpInvoiceReportRepository(Repository):
+    def __init__(self, db_session):
+        super().__init__(db_session, ErpInvoiceReport)
+
+    def insert_erp_invoice_report(
+        self, supplier=None, flight_date=None, flight_no=None, dep=None,
+        arr=None, class_=None, invoiced_pax=None, service_code=None,
+        supplier_code=None, service_description=None, aircraft=None,
+        qty=None, unit_price=None, sub_total=None, tax=None,
+        total_inc_tax=None, currency=None, item_status=None,
+        invoice_status=None, invoice_date=None, paid_date=None,
+        flight_no_red=None
+    ):
+        erp_invoice = ErpInvoiceReport(
+            supplier=supplier,
+            flight_date=flight_date,
+            flight_no=flight_no,
+            dep=dep,
+            arr=arr,
+            class_=class_,
+            invoiced_pax=invoiced_pax,
+            service_code=service_code,
+            supplier_code=supplier_code,
+            service_description=service_description,
+            aircraft=aircraft,
+            qty=qty,
+            unit_price=unit_price,
+            sub_total=sub_total,
+            tax=tax,
+            total_inc_tax=total_inc_tax,
+            currency=currency,
+            item_status=item_status,
+            invoice_status=invoice_status,
+            invoice_date=invoice_date,
+            paid_date=paid_date,
+            flight_no_red=flight_no_red
+        )
+        self.session.add(erp_invoice)
+        self.session.commit()
+        print(f"Inserted ERP invoice report for flight {flight_no}")
+        return erp_invoice.Id
+
+    def insert_packeg_erp_invoice(self, invoice_data, filename=None):
+        for record in invoice_data:
+            erp_invoice = ErpInvoiceReport(
+                supplier=record.get('Supplier'),
+                flight_date=record.get('FlightDate'),
+                flight_no=record.get('FlightNo'),
+                dep=record.get('Dep'),
+                arr=record.get('Arr'),
+                class_=record.get('Class'),
+                invoiced_pax=record.get('InvoicedPax'),
+                service_code=record.get('ServiceCode'),
+                supplier_code=record.get('SupplierCode'),
+                service_description=record.get('ServiceDescription'),
+                aircraft=record.get('Aircraft'),
+                qty=record.get('Qty'),
+                unit_price=record.get('UnitPrice'),
+                sub_total=record.get('SubTotal'),
+                tax=record.get('Tax'),
+                total_inc_tax=record.get('TotalIncTax'),
+                currency=record.get('Currency'),
+                item_status=record.get('ItemStatus'),
+                invoice_status=record.get('InvoiceStatus'),
+                invoice_date=record.get('InvoiceDate'),
+                paid_date=record.get('PaidDate'),
+                flight_no_red=record.get('FlightNoRed')
+            )
+            self.session.add(erp_invoice)
+        self.session.commit()
+        print(f"Inserted {len(invoice_data)} ERP invoice reports")
+        return True
+
+    def delete_erp_invoice(self, id):
+        erp_invoice = self.session.query(ErpInvoiceReport).filter(ErpInvoiceReport.Id == id).first()
+        if not erp_invoice:
+            raise CustomException(f"ErpInvoiceReport with ID {id} not found")
+        
+        erp_invoice.Excluido = True
+        self.session.commit()
+        return {'message': f'Deleted ErpInvoiceReport id {id}'}
+
+    def get_by_id(self, id):
+        return self.session.query(ErpInvoiceReport).filter(ErpInvoiceReport.Id == id, ErpInvoiceReport.Excluido == False).first()
+
+    def get_by_flight_no(self, flight_no):
+        return self.session.query(ErpInvoiceReport).filter(ErpInvoiceReport.FlightNo == flight_no, ErpInvoiceReport.Excluido == False).all()
+

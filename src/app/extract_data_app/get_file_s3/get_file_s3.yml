@@ -1,0 +1,14 @@
+image: get_file_s3
+description: get file from s3
+memorySize: 1024
+timeout: 900
+iamRoleStatementsInherit: true
+iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - s3:ListBucket
+    Resource: "arn:aws:s3:::mtw-elementar-dev-018061303185"
+  - Effect: "Allow"
+    Action:
+      - s3:GetObject
+    Resource: "arn:aws:s3:::mtw-elementar-dev-018061303185/public/airline_files/*"

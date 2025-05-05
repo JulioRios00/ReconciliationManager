@@ -18,7 +18,7 @@ from common.custom_exception import CustomException
 from common.lambda_boto import invoke_lambda_async
 
 # Application-Specific Services
-from services.css_service import FlightService, PriceReportService, InvoiceService
+from services.ccs_service import FlightService, PriceReportService, InvoiceService
 
 app = Flask(__name__)
 authorize = Authorize(current_user=get_current_user, app=app)
