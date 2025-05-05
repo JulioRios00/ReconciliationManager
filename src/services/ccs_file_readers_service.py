@@ -129,7 +129,7 @@ def billing_promeus_invoice_report(file_path: str) -> pd.DataFrame:
     }
 
     df = df.rename(columns=column_mapping)
-    
+
     if "FlightNo" in df.columns:
         df["FlightNoRed"] = df["FlightNo"].apply(
             lambda x: ''.join(char for char in str(x) if char.isdigit()) if x else None
@@ -282,10 +282,9 @@ def billing_inflair_recon_report(file_path: str) -> List[Dict[str, Any]]:
         'UnitPrice': 'UnitPrice',
         'TotalAmount': 'TotalAmount'
     }
-    
+
     df = df.rename(columns=column_mapping)
 
-    # Format FltNo to add leading zero for numbers less than 100
     if 'FltNo' in df.columns:
         df['FltNo'] = df['FltNo'].apply(
             lambda x: f"0{x}" if isinstance(x, (int, float)) and x < 100 else x

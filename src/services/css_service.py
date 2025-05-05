@@ -9,6 +9,13 @@ from repositories.ccs_repository import (
     SourceRepository,
     PriceReportRepository,
     InvoiceRepository,
+    ErpInvoiceReportRepository,
+    BillingReconRepository
+)
+
+from models.schema_ccs import (
+    ErpInvoiceReport,
+    BillingRecon
 )
 
 # Application-Specific Service Layer Imports
@@ -242,4 +249,286 @@ class InvoiceService:
             print(f"Error deleting invoice: {e}")
             raise CustomException(
                 "an error occurred while deleting the invoice history"
+            )
+
+
+class BillingReconService:
+    def __init__(self, db_session):
+        self.billing_recon_repository = BillingReconRepository(db_session)
+
+    def process_billing_recon(self, data, filename=None):
+        """
+        Process billing reconciliation data and store it in the database.
+
+        Args:
+            data: The billing reconciliation data to process
+            filename: Optional filename for tracking purposes
+
+        Returns:
+            bool: True if processing was successful
+        """
+        try:
+
+            billing_data = self._prepare_billing_data(data)
+            self.billing_recon_repository.insert_packeg_billing_recon(
+                billing_data, filename
+            )
+            print("Successfully processed billing reconciliation data")
+
+            return True
+
+        except Exception as e:
+            print(f"Error processing billing reconciliation data: {e}")
+            raise CustomException(
+                "An error occurred while processing billing reconciliation data"
+            )
+
+    def _prepare_billing_data(self, data):
+        """
+        Transform input data to the format expected by the repository.
+
+        Args:
+            data: Raw input data
+
+        Returns:
+            list: Formatted data ready for database insertion
+        """
+        return data
+
+    def delete_billing_recon(self, id):
+        """
+        Delete a billing reconciliation record.
+
+        Args:
+            id: The ID of the record to delete
+
+        Returns:
+            dict: Message indicating success
+        """
+        try:
+            return self.billing_recon_repository.delete_billing_recon(id)
+        except CustomException as e:
+            raise e
+        except Exception as e:
+            print(f"Error deleting billing reconciliation: {e}")
+            raise CustomException(
+                "An error occurred while deleting the billing reconciliation"
+            )
+
+    def get_by_id(self, id):
+        """
+        Get a billing reconciliation record by ID.
+
+        Args:
+            id: The ID of the record to retrieve
+
+        Returns:
+            BillingRecon: The billing reconciliation record
+        """
+        try:
+            return self.billing_recon_repository.get_by_id(id)
+        except Exception as e:
+            print(f"Error retrieving billing reconciliation: {e}")
+            raise CustomException(
+                "An error occurred while retrieving the billing reconciliation"
+            )
+
+    def get_by_flight_no(self, flight_no):
+        """
+        Get billing reconciliation records by flight number.
+
+        Args:
+            flight_no: The flight number to search for
+
+        Returns:
+            list: List of BillingRecon records
+        """
+        try:
+            return self.billing_recon_repository.get_by_flight_no(flight_no)
+        except Exception as e:
+            print(
+                "Error retrieving billing "
+                f"reconciliation by flight number: {e}"
+            )
+            raise CustomException(
+                "An error occurred while "
+                "retrieving billing reconciliation records"
+            )
+
+    def search_billing_recon(
+        self,
+        flight_no=None,
+        facility=None,
+        item_code=None
+    ):
+
+        try:
+            query = (
+                self.billing_recon_repository.session.query(BillingRecon)
+                .filter(BillingRecon.Excluido is False)
+            )
+
+            if flight_no:
+                query = query.filter(BillingRecon.FltNo == flight_no)
+
+            if facility:
+                query = query.filter(
+                    BillingRecon.Facility.ilike(f"%{facility}%")
+                )
+
+            if item_code:
+                query = query.filter(BillingRecon.Itemcode == item_code)
+
+            return query.all()
+        except Exception as e:
+            print(f"Error searching billing reconciliation records: {e}")
+            raise CustomException(
+                "An error occurred while "
+                "searching billing reconciliation records"
+            )
+
+
+class ErpInvoiceReportService:
+    def __init__(self, db_session):
+        self.erp_invoice_repository = ErpInvoiceReportRepository(db_session)
+
+    def process_erp_invoice(self, data, filename=None):
+        """
+        Process ERP invoice report data and store it in the database.
+
+        Args:
+            data: The ERP invoice data to process
+            filename: Optional filename for tracking purposes
+
+        Returns:
+            bool: True if processing was successful
+        """
+        try:
+            # Assuming data is already in the correct format for processing
+            # If data needs transformation, add that logic here
+            invoice_data = self._prepare_invoice_data(data)
+            self.erp_invoice_repository.insert_packeg_erp_invoice(
+                invoice_data, filename
+            )
+
+            print("Successfully processed ERP invoice data")
+
+            return True
+
+        except Exception as e:
+            print(f"Error processing ERP invoice data: {e}")
+            raise CustomException(
+                "An error occurred while processing ERP invoice data"
+            )
+
+    def _prepare_invoice_data(self, data):
+        """
+        Transform input data to the format expected by the repository.
+
+        Args:
+            data: Raw input data
+        Returns:
+            list: Formatted data ready for database insertion
+        """
+        return data
+
+    def delete_erp_invoice(self, id):
+        """
+        Delete an ERP invoice report record.
+
+        Args:
+            id: The ID of the record to delete
+
+        Returns:
+            dict: Message indicating success
+        """
+        try:
+            return self.erp_invoice_repository.delete_erp_invoice(id)
+        except CustomException as e:
+            raise e
+
+        except Exception as e:
+            print(f"Error deleting ERP invoice: {e}")
+            raise CustomException(
+                "An error occurred while deleting the ERP invoice"
+            )
+
+    def get_by_id(self, id):
+        """
+        Get an ERP invoice report record by ID.
+
+        Args:
+            id: The ID of the record to retrieve
+
+        Returns:
+            ErpInvoiceReport: The ERP invoice report record
+        """
+        try:
+            return self.erp_invoice_repository.get_by_id(id)
+        except Exception as e:
+            print(f"Error retrieving ERP invoice: {e}")
+            raise CustomException(
+                "An error occurred while retrieving the ERP invoice"
+            )
+
+    def get_by_flight_no(self, flight_no):
+        """
+        Get ERP invoice report records by flight number.
+
+        Args:
+            flight_no: The flight number to search for
+
+        Returns:
+            list: List of ErpInvoiceReport records
+        """
+        try:
+            return self.erp_invoice_repository.get_by_flight_no(flight_no)
+        except Exception as e:
+            print(f"Error retrieving ERP invoice by flight number: {e}")
+            raise CustomException(
+                "An error occurred while retrieving ERP invoice records"
+            )
+
+    def search_erp_invoice(
+        self,
+        flight_no=None,
+        supplier=None,
+        service_code=None
+    ):
+        """
+        Search for ERP invoice reports based on various criteria.
+
+        Args:
+            flight_no: Optional flight number to search for
+            supplier: Optional supplier name to search for
+            service_code: Optional service code to search for
+
+        Returns:
+            list: List of matching ErpInvoiceReport records
+        """
+        try:
+            query = (
+                self.erp_invoice_repository.session.query(ErpInvoiceReport)
+                .filter(ErpInvoiceReport.Excluido is False)
+            )
+
+            if flight_no:
+                query = query.filter(ErpInvoiceReport.FlightNo == flight_no)
+
+            if supplier:
+                query = query.filter(
+                    ErpInvoiceReport.Supplier.ilike(f"%{supplier}%")
+                )
+
+            if service_code:
+                query = query.filter(
+                    ErpInvoiceReport.ServiceCode == service_code
+                )
+
+            return query.all()
+
+        except Exception as e:
+            print(f"Error searching ERP invoices: {e}")
+            raise CustomException(
+                "An error occurred while searching ERP invoice records"
             )

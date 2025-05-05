@@ -399,6 +399,7 @@ class InvoiceHistory(Base):
             for c in self.__table__.columns
         }
 
+
 # billing inflair
 class BillingRecon(Base):
     __tablename__ = 'BillingRecon'
@@ -459,7 +460,8 @@ class BillingRecon(Base):
             c.name: str(getattr(self, c.name))
             for c in self.__table__.columns
         }
-
+        
+        
 # billing_promeus
 class ErpInvoiceReport(Base):
     __tablename__ = 'ErpInvoiceReport'
