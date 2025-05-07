@@ -1,7 +1,4 @@
-image: get_file_s3
-description: get file from s3
-memorySize: 1024
-timeout: 900
+image: read_files_from_catering_and_airline
 iamRoleStatementsInherit: true
 iamRoleStatements:
   - Effect: "Allow"
@@ -12,6 +9,9 @@ iamRoleStatements:
     Action:
       - s3:GetObject
     Resource: "arn:aws:s3:::mtw-elementar-dev-018061303185/public/airline_files/*"
+description: Reads the files from the ccs service uploaded by the catering company and airline company
+memorySize: 1024
+timeout: 900
 events:
   - s3:
       bucket: mtw-elementar-dev-018061303185
@@ -19,10 +19,12 @@ events:
       existing: true
       rules:
         - prefix: public/airline_files/Airline Billing History/
+        - sufix: .csv
   - s3:
       bucket: mtw-elementar-dev-018061303185
       event: s3:ObjectCreated:*
       existing: true
       rules:
         - prefix: public/airline_files/GCG Invoice History/
+        - sufix: .xlsx
 
