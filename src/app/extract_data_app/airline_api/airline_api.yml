@@ -1,7 +1,7 @@
 image: airline_api
 description: airline api
 memorySize: 1024
-timeout: 30
+timeout: 29
 iamRoleStatementsInherit: true
 iamRoleStatements:
   - Effect: "Allow"
