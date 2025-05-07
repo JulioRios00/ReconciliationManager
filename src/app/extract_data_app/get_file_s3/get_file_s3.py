@@ -1,9 +1,5 @@
 import json
-import boto3
 import os
-import io
-import sys
-import tempfile
 from io import StringIO
 from common.s3 import get_file_body_by_key
 from services.ccs_file_readers_service import FileReadersService
@@ -16,21 +12,29 @@ READER_FUNCTIONS = {
     'save_pricing_promeus_to_db': 'pricing_read_promeus_with_flight_classes'
 }
 
+PREFIX_TO_PROCESSOR = {
+    'public/airline_files/Airline Billing History/':
+        'save_billing_inflair_to_db',
+    'public/airline_files/GCG Invoice History/':
+        'save_billing_promeus_to_db',
+}
+
 
 def main(event, context):
 
     key = event['Records'][0]['s3']['object']['key']
     bucket = event['Records'][0]['s3']['bucket']['name']
+
     processor_function_name = (
         event['Records'][0]['s3']['object'].get('processorFunction')
     )
 
     if not processor_function_name:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'No processor function specified'})
-        }
-    
+        for prefix, processor in PREFIX_TO_PROCESSOR.items():
+            if key.startswith(prefix):
+                processor_function_name = processor
+                break
+
     reader_method_name = READER_FUNCTIONS.get(processor_function_name)
     if not reader_method_name:
         return {
