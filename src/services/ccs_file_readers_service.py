@@ -7,7 +7,6 @@ from repositories.ccs_repository import (
     BillingReconRepository,
     ErpInvoiceReportRepository,
 )
-from models.schema_ccs import BillingRecon, ErpInvoiceReport
 
 
 class FileReadersService:

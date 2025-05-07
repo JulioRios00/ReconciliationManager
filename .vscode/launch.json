@@ -883,11 +883,11 @@
 	{
 		"type": "aws-sam",
 		"request": "direct-invoke",
-		"name": "get_file_s3.main (python3.8)",
+		"name": "read_files_recon.main (python3.8)",
 		"invokeTarget": {
 		  "target": "code",
 		  "projectRoot": "${workspaceFolder}/src",
-		  "lambdaHandler": "app/extract_data_app/get_file_s3/get_file_s3.main"
+		  "lambdaHandler": "app/extract_data_app/read_files_recon/read_files_recon.main"
 		},
 		"lambda": {
 			"memoryMb": 3000,
