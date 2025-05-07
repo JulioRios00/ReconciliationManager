@@ -130,7 +130,7 @@ provider:
         file: Dockerfile.airlineapi
       read_files_recon:
         path: "./src"
-        file: Dockerfile.readfilesfromcateringandairline
+        file: Dockerfile.readfilesrecon
   tracing:
     apiGateway: true
     lambda: true
