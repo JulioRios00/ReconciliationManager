@@ -128,9 +128,9 @@ provider:
       airline_api:
         path: "./src"
         file: Dockerfile.airlineapi
-      get_file_s3:
+      read_files_from_catering_and_airline:
         path: "./src"
-        file: Dockerfile.getfiles3
+        file: Dockerfile.readfilesfromcateringandairline
   tracing:
     apiGateway: true
     lambda: true
@@ -155,7 +155,7 @@ functions:
   airline_api: ${file(src/app/extract_data_app/airline_api/airline_api.yml)}
   analyze_price_report: ${file(src/app/extract_data_app/analyze_price_report/analyze_tp_100.yml)}
   analyze_invoice: ${file(src/app/extract_data_app/analyze_invoice/analyze_invoice.yml)}
-  get_file_s3: ${file(src/app/extract_data_app/get_file_s3/get_file_s3.yml)}
+  read_files_from_catering_and_airline: ${file(src/app/extract_data_app/read_files_from_catering_and_airline/read_files_from_catering_and_airline.yml)}
 resources:
   - Conditions:
       EnvQa : !Equals [ "${self:custom.stage}", "qa"]
