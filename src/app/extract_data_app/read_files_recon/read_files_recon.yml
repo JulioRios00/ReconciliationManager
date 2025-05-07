@@ -20,10 +20,10 @@ events:
       rules:
         - prefix: public/airline_files/Airline Billing History/
         - suffix: .csv
-  - s3:
-      bucket: mtw-elementar-${self:custom.stage}-${aws:accountId}
-      event: s3:ObjectCreated:*
-      existing: true
-      rules:
-        - prefix: public/airline_files/GCG Invoice History/
-        - suffix: .xlsx
+  # - s3:
+  #     bucket: mtw-elementar-${self:custom.stage}-${aws:accountId}
+  #     event: s3:ObjectCreated:*
+  #     existing: true
+  #     rules:
+  #       - prefix: public/airline_files/GCG Invoice History/
+  #       - suffix: .xlsx
