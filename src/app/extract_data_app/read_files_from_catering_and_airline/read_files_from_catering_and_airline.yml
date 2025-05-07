@@ -1,4 +1,4 @@
-image: read_files_from_catering_and_airline
+image: read_files_recon
 iamRoleStatementsInherit: true
 iamRoleStatements:
   - Effect: "Allow"
