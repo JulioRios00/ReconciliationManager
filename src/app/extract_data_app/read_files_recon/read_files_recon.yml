@@ -12,10 +12,3 @@ iamRoleStatements:
 description: Reads the files from the ccs service uploaded by the catering company and airline company
 memorySize: 1024
 timeout: 600
-events:
-  - s3:
-      bucket: mtw-elementar-${self:custom.stage}-${aws:accountId}
-      event: s3:ObjectCreated:*
-      existing: true
-      rules:
-        - prefix: public/airline_files/Airline Billing History/
