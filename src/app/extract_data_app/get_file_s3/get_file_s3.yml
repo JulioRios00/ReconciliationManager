@@ -12,3 +12,17 @@ iamRoleStatements:
     Action:
       - s3:GetObject
     Resource: "arn:aws:s3:::mtw-elementar-dev-018061303185/public/airline_files/*"
+events:
+  - s3:
+      bucket: mtw-elementar-dev-018061303185
+      event: s3:ObjectCreated:*
+      existing: true
+      rules:
+        - prefix: public/airline_files/Airline Billing History/
+  - s3:
+      bucket: mtw-elementar-dev-018061303185
+      event: s3:ObjectCreated:*
+      existing: true
+      rules:
+        - prefix: public/airline_files/GCG Invoice History/
+
