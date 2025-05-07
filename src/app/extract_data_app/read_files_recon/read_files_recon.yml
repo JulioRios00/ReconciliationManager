@@ -19,4 +19,3 @@ events:
       existing: true
       rules:
         - prefix: public/airline_files/Airline Billing History/
-
