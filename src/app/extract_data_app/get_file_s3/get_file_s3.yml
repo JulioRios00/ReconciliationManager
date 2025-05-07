@@ -4,24 +4,24 @@ iamRoleStatements:
   - Effect: "Allow"
     Action:
       - s3:ListBucket
-    Resource: "arn:aws:s3:::mtw-elementar-dev-018061303185"
+    Resource: "arn:aws:s3:::mtw-elementar-${self:custom.stage}-${aws:accountId}"
   - Effect: "Allow"
     Action:
       - s3:GetObject
-    Resource: "arn:aws:s3:::mtw-elementar-dev-018061303185/public/airline_files/*"
+    Resource: "arn:aws:s3:::mtw-elementar-${self:custom.stage}-${aws:accountId}/public/airline_files/*"
 description: Reads the files from the ccs service uploaded by the catering company and airline company
 memorySize: 1024
 timeout: 900
 events:
   - s3:
-      bucket: mtw-elementar-dev-018061303185
+      bucket: mtw-elementar-${self:custom.stage}-${aws:accountId}
       event: s3:ObjectCreated:*
       existing: true
       rules:
         - prefix: public/airline_files/Airline Billing History/
         - sufix: .csv
   - s3:
-      bucket: mtw-elementar-dev-018061303185
+      bucket: mtw-elementar-${self:custom.stage}-${aws:accountId}
       event: s3:ObjectCreated:*
       existing: true
       rules:
