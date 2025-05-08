@@ -3,6 +3,7 @@ import json
 from collections import defaultdict
 import numpy as np
 from typing import List, Dict, Any
+from datetime import datetime, date
 from repositories.ccs_repository import (
     BillingReconRepository,
     ErpInvoiceReportRepository,
@@ -68,6 +69,7 @@ class FileReadersService:
 
         return data
 
+    # gcg
     def billing_promeus_invoice_report(
         self,
         file_path: str
@@ -126,6 +128,14 @@ class FileReadersService:
                 )
             )
 
+        if "FlightDate" in df.columns:
+            try:
+                df["FlightDate"] = pd.to_datetime(df["FlightDate"]).dt.strftime("%Y-%m-%d")
+                print(f"Flight date conversion successful: {df['FlightDate']}")
+            except Exception as e:
+                print(f"Error converting FlightDate: {e}")
+                print(f"Original FlightDate values: {df['FlightDate'].head()}")
+
         for col in df.select_dtypes(include=["datetime64"]).columns:
             df[col] = df[col].apply(format_date)
 
@@ -141,19 +151,18 @@ class FileReadersService:
 
         data = df.to_dict(orient="records")
 
-        try:
-            # Insert data into the database
-            self.erp_invoice_repository.insert_packeg_erp_invoice(data)
-            print(
-                f"Successfully inserted {len(data)} \
-                ERP invoice records into the database"
-            )
-        except Exception as e:
-            print(f"Error inserting ERP invoice data: {e}")
+        # try:
+        #     self.erp_invoice_repository.insert_package_erp_invoice(data)
+        #     print(
+        #         f"Successfully inserted {len(data)} \
+        #         ERP invoice records into the database"
+        #     )
+        # except Exception as e:
+        #     print(f"Error inserting ERP invoice data: {e}")
 
         # save_json(data, "billing_promeus.json")
 
-        return data
+        # return data
 
     def pricing_read_promeus_with_flight_classes(
         self, file_path: str
@@ -245,6 +254,7 @@ class FileReadersService:
         # save_json(result, "pricing_inflair.json")
         return result
 
+	#Airline billing history
     def billing_inflair_recon_report(
         self,
         file_path: str
@@ -264,6 +274,9 @@ class FileReadersService:
             List of records from the CSV file
         """
         df = pd.read_csv(file_path)
+		## corrigir problema de leitura do arquivo
+        if len(df) > 2:
+            df = df.iloc[:-2]
 
         df.columns = [
             col.strip() if isinstance(col, str) else col for col in df.columns
@@ -296,13 +309,16 @@ class FileReadersService:
                            and x < 100 else x)
             )
 
-        for col in df.select_dtypes(include=["datetime64"]).columns:
-            df[col] = df[col].apply(format_date)
+        if "FltDate" in df.columns:
+            df["FltDate"] = df["FltDate"].apply(format_date)
 
-        for col in df.select_dtypes(include=["object"]).columns:
-            df[col] = df[col].apply(
-                lambda x: x.strip() if isinstance(x, str) else x
-            )
+        # for col in df.select_dtypes(include=["datetime64"]).columns:
+        #     df[col] = df[col].apply(format_date)
+
+        # for col in df.select_dtypes(include=["object"]).columns:
+        #     df[col] = df[col].apply(
+        #         lambda x: x.strip() if isinstance(x, str) else x
+        #     )
 
         for col in ["Pax", "Qty", "UnitPrice", "TotalAmount"]:
             if col in df.columns:
@@ -313,8 +329,7 @@ class FileReadersService:
         data = df.to_dict(orient="records")
 
         try:
-            # Insert data into the database
-            self.billing_recon_repository.insert_packeg_billing_recon(data)
+            self.billing_recon_repository.bulk_insert(data)
             print(
                 f"Successfully inserted {len(data)} \
                 billing reconciliation records into the database"
@@ -324,17 +339,31 @@ class FileReadersService:
 
         # save_json(data, "billing_inflair_recon.json")
 
-        return data
+        # return data
 
 
-def format_date(date_value) -> str:
-    """Format dates in YYYY-MM-DD"""
-    if pd.isna(date_value):
+def format_date(date_value) -> date:
+    """
+    Converts a date value to datetime.date format 'YYYY-MM-DD'.
+    Accepts formats: 'D/M/YYYY', 'D/M/YY', Timestamp and datetime.date objects.
+    """
+    if isinstance(date_value, pd.Timestamp):
+        return date_value.date()
+        
+    if isinstance(date_value, date):
+        return date_value
+        
+    if not date_value or not isinstance(date_value, str):
         return None
-    try:
-        return pd.to_datetime(date_value).strftime("%Y-%m-%d")
-    except Exception:
-        return None
+
+    for fmt in ("%d/%m/%Y", "%d/%m/%y"):
+        try:
+            return datetime.strptime(date_value.strip(), fmt).date()
+        except ValueError:
+            continue
+
+    print(f"Error formatting date: {date_value}")
+    return None
 
 
 def group_data_by_class(data):

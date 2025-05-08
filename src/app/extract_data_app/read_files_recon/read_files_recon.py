@@ -1,33 +1,98 @@
 import json
 import os
 from io import StringIO
-from common.s3 import get_file_body_by_key
+from common.s3 import get_file_body_by_key, list_objects
 from services.ccs_file_readers_service import FileReadersService
 from common.conexao_banco import get_session
 
 READER_FUNCTIONS = {
-    'save_billing_inflair_to_db': 'billing_inflair_recon_report',
-    'save_billing_promeus_to_db': 'billing_promeus_invoice_report',
-    'save_pricing_inflair_to_db': 'pricing_read_inflair',
-    'save_pricing_promeus_to_db': 'pricing_read_promeus_with_flight_classes'
+    'billing_inflair_recon_report': 'billing_inflair_recon_report',
+    'billing_promeus_invoice_report': 'billing_promeus_invoice_report',
+    'pricing_read_inflair': 'pricing_read_inflair',
+    'pricing_read_promeus_with_flight_classes':
+        'pricing_read_promeus_with_flight_classes'
 }
 
 PREFIX_TO_PROCESSOR = {
     'public/airline_files/Airline Billing History/':
-        'save_billing_inflair_to_db',
+        'billing_inflair_recon_report',
     'public/airline_files/GCG Invoice History/':
-        'save_billing_promeus_to_db',
+        'billing_promeus_invoice_report',
 }
 
 
 def main(event, context):
-
+    # ja temos o nome do arquivo
     key = event['Records'][0]['s3']['object']['key']
     bucket = event['Records'][0]['s3']['bucket']['name']
 
     processor_function_name = (
         event['Records'][0]['s3']['object'].get('processorFunction')
     )
+
+    analised_files, size = get_file_body_by_key(
+        "public/airline_files/analised_files_list.json",
+        bucket
+    )
+
+    analyzed_files_json = json.loads(analised_files.read())
+    s3_files = list_objects(
+        Bucket="mtw-elementar-dev-018061303185",
+        Prefix="public/airline_files/"
+    )
+
+    def check_file_in_json(folder_name, file_name, analyzed_files_json):
+        """
+        Check if file exists in the analyzed files JSON structure
+        Returns tuple (exists: bool, message: str)
+        """
+        folder_mapping = {
+            'Airline Billing History': 'Airline Billing History',
+            'GCG Invoice History': 'GCG Invoice History',
+            'Airline Price Report': 'Airline Price Report',
+            'GCG Price Report': 'GCG Price Report'
+        }
+
+        mapped_folder = folder_mapping.get(folder_name)
+        if not mapped_folder:
+            return False, f"Unknown folder type: {folder_name}"
+
+        if mapped_folder in analyzed_files_json:
+            if file_name in analyzed_files_json[mapped_folder]:
+                return True, "File found in analyzed files"
+
+        return False, "File not found in analyzed files"
+
+    def process_s3_files(s3_files, analyzed_files_json):
+        results = []
+        for obj in s3_files['Contents']:
+            full_key = obj['Key']
+            sub_path = full_key.replace('public/airline_files/', '', 1)
+            parts = sub_path.split('/', 1)
+
+            if len(parts) == 2:
+                folder_name, file_name = parts
+                is_analyzed, message = check_file_in_json(
+                    folder_name,
+                    file_name,
+                    analyzed_files_json
+                )
+
+                results.append({
+                    'folder': folder_name,
+                    'file': file_name,
+                    'analyzed': is_analyzed,
+                    'message': message
+                })
+
+        return results
+
+    results = process_s3_files(s3_files, analyzed_files_json)
+
+    for result in results:
+        if result['analyzed']:
+            print(f"File {result['file']} already analyzed.")
+            return
 
     if not processor_function_name:
         for prefix, processor in PREFIX_TO_PROCESSOR.items():
