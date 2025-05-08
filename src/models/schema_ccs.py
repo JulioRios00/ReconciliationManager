@@ -53,13 +53,14 @@ class Flight(Base):
             ForeignKey('ccs.Configuration.Id'),
             nullable=True)
         )
-    Configuracao = relationship("Configuration")
+    # Fix: Explicitly specify foreign_keys parameter
+    Configuracao = relationship("Configuration", foreign_keys=[ConfiguracaoId], overlaps="Flight")
     FlightDateId = Column(
         UUID(as_uuid=True),
         ForeignKey('ccs.FlightDate.Id'),
         nullable=True
     )
-    FlightDate = relationship("FlightDate")
+    FlightDate = relationship("FlightDate", foreign_keys=[FlightDateId], overlaps="Flight")
     DataVoo = Column(Date, nullable=True)
     FlightReportId = (
         Column(
@@ -126,29 +127,8 @@ class Configuration(Base):
     Svc = Column(Integer)
     # Foreign Key
     IdFlight = Column(UUID(as_uuid=True), ForeignKey('ccs.Flight.Id'))
-    # Lazy loading com nome correto
-    Flight = relationship("Flight", lazy='joined')
-
-    def __init__(
-        self, tipo_de_classe, pacote, destino_packet, codigo_do_item,
-        descricao, provision1, provision2, tipo, svc, id_flight
-    ):
-        self.TipoDeClasse = tipo_de_classe
-        self.Pacote = pacote
-        self.DestinoPacket = destino_packet
-        self.CodigoDoItem = codigo_do_item
-        self.Descricao = descricao
-        self.Provision1 = provision1
-        self.Provision2 = provision2
-        self.Tipo = tipo
-        self.Svc = svc
-        self.IdFlight = id_flight
-
-    def serialize(self):
-        return {
-            c.name: str(getattr(self, c.name))
-            for c in self.__table__.columns
-        }
+    # Fix: Explicitly specify foreign_keys parameter
+    Flight = relationship("Flight", foreign_keys=[IdFlight], overlaps="Configuracao")
 
 
 class FlightDate(Base):
@@ -168,7 +148,7 @@ class FlightDate(Base):
     DataVoo = Column(Date)
 
     IdFlight = Column(UUID(as_uuid=True), ForeignKey('ccs.Flight.Id'))
-    Flight = relationship("Flight", lazy='joined')
+    Flight = relationship("Flight", foreign_keys=[IdFlight], overlaps="FlightDate")
 
     def __init__(self, data_voo, id_flight):
         self.DataVoo = data_voo
@@ -432,10 +412,10 @@ class BillingRecon(Base):
     TotalAmount = Column(String)
 
     def __init__(
-        self, facility=None, flt_date=None, flt_no=None, flt_inv=None,
-        class_=None, item_group=None, itemcode=None, item_desc=None,
-        al_bill_code=None, al_bill_desc=None, bill_catg=None, unit=None,
-        pax=None, qty=None, unit_price=None, total_amount=None
+        self, facility, flt_date, flt_no, flt_inv,
+        class_, item_group, itemcode, item_desc,
+        al_bill_code, al_bill_desc, bill_catg, unit,
+        pax, qty, unit_price, total_amount
     ):
         self.Facility = facility
         self.FltDate = flt_date

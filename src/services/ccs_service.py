@@ -270,7 +270,7 @@ class BillingReconService:
         try:
 
             billing_data = self._prepare_billing_data(data)
-            self.billing_recon_repository.insert_packeg_billing_recon(
+            self.billing_recon_repository.insert_package_billing_recon(
                 billing_data, filename
             )
             print("Successfully processed billing reconciliation data")
@@ -407,7 +407,7 @@ class ErpInvoiceReportService:
             # Assuming data is already in the correct format for processing
             # If data needs transformation, add that logic here
             invoice_data = self._prepare_invoice_data(data)
-            self.erp_invoice_repository.insert_packeg_erp_invoice(
+            self.erp_invoice_repository.insert_package_erp_invoice(
                 invoice_data, filename
             )
 

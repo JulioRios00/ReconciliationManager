@@ -47,9 +47,15 @@ def check_obj_exists(key, bucket_name):
             return False
     return True
 
+
 def move_obj(bucket, origin_key, destination_key):
     return s3.copy_object(
         Bucket=bucket,
         CopySource={'Bucket': bucket, 'Key': origin_key},
         Key=destination_key
         )
+
+
+def list_objects(**kwargs):
+    return s3.list_objects_v2(**kwargs)
+
