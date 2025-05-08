@@ -151,14 +151,14 @@ class FileReadersService:
 
         data = df.to_dict(orient="records")
 
-        # try:
-        #     self.erp_invoice_repository.insert_package_erp_invoice(data)
-        #     print(
-        #         f"Successfully inserted {len(data)} \
-        #         ERP invoice records into the database"
-        #     )
-        # except Exception as e:
-        #     print(f"Error inserting ERP invoice data: {e}")
+        try:
+            self.erp_invoice_repository.insert_package_erp_invoice(data)
+            print(
+                f"Successfully inserted {len(data)} \
+                ERP invoice records into the database"
+            )
+        except Exception as e:
+            print(f"Error inserting ERP invoice data: {e}")
 
         # save_json(data, "billing_promeus.json")
 
@@ -311,14 +311,6 @@ class FileReadersService:
 
         if "FltDate" in df.columns:
             df["FltDate"] = df["FltDate"].apply(format_date)
-
-        # for col in df.select_dtypes(include=["datetime64"]).columns:
-        #     df[col] = df[col].apply(format_date)
-
-        # for col in df.select_dtypes(include=["object"]).columns:
-        #     df[col] = df[col].apply(
-        #         lambda x: x.strip() if isinstance(x, str) else x
-        #     )
 
         for col in ["Pax", "Qty", "UnitPrice", "TotalAmount"]:
             if col in df.columns:
