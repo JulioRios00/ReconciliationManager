@@ -22,7 +22,6 @@ PREFIX_TO_PROCESSOR = {
 
 
 def main(event, context):
-    # ja temos o nome do arquivo
     key = event['Records'][0]['s3']['object']['key']
     bucket = event['Records'][0]['s3']['bucket']['name']
 
@@ -36,6 +35,7 @@ def main(event, context):
     )
 
     analyzed_files_json = json.loads(analised_files.read())
+    print(f'Analyzed files: {analyzed_files_json}')
     s3_files = list_objects(
         Bucket="mtw-elementar-dev-018061303185",
         Prefix="public/airline_files/"
@@ -67,6 +67,7 @@ def main(event, context):
         results = []
         for obj in s3_files['Contents']:
             full_key = obj['Key']
+            print(f"Processing file: {full_key}")
             sub_path = full_key.replace('public/airline_files/', '', 1)
             parts = sub_path.split('/', 1)
 
@@ -111,6 +112,7 @@ def main(event, context):
 
     file, size = get_file_body_by_key(key, bucket)
     file_content = file.read()
+    print(f'File content: {file_content}')
 
     temp_dir = '/tmp'
     temp_file_path = os.path.join(temp_dir, f"temp_{os.path.basename(key)}")
