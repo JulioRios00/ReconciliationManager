@@ -22,8 +22,21 @@ PREFIX_TO_PROCESSOR = {
 
 
 def main(event, context):
-    key = event['Records'][0]['s3']['object']['key']
-    bucket = event['Records'][0]['s3']['bucket']['name']
+    # Handle EventBridge format
+    if 'detail' in event:
+        key = event['detail']['object']['key'][0]['prefix']
+        bucket = event['detail']['bucket']['name'][0]
+    # Handle direct S3 event format 
+    elif 'Records' in event:
+        key = event['Records'][0]['s3']['object']['key']
+        bucket = event['Records'][0]['s3']['bucket']['name']
+    else:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({
+                'error': 'Unsupported event format'
+            })
+        }
 
     processor_function_name = (
         event['Records'][0]['s3']['object'].get('processorFunction')
