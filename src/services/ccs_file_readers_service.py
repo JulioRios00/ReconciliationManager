@@ -319,6 +319,7 @@ class FileReadersService:
         df = df.replace({np.nan: None})
 
         data = df.to_dict(orient="records")
+        print("first record", data[0])
 
         try:
             self.billing_recon_repository.bulk_insert(data)
