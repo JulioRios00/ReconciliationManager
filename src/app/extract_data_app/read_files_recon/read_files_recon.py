@@ -70,31 +70,6 @@ def main(event, context):
     analyzed_files_json = json.loads(analised_files.read())
     print(f'Analyzed files: {analyzed_files_json}')
 
-    sub_path = key.replace('public/airline_files/', '', 1)
-    parts = sub_path.split('/', 1)
-
-    if len(parts) == 2:
-        folder_name, file_name = parts
-
-        folder_mapping = {
-            'Airline Billing History': 'Airline Billing History',
-            'GCG Invoice History': 'GCG Invoice History',
-            'Airline Price Report': 'Airline Price Report',
-            'GCG Price Report': 'GCG Price Report'
-        }
-
-        mapped_folder = folder_mapping.get(folder_name)
-        if mapped_folder and mapped_folder in analyzed_files_json:
-            if file_name in analyzed_files_json[mapped_folder]:
-                print(f"File {file_name} already analyzed.")
-                return {
-                    'statusCode': 200,
-                    'body': json.dumps({
-                        'message': 'File already analyzed',
-                        'file': file_name
-                    })
-                }
-
     file, size = get_file_body_by_key(key, bucket)
     file_content = file.read()
     print(f'File size: {size} bytes')
