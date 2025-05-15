@@ -8,7 +8,7 @@ from repositories.ccs_repository import (
     BillingReconRepository,
     ErpInvoiceReportRepository,
 )
-
+from models.billing_recon import BillingRecon
 
 class FileReadersService:
     def __init__(self, db_session):
@@ -322,7 +322,16 @@ class FileReadersService:
         print("first record", data[0])
 
         try:
-            self.billing_recon_repository.bulk_insert(data)
+            # Convert dictionaries to model instances before bulk insert            
+            model_instances = []
+            for item in data:
+                model_instance = BillingRecon()
+                for key, value in item.items():
+                    if hasattr(model_instance, key):
+                        setattr(model_instance, key, value)
+                model_instances.append(model_instance)
+
+            self.billing_recon_repository.bulk_insert(model_instances)
             print(
                 f"Successfully inserted {len(data)} \
                 billing reconciliation records into the database"
@@ -330,9 +339,8 @@ class FileReadersService:
         except Exception as e:
             print(f"Error inserting billing reconciliation data: {e}")
 
-        # save_json(data, "billing_inflair_recon.json")
-
-        # return data
+        # Return the original data for the Lambda function
+        return data
 
 
 def format_date(date_value) -> date:
