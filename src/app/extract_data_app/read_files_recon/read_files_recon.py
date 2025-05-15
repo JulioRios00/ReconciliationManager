@@ -23,11 +23,10 @@ PREFIX_TO_PROCESSOR = {
 
 def main(event, context):
     print("event object", event)
-    # Handle EventBridge format
+
     if 'detail' in event:
         key = event['detail']['object']['key']
         bucket = event['detail']['bucket']['name']
-
     else:
         return {
             'statusCode': 400,
@@ -36,9 +35,32 @@ def main(event, context):
             })
         }
 
-    processor_function_name = (
-        event['Records'][0]['s3']['object'].get('processorFunction')
-    )
+    processor_function_name = None
+    for prefix, processor in PREFIX_TO_PROCESSOR.items():
+        if key.startswith(prefix):
+            processor_function_name = processor
+            break
+
+    if not processor_function_name:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({
+                'error': f'No processor found for file: {key}'
+            })
+        }
+
+    reader_method_name = READER_FUNCTIONS.get(processor_function_name)
+    if not reader_method_name:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({
+                'error': f'Unknown reader function: {processor_function_name}'
+            })
+        }
+
+    print(f"Using processor: {processor_function_name},"
+          f" method: {reader_method_name}"
+          )
 
     analised_files, size = get_file_body_by_key(
         "public/airline_files/analised_files_list.json",
@@ -47,16 +69,13 @@ def main(event, context):
 
     analyzed_files_json = json.loads(analised_files.read())
     print(f'Analyzed files: {analyzed_files_json}')
-    s3_files = list_objects(
-        Bucket="mtw-elementar-dev-018061303185",
-        Prefix="public/airline_files/"
-    )
 
-    def check_file_in_json(folder_name, file_name, analyzed_files_json):
-        """
-        Check if file exists in the analyzed files JSON structure
-        Returns tuple (exists: bool, message: str)
-        """
+    sub_path = key.replace('public/airline_files/', '', 1)
+    parts = sub_path.split('/', 1)
+
+    if len(parts) == 2:
+        folder_name, file_name = parts
+
         folder_mapping = {
             'Airline Billing History': 'Airline Billing History',
             'GCG Invoice History': 'GCG Invoice History',
@@ -65,65 +84,20 @@ def main(event, context):
         }
 
         mapped_folder = folder_mapping.get(folder_name)
-        if not mapped_folder:
-            return False, f"Unknown folder type: {folder_name}"
-
-        if mapped_folder in analyzed_files_json:
+        if mapped_folder and mapped_folder in analyzed_files_json:
             if file_name in analyzed_files_json[mapped_folder]:
-                return True, "File found in analyzed files"
-
-        return False, "File not found in analyzed files"
-
-    def process_s3_files(s3_files, analyzed_files_json):
-        results = []
-        for obj in s3_files['Contents']:
-            full_key = obj['Key']
-            print(f"Processing file: {full_key}")
-            sub_path = full_key.replace('public/airline_files/', '', 1)
-            parts = sub_path.split('/', 1)
-
-            if len(parts) == 2:
-                folder_name, file_name = parts
-                is_analyzed, message = check_file_in_json(
-                    folder_name,
-                    file_name,
-                    analyzed_files_json
-                )
-
-                results.append({
-                    'folder': folder_name,
-                    'file': file_name,
-                    'analyzed': is_analyzed,
-                    'message': message
-                })
-
-        return results
-
-    results = process_s3_files(s3_files, analyzed_files_json)
-
-    for result in results:
-        if result['analyzed']:
-            print(f"File {result['file']} already analyzed.")
-            return
-
-    if not processor_function_name:
-        for prefix, processor in PREFIX_TO_PROCESSOR.items():
-            if key.startswith(prefix):
-                processor_function_name = processor
-                break
-
-    reader_method_name = READER_FUNCTIONS.get(processor_function_name)
-    if not reader_method_name:
-        return {
-            'statusCode': 400,
-            'body': json.dumps(
-                {'error': f'Unknown reader function:{processor_function_name}'}
-            )
-        }
+                print(f"File {file_name} already analyzed.")
+                return {
+                    'statusCode': 200,
+                    'body': json.dumps({
+                        'message': 'File already analyzed',
+                        'file': file_name
+                    })
+                }
 
     file, size = get_file_body_by_key(key, bucket)
     file_content = file.read()
-    print(f'File content: {file_content}')
+    print(f'File size: {size} bytes')
 
     temp_dir = '/tmp'
     temp_file_path = os.path.join(temp_dir, f"temp_{os.path.basename(key)}")
@@ -134,9 +108,7 @@ def main(event, context):
     try:
         with get_session() as session:
             file_reader_service = FileReadersService(session)
-
             reader_method = getattr(file_reader_service, reader_method_name)
-
             data = reader_method(temp_file_path)
 
         os.unlink(temp_file_path)
