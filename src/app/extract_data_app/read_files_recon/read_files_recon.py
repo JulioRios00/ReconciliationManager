@@ -22,14 +22,12 @@ PREFIX_TO_PROCESSOR = {
 
 
 def main(event, context):
+    print("event object", event)
     # Handle EventBridge format
     if 'detail' in event:
-        key = event['detail']['object']['key'][0]['prefix']
-        bucket = event['detail']['bucket']['name'][0]
-    # Handle direct S3 event format 
-    elif 'Records' in event:
-        key = event['Records'][0]['s3']['object']['key']
-        bucket = event['Records'][0]['s3']['bucket']['name']
+        key = event['detail']['object']['key']
+        bucket = event['detail']['bucket']['name']
+
     else:
         return {
             'statusCode': 400,
