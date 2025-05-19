@@ -8,8 +8,7 @@ from repositories.ccs_repository import (
     BillingReconRepository,
     ErpInvoiceReportRepository,
 )
-from models.schema_ccs import BillingRecon
-
+from models.billing_recon import BillingRecon
 
 class FileReadersService:
     def __init__(self, db_session):
