@@ -8,7 +8,8 @@ from repositories.ccs_repository import (
     BillingReconRepository,
     ErpInvoiceReportRepository,
 )
-from models.billing_recon import BillingRecon
+from models.schema_ccs import BillingRecon
+
 
 class FileReadersService:
     def __init__(self, db_session):
@@ -16,7 +17,10 @@ class FileReadersService:
         self.erp_invoice_repository = ErpInvoiceReportRepository(db_session)
         self.session = db_session
 
-    def billing_inflair_invoice_report(self, file_path: str) -> List[Dict[str, Any]]:
+    def billing_inflair_invoice_report(
+        self,
+        file_path: str
+    ) -> List[Dict[str, Any]]:
         """
         This method reads the billing inflair file and returns an array
         of objects and a json file (will be commented in the code)
