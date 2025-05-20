@@ -1,7 +1,7 @@
 import json
 import os
 from io import StringIO
-from common.s3 import get_file_body_by_key, list_objects
+from common.s3 import get_file_body_by_key
 from services.ccs_file_readers_service import FileReadersService
 from common.conexao_banco import get_session
 
@@ -61,14 +61,6 @@ def main(event, context):
     print(f"Using processor: {processor_function_name},"
           f" method: {reader_method_name}"
           )
-
-    analised_files, size = get_file_body_by_key(
-        "public/airline_files/analised_files_list.json",
-        bucket
-    )
-
-    analyzed_files_json = json.loads(analised_files.read())
-    print(f'Analyzed files: {analyzed_files_json}')
 
     file, size = get_file_body_by_key(key, bucket)
     file_content = file.read()
