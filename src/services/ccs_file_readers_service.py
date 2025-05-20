@@ -287,36 +287,36 @@ class FileReadersService:
         ]
 
         column_mapping = {
-            "Facility": "Facility",
-            "FltDate": "FltDate",
-            "FltNo": "FltNo",
-            "Fl Inv": "FltInv",
-            "Class": "Class",
-            "Ite Group": "ItemGroup",
-            "Ite code": "Itemcode",
-            "Ite Desc": "ItemDesc",
-            "AlBillCode": "AlBillCode",
-            "AlBillDesc": "AlBillDesc",
-            "BillCatg": "BillCatg",
-            "Unit": "Unit",
-            "Pax": "Pax",
-            "Qty": "Qty",
-            "UnitPrice": "UnitPrice",
-            "TotalAmount": "TotalAmount",
+            "Facility": "facility",
+            "FltDate": "flt_date",
+            "FltNo": "flt_no",
+            "Fl Inv": "flt_inv",
+            "Class": "class_",
+            "Ite Group": "item_group",
+            "Ite code": "itemcode",
+            "Ite Desc": "item_desc",
+            "AlBillCode": "al_bill_code",
+            "AlBillDesc": "al_bill_desc",
+            "BillCatg": "bill_catg",
+            "Unit": "unit",
+            "Pax": "pax",
+            "Qty": "qty",
+            "UnitPrice": "unit_price",
+            "TotalAmount": "total_amount",
         }
 
         df = df.rename(columns=column_mapping)
 
-        if "FltNo" in df.columns:
-            df["FltNo"] = df["FltNo"].apply(
+        if "flt_no" in df.columns:
+            df["flt_no"] = df["flt_no"].apply(
                 lambda x: (f"0{x}" if isinstance(x, (int, float))
                            and x < 100 else x)
             )
 
-        if "FltDate" in df.columns:
-            df["FltDate"] = df["FltDate"].apply(format_date)
+        if "flt_date" in df.columns:
+            df["flt_date"] = df["flt_date"].apply(format_date)
 
-        for col in ["Pax", "Qty", "UnitPrice", "TotalAmount"]:
+        for col in ["pax", "qty", "unit_price", "total_amount"]:
             if col in df.columns:
                 df[col] = df[col].astype(str)
 
@@ -328,7 +328,6 @@ class FileReadersService:
         try:
             model_instances = []
             for item in data:
-
                 model_instance = BillingRecon(**item)
                 model_instances.append(model_instance)
 
