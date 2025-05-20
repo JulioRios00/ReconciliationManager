@@ -258,7 +258,7 @@ class FileReadersService:
         # save_json(result, "pricing_inflair.json")
         return result
 
-	#Airline billing history
+    # Airline billing history
     def billing_inflair_recon_report(
         self,
         file_path: str
@@ -278,7 +278,7 @@ class FileReadersService:
             List of records from the CSV file
         """
         df = pd.read_csv(file_path)
-		## corrigir problema de leitura do arquivo
+        # corrigir problema de leitura do arquivo
         if len(df) > 2:
             df = df.iloc[:-2]
 
@@ -326,13 +326,10 @@ class FileReadersService:
         print("first record", data[0])
 
         try:
-            # Convert dictionaries to model instances before bulk insert            
             model_instances = []
             for item in data:
-                model_instance = BillingRecon()
-                for key, value in item.items():
-                    if hasattr(model_instance, key):
-                        setattr(model_instance, key, value)
+
+                model_instance = BillingRecon(**item)
                 model_instances.append(model_instance)
 
             self.billing_recon_repository.bulk_insert(model_instances)
@@ -342,8 +339,9 @@ class FileReadersService:
             )
         except Exception as e:
             print(f"Error inserting billing reconciliation data: {e}")
+            import traceback
+            print(traceback.format_exc())
 
-        # Return the original data for the Lambda function
         return data
 
 
@@ -354,10 +352,10 @@ def format_date(date_value) -> date:
     """
     if isinstance(date_value, pd.Timestamp):
         return date_value.date()
-        
+
     if isinstance(date_value, date):
         return date_value
-        
+
     if not date_value or not isinstance(date_value, str):
         return None
 
