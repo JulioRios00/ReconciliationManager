@@ -380,8 +380,9 @@ class InvoiceHistory(Base):
         }
 
 
-class BillingRecon(Base):
-    __tablename__ = 'BillingRecon'
+# CateringInvoiceReport
+class CateringInvoiceReport(Base):
+    __tablename__ = 'CateringInvoiceReport'
     __table_args__ = {'schema': 'ccs'}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -441,8 +442,9 @@ class BillingRecon(Base):
         }
 
 
-class ErpInvoiceReport(Base):
-    __tablename__ = 'ErpInvoiceReport'
+# mudar para AirCompanyInvoiceReport
+class AirCompanyInvoiceReport(Base):
+    __tablename__ = 'CateringInvoiceReport'
     __table_args__ = {'schema': 'ccs'}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -652,3 +654,32 @@ class Reconciliation(Base):
             c.name: str(getattr(self, c.name))
             for c in self.__table__.columns
         }
+
+
+class FlightNumberMapping(Base):
+    __tablename__ = 'FlightNumberMapping'
+    __table_args__ = {'schema': 'ccs'}
+
+    Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    DataCriacao = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP")
+    )
+    DataAtualizacao = Column(TIMESTAMP)
+    Ativo = Column(Boolean, nullable=False, default=True)
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+    AirCompanyFlightNumber = Column(String, nullable=True)
+    CateringFlightNumber = Column(String, nullable=True)
+
+    def __init__(self, air_company_flight_number=None, catering_flight_number=None):
+        self.AirCompanyFlightNumber = air_company_flight_number
+        self.CateringFlightNumber = catering_flight_number
+
+    def serialize(self):
+        return {
+            c.name: str(getattr(self, c.name))
+            for c in self.__table__.columns
+        }
+        
