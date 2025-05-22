@@ -444,7 +444,7 @@ class CateringInvoiceReport(Base):
 
 # mudar para AirCompanyInvoiceReport
 class AirCompanyInvoiceReport(Base):
-    __tablename__ = 'CateringInvoiceReport'
+    __tablename__ = 'AirCompanyInvoiceReport'
     __table_args__ = {'schema': 'ccs'}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -673,7 +673,8 @@ class FlightNumberMapping(Base):
     AirCompanyFlightNumber = Column(String, nullable=True)
     CateringFlightNumber = Column(String, nullable=True)
 
-    def __init__(self, air_company_flight_number=None, catering_flight_number=None):
+    def __init__(self, air_company_flight_number=None,
+                 catering_flight_number=None):
         self.AirCompanyFlightNumber = air_company_flight_number
         self.CateringFlightNumber = catering_flight_number
 
@@ -682,4 +683,46 @@ class FlightNumberMapping(Base):
             c.name: str(getattr(self, c.name))
             for c in self.__table__.columns
         }
-        
+
+
+class FlightClassMapping(Base):
+    __tablename__ = 'FlightClassMapping'
+    __table_args__ = {'schema': 'ccs'}
+
+    Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    DataCriacao = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP")
+    )
+    DataAtualizacao = Column(TIMESTAMP)
+    Ativo = Column(Boolean, nullable=False, default=True)
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+    PromeusClass = Column(String, nullable=True)
+    InflairClass = Column(String, nullable=True)
+
+    ItemGroup = Column(String, nullable=True)
+    ItemCode = Column(String, nullable=True)
+    ItemDesc = Column(String, nullable=True)
+    ALBillCode = Column(String, nullable=True)
+    ALBillDesc = Column(String, nullable=True)
+    BillCatg = Column(String, nullable=True)
+
+    def __init__(self, promeus_class=None, inflair_class=None, item_group=None,
+                 item_code=None, item_desc=None, al_bill_code=None,
+                 al_bill_desc=None, bill_catg=None):
+        self.PromeusClass = promeus_class  
+        self.InflairClass = inflair_class
+        self.ItemGroup = item_group
+        self.ItemCode = item_code
+        self.ItemDesc = item_desc
+        self.ALBillCode = al_bill_code
+        self.ALBillDesc = al_bill_desc
+        self.BillCatg = bill_catg
+
+    def serialize(self):
+        return {
+            c.name: str(getattr(self, c.name))
+            for c in self.__table__.columns
+        }
