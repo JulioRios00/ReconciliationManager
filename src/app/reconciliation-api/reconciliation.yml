@@ -1,0 +1,30 @@
+reconciliation_api:
+  handler: src/app/reconciliation-api/reconciliation.main
+  memorySize: 3072  
+  timeout: 60
+  events:
+    - httpApi:
+        path: /api/reconciliation/data
+        method: get
+        cors: true
+        authorizer:
+          name: CognitoAuthorizer
+        request:
+          parameters:
+            querystrings:
+              limit: false
+              offset: false
+  environment:
+    LOG_LEVEL: INFO
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - secretsmanager:GetSecretValue
+        - secretsmanager:DescribeSecret
+      Resource:
+        - ${param:ELEMENTAR_SECRETS_MANAGER_ARN}
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource:
+        - '*'
