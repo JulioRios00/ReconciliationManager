@@ -14,6 +14,7 @@ reconciliation_api:
             querystrings:
               limit: false
               offset: false
+              filter_type: false
   environment:
     LOG_LEVEL: INFO
   iamRoleStatements:

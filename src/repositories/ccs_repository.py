@@ -3,6 +3,7 @@ from repositories.repository import Repository
 from typing import List, Dict
 from decimal import Decimal
 from datetime import datetime
+from sqlalchemy.orm import Session
 #Tables
 from models.schema_ccs import (
     Flight,
@@ -12,10 +13,12 @@ from models.schema_ccs import (
     PriceReport,
     InvoiceHistory,
     CateringInvoiceReport,
-    AirCompanyInvoiceReport
+    AirCompanyInvoiceReport,
+    Reconciliation
 )
 # Application-Specific Common Utilities
 from common.custom_exception import CustomException
+
 
 class FlightRepository(Repository):
     def __init__(self, db_session):
@@ -451,3 +454,60 @@ class ErpInvoiceReportRepository(Repository):
 
     def get_by_flight_no(self, flight_no):
         return self.session.query(AirCompanyInvoiceReport).filter(AirCompanyInvoiceReport.FlightNo == flight_no, AirCompanyInvoiceReport.Excluido.is_(False)).all()
+
+
+class ReconciliationRepository:
+    def __init__(self, session: Session):
+        self.session = session
+    
+    def get_all(self):
+        """Get all reconciliation records"""
+        return self.session.query(Reconciliation).order_by(
+            Reconciliation.AirFlightDate, 
+            Reconciliation.AirFlightNo
+        ).all()
+
+    def get_paginated(self, limit=100, offset=0):
+        """Get paginated reconciliation records"""
+        return self.session.query(Reconciliation).order_by(
+            Reconciliation.AirFlightDate, 
+            Reconciliation.AirFlightNo
+        ).limit(limit).offset(offset).all()
+
+    def get_count(self):
+        """Get total count of reconciliation records"""
+        return self.session.query(Reconciliation).count()
+
+    def get_filtered(self, filter_type):
+        """Get filtered reconciliation records"""
+        query = self.session.query(Reconciliation)
+
+        if filter_type == 'discrepancies':
+            query = query.filter((Reconciliation.DifQty == 'Yes') |
+                                 (Reconciliation.DifPrice == 'Yes'))
+        elif filter_type == 'air_only':
+            query = query.filter((Reconciliation.Air == 'Yes') &
+                                 (Reconciliation.Cat == 'No'))
+        elif filter_type == 'cat_only':
+            query = query.filter((Reconciliation.Air == 'No') &
+                                 (Reconciliation.Cat == 'Yes'))
+
+        return query.order_by(
+            Reconciliation.AirFlightDate,
+            Reconciliation.AirFlightNo).all()
+
+    def get_filtered_count(self, filter_type):
+        """Get count of filtered reconciliation records"""
+        query = self.session.query(Reconciliation)
+
+        if filter_type == 'discrepancies':
+            query = query.filter((Reconciliation.DifQty == 'Yes') |
+                                 (Reconciliation.DifPrice == 'Yes'))
+        elif filter_type == 'air_only':
+            query = query.filter((Reconciliation.Air == 'Yes') &
+                                 (Reconciliation.Cat == 'No'))
+        elif filter_type == 'cat_only':
+            query = query.filter((Reconciliation.Air == 'No') &
+                                 (Reconciliation.Cat == 'Yes'))
+
+        return query.count()
