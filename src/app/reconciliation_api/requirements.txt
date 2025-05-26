@@ -2,3 +2,4 @@ sqlalchemy==1.4.23
 psycopg2-binary==2.9.1
 boto3==1.18.40
 flask==2.0.1
+sqlalchemy_pagination
