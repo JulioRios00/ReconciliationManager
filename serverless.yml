@@ -1,5 +1,7 @@
 service: serverless-ccs
 
+
+
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
@@ -138,6 +140,8 @@ provider:
   
 package:
   individually: true
+  include:
+    - src/**
   patterns:
     - '!__pycache__/**'
     - '!node_modules/**'
