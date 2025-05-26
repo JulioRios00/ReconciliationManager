@@ -1,6 +1,6 @@
 import logging
 import traceback
-from src.repositories.ccs_repository import ReconciliationRepository
+from repositories.ccs_repository import ReconciliationRepository
 
 
 class ReconciliationService:
