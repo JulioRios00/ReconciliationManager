@@ -9,7 +9,8 @@ from sqlalchemy import (
     text,
     DECIMAL,
     ForeignKey,
-    Date)
+    Date,
+    func)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy import DateTime
@@ -521,21 +522,17 @@ class AirCompanyInvoiceReport(Base):
 
 class Reconciliation(Base):
     __tablename__ = 'Reconciliation'
-    __table_args__ = {'schema': 'ccs'}
+    __table_args__ = {'schema': 'ccs', 'extend_existing': True}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    DataCriacao = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text("CURRENT_TIMESTAMP")
-    )
-    DataAtualizacao = Column(TIMESTAMP)
+    DataCriacao = Column(DateTime, nullable=False, server_default=func.now())
+    DataAtualizacao = Column(DateTime)
     Ativo = Column(Boolean, nullable=False, default=True)
     Excluido = Column(Boolean, nullable=False, default=False)
-
-    # Air (ERP) fields
+    
+    # Air data
     AirSupplier = Column(String)
-    AirFlightDate = Column(Date)
+    AirFlightDate = Column(DateTime)
     AirFlightNo = Column(String)
     AirDep = Column(String)
     AirArr = Column(String)
@@ -545,21 +542,21 @@ class Reconciliation(Base):
     AirSupplierCode = Column(String)
     AirServiceDescription = Column(String)
     AirAircraft = Column(String)
-    AirQty = Column(Integer)
-    AirUnitPrice = Column(DECIMAL(15, 2))
-    AirSubTotal = Column(DECIMAL(15, 2))
-    AirTax = Column(DECIMAL(15, 2))
-    AirTotalIncTax = Column(DECIMAL(15, 2))
+    AirQty = Column(String)
+    AirUnitPrice = Column(String)
+    AirSubTotal = Column(String)
+    AirTax = Column(String)
+    AirTotalIncTax = Column(String)
     AirCurrency = Column(String)
     AirItemStatus = Column(String)
     AirInvoiceStatus = Column(String)
-    AirInvoiceDate = Column(Date)
-    AirPaidDate = Column(Date)
+    AirInvoiceDate = Column(DateTime)
+    AirPaidDate = Column(DateTime)
     AirFlightNoRed = Column(String)
-
-    # Cat (Caterer) fields
+    
+    # Cat data
     CatFacility = Column(String)
-    CatFltDate = Column(Date)
+    CatFltDate = Column(DateTime)
     CatFltNo = Column(String)
     CatFltInv = Column(String)
     CatClass = Column(String)
@@ -570,89 +567,71 @@ class Reconciliation(Base):
     CatAlBillDesc = Column(String)
     CatBillCatg = Column(String)
     CatUnit = Column(String)
-    CatPax = Column(Integer)
-    CatQty = Column(Integer)
-    CatUnitPrice = Column(DECIMAL(15, 2))
-    CatTotalAmount = Column(DECIMAL(15, 2))
-
-    # Reconciliation flags and differences
-    Air = Column(String(3))
-    Cat = Column(String(3))
-    DifQty = Column(String(3))
-    DifPrice = Column(String(3))
-    AmountDif = Column(DECIMAL(15, 2))
-    QtyDif = Column(Integer)
-
-    def __init__(
-        self, air_supplier=None, air_flight_date=None, air_flight_no=None,
-        air_dep=None, air_arr=None, air_class=None, air_invoiced_pax=None,
-        air_service_code=None, air_supplier_code=None,
-        air_service_description=None, air_aircraft=None,
-        air_qty=None, air_unit_price=None, air_sub_total=None, air_tax=None,
-        air_total_inc_tax=None, air_currency=None, air_item_status=None,
-        air_invoice_status=None, air_invoice_date=None, air_paid_date=None,
-        air_flight_no_red=None, cat_facility=None, cat_flt_date=None,
-        cat_flt_no=None, cat_flt_inv=None, cat_class=None, cat_item_group=None,
-        cat_itemcode=None, cat_item_desc=None, cat_al_bill_code=None,
-        cat_al_bill_desc=None, cat_bill_catg=None, cat_unit=None,
-        cat_pax=None, cat_qty=None, cat_unit_price=None,
-        cat_total_amount=None, air=None, cat=None,
-        dif_qty=None, dif_price=None, amount_dif=None, qty_dif=None
-    ):
-        # Air (ERP) fields
-        self.AirSupplier = air_supplier
-        self.AirFlightDate = air_flight_date
-        self.AirFlightNo = air_flight_no
-        self.AirDep = air_dep
-        self.AirArr = air_arr
-        self.AirClass = air_class
-        self.AirInvoicedPax = air_invoiced_pax
-        self.AirServiceCode = air_service_code
-        self.AirSupplierCode = air_supplier_code
-        self.AirServiceDescription = air_service_description
-        self.AirAircraft = air_aircraft
-        self.AirQty = air_qty
-        self.AirUnitPrice = air_unit_price
-        self.AirSubTotal = air_sub_total
-        self.AirTax = air_tax
-        self.AirTotalIncTax = air_total_inc_tax
-        self.AirCurrency = air_currency
-        self.AirItemStatus = air_item_status
-        self.AirInvoiceStatus = air_invoice_status
-        self.AirInvoiceDate = air_invoice_date
-        self.AirPaidDate = air_paid_date
-        self.AirFlightNoRed = air_flight_no_red
-
-        # Cat (Caterer) fields
-        self.CatFacility = cat_facility
-        self.CatFltDate = cat_flt_date
-        self.CatFltNo = cat_flt_no
-        self.CatFltInv = cat_flt_inv
-        self.CatClass = cat_class
-        self.CatItemGroup = cat_item_group
-        self.CatItemcode = cat_itemcode
-        self.CatItemDesc = cat_item_desc
-        self.CatAlBillCode = cat_al_bill_code
-        self.CatAlBillDesc = cat_al_bill_desc
-        self.CatBillCatg = cat_bill_catg
-        self.CatUnit = cat_unit
-        self.CatPax = cat_pax
-        self.CatQty = cat_qty
-        self.CatUnitPrice = cat_unit_price
-        self.CatTotalAmount = cat_total_amount
-
-        # Reconciliation flags and differences
-        self.Air = air
-        self.Cat = cat
-        self.DifQty = dif_qty
-        self.DifPrice = dif_price
-        self.AmountDif = amount_dif
-        self.QtyDif = qty_dif
-
+    CatPax = Column(String)
+    CatQty = Column(String)
+    CatUnitPrice = Column(String)
+    CatTotalAmount = Column(String)
+    
+    # Comparison flags
+    Air = Column(String)
+    Cat = Column(String)
+    DifQty = Column(String)
+    DifPrice = Column(String)
+    AmountDif = Column(String)
+    QtyDif = Column(String)
+    
     def serialize(self):
+        """Return object data in easily serializable format"""
         return {
-            c.name: str(getattr(self, c.name))
-            for c in self.__table__.columns
+            'Id': str(self.Id),
+            'DataCriacao': str(self.DataCriacao) if self.DataCriacao else None,
+            'DataAtualizacao': str(self.DataAtualizacao) if self.DataAtualizacao else None,
+            'Ativo': str(self.Ativo),
+            'Excluido': str(self.Excluido),
+            'AirSupplier': self.AirSupplier,
+            'AirFlightDate': str(self.AirFlightDate) if self.AirFlightDate else None,
+            'AirFlightNo': self.AirFlightNo,
+            'AirDep': self.AirDep,
+            'AirArr': self.AirArr,
+            'AirClass': self.AirClass,
+            'AirInvoicedPax': self.AirInvoicedPax,
+            'AirServiceCode': self.AirServiceCode,
+            'AirSupplierCode': self.AirSupplierCode,
+            'AirServiceDescription': self.AirServiceDescription,
+            'AirAircraft': self.AirAircraft,
+            'AirQty': self.AirQty,
+            'AirUnitPrice': self.AirUnitPrice,
+            'AirSubTotal': self.AirSubTotal,
+            'AirTax': self.AirTax,
+            'AirTotalIncTax': self.AirTotalIncTax,
+            'AirCurrency': self.AirCurrency,
+            'AirItemStatus': self.AirItemStatus,
+            'AirInvoiceStatus': self.AirInvoiceStatus,
+            'AirInvoiceDate': str(self.AirInvoiceDate) if self.AirInvoiceDate else None,
+            'AirPaidDate': str(self.AirPaidDate) if self.AirPaidDate else None,
+            'AirFlightNoRed': self.AirFlightNoRed,
+            'CatFacility': self.CatFacility,
+            'CatFltDate': str(self.CatFltDate) if self.CatFltDate else None,
+            'CatFltNo': self.CatFltNo,
+            'CatFltInv': self.CatFltInv,
+            'CatClass': self.CatClass,
+            'CatItemGroup': self.CatItemGroup,
+            'CatItemcode': self.CatItemcode,
+            'CatItemDesc': self.CatItemDesc,
+            'CatAlBillCode': self.CatAlBillCode,
+            'CatAlBillDesc': self.CatAlBillDesc,
+            'CatBillCatg': self.CatBillCatg,
+            'CatUnit': self.CatUnit,
+            'CatPax': self.CatPax,
+            'CatQty': self.CatQty,
+            'CatUnitPrice': self.CatUnitPrice,
+            'CatTotalAmount': self.CatTotalAmount,
+            'Air': self.Air,
+            'Cat': self.Cat,
+            'DifQty': self.DifQty,
+            'DifPrice': self.DifPrice,
+            'AmountDif': self.AmountDif,
+            'QtyDif': self.QtyDif
         }
 
 

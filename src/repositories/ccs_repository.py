@@ -3,6 +3,7 @@ from repositories.repository import Repository
 from typing import List, Dict
 from decimal import Decimal
 from datetime import datetime
+from sqlalchemy.orm import Session
 #Tables
 from models.schema_ccs import (
     Flight,
@@ -11,11 +12,13 @@ from models.schema_ccs import (
     DataSource,
     PriceReport,
     InvoiceHistory,
-    BillingRecon,
-    ErpInvoiceReport
+    CateringInvoiceReport,
+    AirCompanyInvoiceReport,
+    Reconciliation
 )
 # Application-Specific Common Utilities
 from common.custom_exception import CustomException
+
 
 class FlightRepository(Repository):
     def __init__(self, db_session):
@@ -276,7 +279,7 @@ class InvoiceRepository(Repository):
 
 class BillingReconRepository(Repository):
     def __init__(self, db_session):
-        super().__init__(db_session, BillingRecon)
+        super().__init__(db_session, CateringInvoiceReport)
 
     def insert_billing_recon(
         self, facility=None, flt_date=None, flt_no=None, flt_inv=None,
@@ -284,7 +287,7 @@ class BillingReconRepository(Repository):
         al_bill_code=None, al_bill_desc=None, bill_catg=None, unit=None,
         pax=None, qty=None, unit_price=None, total_amount=None
     ):
-        billing_recon = BillingRecon(
+        billing_recon = CateringInvoiceReport(
             facility=facility, 
             flt_date=flt_date, 
             flt_no=flt_no, 
@@ -309,7 +312,7 @@ class BillingReconRepository(Repository):
 
     def insert_package_billing_recon(self, billing_data, filename=None):
         for record in billing_data:
-            billing_recon = BillingRecon(
+            billing_recon = CateringInvoiceReport(
                 facility=record.get('Facility'),
                 flt_date=record.get('FltDate'),
                 flt_no=record.get('FltNo'),
@@ -337,24 +340,24 @@ class BillingReconRepository(Repository):
         return True
 
     def delete_billing_recon(self, id):
-        billing_recon = self.session.query(BillingRecon).filter(BillingRecon.Id == id).first()
+        billing_recon = self.session.query(CateringInvoiceReport).filter(CateringInvoiceReport.Id == id).first()
         if not billing_recon:
-            raise CustomException(f"BillingRecon with ID {id} not found")
+            raise CustomException(f"CateringInvoiceReport with ID {id} not found")
 
         billing_recon.Excluido = True
         self.session.commit()
-        return {'message': f'Deleted BillingRecon id {id}'}
+        return {'message': f'Deleted CateringInvoiceReport id {id}'}
 
     def get_by_id(self, id):
-        return self.session.query(BillingRecon).filter(BillingRecon.Id == id, BillingRecon.Excluido == False).first()
+        return self.session.query(CateringInvoiceReport).filter(CateringInvoiceReport.Id == id, CateringInvoiceReport.Excluido == False).first()
 
     def get_by_flight_no(self, flight_no):
-        return self.session.query(BillingRecon).filter(BillingRecon.FltNo == flight_no, BillingRecon.Excluido == False).all()
+        return self.session.query(CateringInvoiceReport).filter(CateringInvoiceReport.FltNo == flight_no, CateringInvoiceReport.Excluido == False).all()
 
 
 class ErpInvoiceReportRepository(Repository):
     def __init__(self, db_session):
-        super().__init__(db_session, ErpInvoiceReport)
+        super().__init__(db_session, AirCompanyInvoiceReport)
 
     def insert_erp_invoice_report(
         self, supplier=None, flight_date=None, flight_no=None, dep=None,
@@ -365,7 +368,7 @@ class ErpInvoiceReportRepository(Repository):
         invoice_status=None, invoice_date=None, paid_date=None,
         flight_no_red=None
     ):
-        erp_invoice = ErpInvoiceReport(
+        erp_invoice = AirCompanyInvoiceReport(
             supplier=supplier,
             flight_date=flight_date,
             flight_no=flight_no,
@@ -398,15 +401,15 @@ class ErpInvoiceReportRepository(Repository):
         inserted_count = 0
         for record in invoice_data:
             # Check if record exists based on key fields
-            existing_record = self.session.query(ErpInvoiceReport).filter(
-                ErpInvoiceReport.FlightNo == record.get('FlightNo'),
-                ErpInvoiceReport.FlightDate == record.get('FlightDate'),
-                ErpInvoiceReport.ServiceCode == record.get('ServiceCode'),
-                ErpInvoiceReport.Excluido.is_(False)
+            existing_record = self.session.query(AirCompanyInvoiceReport).filter(
+                AirCompanyInvoiceReport.FlightNo == record.get('FlightNo'),
+                AirCompanyInvoiceReport.FlightDate == record.get('FlightDate'),
+                AirCompanyInvoiceReport.ServiceCode == record.get('ServiceCode'),
+                AirCompanyInvoiceReport.Excluido.is_(False)
             ).first()
 
             if not existing_record:
-                erp_invoice = ErpInvoiceReport(
+                erp_invoice = AirCompanyInvoiceReport(
                     supplier=record.get('Supplier'),
                     flight_date=record.get('FlightDate'),
                     flight_no=record.get('FlightNo'),
@@ -438,16 +441,73 @@ class ErpInvoiceReportRepository(Repository):
         return True
 
     def delete_erp_invoice(self, id):
-        erp_invoice = self.session.query(ErpInvoiceReport).filter(ErpInvoiceReport.Id == id).first()
+        erp_invoice = self.session.query(AirCompanyInvoiceReport).filter(AirCompanyInvoiceReport.Id == id).first()
         if not erp_invoice:
-            raise CustomException(f"ErpInvoiceReport with ID {id} not found")
+            raise CustomException(f"AirCompanyInvoiceReport with ID {id} not found")
 
         erp_invoice.Excluido = True
         self.session.commit()
-        return {'message': f'Deleted ErpInvoiceReport id {id}'}
+        return {'message': f'Deleted AirCompanyInvoiceReport id {id}'}
 
     def get_by_id(self, id):
-        return self.session.query(ErpInvoiceReport).filter(ErpInvoiceReport.Id == id, ErpInvoiceReport.Excluido.is_(False)).first()
+        return self.session.query(AirCompanyInvoiceReport).filter(AirCompanyInvoiceReport.Id == id, AirCompanyInvoiceReport.Excluido.is_(False)).first()
 
     def get_by_flight_no(self, flight_no):
-        return self.session.query(ErpInvoiceReport).filter(ErpInvoiceReport.FlightNo == flight_no, ErpInvoiceReport.Excluido.is_(False)).all()
+        return self.session.query(AirCompanyInvoiceReport).filter(AirCompanyInvoiceReport.FlightNo == flight_no, AirCompanyInvoiceReport.Excluido.is_(False)).all()
+
+
+class ReconciliationRepository:
+    def __init__(self, session: Session):
+        self.session = session
+    
+    def get_all(self):
+        """Get all reconciliation records"""
+        return self.session.query(Reconciliation).order_by(
+            Reconciliation.AirFlightDate, 
+            Reconciliation.AirFlightNo
+        ).all()
+
+    def get_paginated(self, limit=100, offset=0):
+        """Get paginated reconciliation records"""
+        return self.session.query(Reconciliation).order_by(
+            Reconciliation.AirFlightDate, 
+            Reconciliation.AirFlightNo
+        ).limit(limit).offset(offset).all()
+
+    def get_count(self):
+        """Get total count of reconciliation records"""
+        return self.session.query(Reconciliation).count()
+
+    def get_filtered(self, filter_type):
+        """Get filtered reconciliation records"""
+        query = self.session.query(Reconciliation)
+
+        if filter_type == 'discrepancies':
+            query = query.filter((Reconciliation.DifQty == 'Yes') |
+                                 (Reconciliation.DifPrice == 'Yes'))
+        elif filter_type == 'air_only':
+            query = query.filter((Reconciliation.Air == 'Yes') &
+                                 (Reconciliation.Cat == 'No'))
+        elif filter_type == 'cat_only':
+            query = query.filter((Reconciliation.Air == 'No') &
+                                 (Reconciliation.Cat == 'Yes'))
+
+        return query.order_by(
+            Reconciliation.AirFlightDate,
+            Reconciliation.AirFlightNo).all()
+
+    def get_filtered_count(self, filter_type):
+        """Get count of filtered reconciliation records"""
+        query = self.session.query(Reconciliation)
+
+        if filter_type == 'discrepancies':
+            query = query.filter((Reconciliation.DifQty == 'Yes') |
+                                 (Reconciliation.DifPrice == 'Yes'))
+        elif filter_type == 'air_only':
+            query = query.filter((Reconciliation.Air == 'Yes') &
+                                 (Reconciliation.Cat == 'No'))
+        elif filter_type == 'cat_only':
+            query = query.filter((Reconciliation.Air == 'No') &
+                                 (Reconciliation.Cat == 'Yes'))
+
+        return query.count()

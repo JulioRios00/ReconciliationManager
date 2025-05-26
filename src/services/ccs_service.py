@@ -14,8 +14,8 @@ from repositories.ccs_repository import (
 )
 
 from models.schema_ccs import (
-    ErpInvoiceReport,
-    BillingRecon
+    AirCompanyInvoiceReport,
+    CateringInvoiceReport
 )
 
 # Application-Specific Service Layer Imports
@@ -323,7 +323,7 @@ class BillingReconService:
             id: The ID of the record to retrieve
 
         Returns:
-            BillingRecon: The billing reconciliation record
+            CateringInvoiceReport: The billing reconciliation record
         """
         try:
             return self.billing_recon_repository.get_by_id(id)
@@ -341,7 +341,7 @@ class BillingReconService:
             flight_no: The flight number to search for
 
         Returns:
-            list: List of BillingRecon records
+            list: List of CateringInvoiceReport records
         """
         try:
             return self.billing_recon_repository.get_by_flight_no(flight_no)
@@ -364,20 +364,20 @@ class BillingReconService:
 
         try:
             query = (
-                self.billing_recon_repository.session.query(BillingRecon)
-                .filter(BillingRecon.Excluido is False)
+                self.billing_recon_repository.session.query(CateringInvoiceReport)
+                .filter(CateringInvoiceReport.Excluido is False)
             )
 
             if flight_no:
-                query = query.filter(BillingRecon.FltNo == flight_no)
+                query = query.filter(CateringInvoiceReport.FltNo == flight_no)
 
             if facility:
                 query = query.filter(
-                    BillingRecon.Facility.ilike(f"%{facility}%")
+                    CateringInvoiceReport.Facility.ilike(f"%{facility}%")
                 )
 
             if item_code:
-                query = query.filter(BillingRecon.Itemcode == item_code)
+                query = query.filter(CateringInvoiceReport.Itemcode == item_code)
 
             return query.all()
         except Exception as e:
@@ -461,7 +461,7 @@ class ErpInvoiceReportService:
             id: The ID of the record to retrieve
 
         Returns:
-            ErpInvoiceReport: The ERP invoice report record
+            AirCompanyInvoiceReport: The ERP invoice report record
         """
         try:
             return self.erp_invoice_repository.get_by_id(id)
@@ -479,7 +479,7 @@ class ErpInvoiceReportService:
             flight_no: The flight number to search for
 
         Returns:
-            list: List of ErpInvoiceReport records
+            list: List of AirCompanyInvoiceReport records
         """
         try:
             return self.erp_invoice_repository.get_by_flight_no(flight_no)
@@ -504,25 +504,25 @@ class ErpInvoiceReportService:
             service_code: Optional service code to search for
 
         Returns:
-            list: List of matching ErpInvoiceReport records
+            list: List of matching AirCompanyInvoiceReport records
         """
         try:
             query = (
-                self.erp_invoice_repository.session.query(ErpInvoiceReport)
-                .filter(ErpInvoiceReport.Excluido is False)
+                self.erp_invoice_repository.session.query(AirCompanyInvoiceReport)
+                .filter(AirCompanyInvoiceReport.Excluido is False)
             )
 
             if flight_no:
-                query = query.filter(ErpInvoiceReport.FlightNo == flight_no)
+                query = query.filter(AirCompanyInvoiceReport.FlightNo == flight_no)
 
             if supplier:
                 query = query.filter(
-                    ErpInvoiceReport.Supplier.ilike(f"%{supplier}%")
+                    AirCompanyInvoiceReport.Supplier.ilike(f"%{supplier}%")
                 )
 
             if service_code:
                 query = query.filter(
-                    ErpInvoiceReport.ServiceCode == service_code
+                    AirCompanyInvoiceReport.ServiceCode == service_code
                 )
 
             return query.all()

@@ -923,8 +923,8 @@
 								  "arn": "arn:{partition}:s3:::mybucket"
 							  },
 							  "object": {
-								  "processorFunction": "billing_promeus_invoice_report",
-								  "key":"public/airline_files/GCG Invoice History/TRANSPORTADORA ORLANDO LTDA - 01698119000142-Billing_-_Promeus_-_VS_Invoice_Report_January_2025copia.xlsx",
+								  "processorFunction": "billing_inflair_recon_report",
+								  "key":"public/airline_files/Airline Billing History/TRANSPORTADORA ORLANDO LTDA - 01698119000142-VA_Airline_Billing_Reconciliation_Report_-_April_2025.xlsx",
 								  "size": 1024,
 								  "eTag": "0123456789abcdef0123456789abcdef",
 								  "sequencer": "0A1B2C3D4E5F678901"
@@ -994,6 +994,82 @@
 			  "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185"
 			}
 		}
-	  }
+	  },{
+  "type": "aws-sam",
+  "request": "direct-invoke",
+  "name": "reconciliation_api.main (python3.8)",
+  "invokeTarget": {
+    "target": "code",
+    "projectRoot": "${workspaceFolder}/src",
+    "lambdaHandler": "app/reconciliation-api/reconciliation.main"
+  },
+  "lambda": {
+	"memoryMb": 3000, 
+    "runtime": "python3.8",
+    "payload": {
+      "json": {
+        "resource": "/{proxy+}",
+        "path": "/api/reconciliation/data",
+        "httpMethod": "GET",
+        "queryStringParameters": {},
+        "pathParameters": {},
+        "stageVariables": {
+          "baz": "qux"
+        },
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJ1QUU5c2NXOWo4a09wT1FkK0pjUzRDTlVMcVhiNGg0WUF6cXk0Y2c1dE1ZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjNGI4ODQwOC1mMDMxLTcwMTMtMDQ2Ny1iMTI0YjBlYTNjNTIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KUndROXk0SmciLCJjbGllbnRfaWQiOiI1dmxpbG90a3I5bXRkcHZiNDdmanY5ZmQ3MyIsIm9yaWdpbl9qdGkiOiJiMzFlZjlkYi1hMjNmLTQ4MDgtYmZhNC04YjBkMWQ4MjA4N2YiLCJldmVudF9pZCI6Ijg0ZmViNTgzLTI3MWUtNDlmYi05MDNmLTNiMzNjYWY1ZTEzMyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MjEzMDkxNzIsImV4cCI6MTcyMTMyNTUxNywiaWF0IjoxNzIxMzIxOTE3LCJqdGkiOiJhODQ4MzFjZi1kZTA2LTQ3NDctYTAyOS04OTgyODIzM2E5MzUiLCJ1c2VybmFtZSI6ImM0Yjg4NDA4LWYwMzEtNzAxMy0wNDY3LWIxMjRiMGVhM2M1MiJ9.e2HVshTdy1ExtUYpgSxaRPGbjbncapHdgOPUdeebE1GqMWFxNQya9RCdxyB3yjxDp_L6ZeJiw9lgkSNeNqZ06rpmWxmXAkTmfWOCt3m9Hx4SieATFArDyiVssze2gNYm4tL1uYWQgL7Qop5RzPKWn_XrhgJ_dm8a-Sao98sSbhLYinI9JTGXJ8Yfg3irTcJSSVf1xvhUup4DvKX4aJU8WckyVYUo0J9qnCmS8dkt_IstIvnWoxtJLVt-UA_v0IFt5miowWqAzsali3okyOxOyQ4-7rBlnFrN0ZjiQEU4uDyG2vBC18g0QruGRgiNU1CHa4LqZ548sor2LCXLabYbHQ",
+          "Content-Type": "application/json",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+          "Accept-Encoding": "gzip, deflate, sdch",
+          "Accept-Language": "pt,en-US,en;q=0.8",
+          "Cache-Control": "max-age=0",
+          "CloudFront-Forwarded-Proto": "https",
+          "CloudFront-Is-Desktop-Viewer": "true",
+          "CloudFront-Is-Mobile-Viewer": "false",
+          "CloudFront-Is-SmartTV-Viewer": "false",
+          "CloudFront-Is-Tablet-Viewer": "false",
+          "CloudFront-Viewer-Country": "US",
+          "Host": "1234567890.execute-api.{dns_suffix}",
+          "Upgrade-Insecure-Requests": "1",
+          "User-Agent": "Custom User Agent String",
+          "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
+          "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
+          "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
+          "X-Forwarded-Port": "443",
+          "X-Forwarded-Proto": "https"
+        },
+        "requestContext": {
+          "accountId": "123456789012",
+          "resourceId": "123456",
+          "stage": "prod",
+          "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+          "identity": {
+            "cognitoIdentityPoolId": null,
+            "accountId": null,
+            "cognitoIdentityId": null,
+            "caller": null,
+            "apiKey": null,
+            "sourceIp": "127.0.0.1",
+            "cognitoAuthenticationType": null,
+            "cognitoAuthenticationProvider": null,
+            "userArn": null,
+            "userAgent": "Custom User Agent String",
+            "user": null
+          },
+          "resourcePath": "/{proxy+}",
+          "httpMethod": "GET",
+          "apiId": "1234567890"
+        },
+        "isBase64Encoded": false
+      }
+    },
+    "environmentVariables": {
+      "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185",
+      "EMAIL_PASSWORD": "ndwbonthulvwdaxp",
+      "FRONTEND_URL": "https://dev.makethefuture.tech"
+    }
+  }
+}
+	  
   ]
 }

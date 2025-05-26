@@ -1,5 +1,6 @@
 import pandas as pd
 import json
+import os
 from collections import defaultdict
 import numpy as np
 from typing import List, Dict, Any
@@ -8,7 +9,7 @@ from repositories.ccs_repository import (
     BillingReconRepository,
     ErpInvoiceReportRepository,
 )
-from models.schema_ccs import BillingRecon
+from models.schema_ccs import CateringInvoiceReport
 
 
 class FileReadersService:
@@ -73,7 +74,6 @@ class FileReadersService:
 
         return data
 
-    # gcg
     def billing_promeus_invoice_report(
         self,
         file_path: str
@@ -168,6 +168,151 @@ class FileReadersService:
 
         # return data
 
+    def billing_inflair_recon_report(
+        self,
+        file_path: str
+    ) -> List[Dict[str, Any]]:
+        """
+        Reads the Inflair Airline Billing Recon Report (CSV or Excel)
+        and returns a list of records.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to the CSV or Excel file
+
+        Returns
+        -------
+        List[Dict[str, Any]]
+            List of records from the file
+        """
+        extension = os.path.splitext(file_path)[1].lower()
+        skip_rows = 0
+        df = None
+
+        if extension == ".csv":
+            with open(file_path, 'r', encoding='utf-8') as f:
+                first_line = f.readline()
+                first_cell = first_line.split(",")[0].strip()
+                skip_rows = 5 if first_cell != "Facility" else 0
+
+            df = pd.read_csv(file_path, skiprows=skip_rows)
+
+        elif extension in [".xls", ".xlsx"]:
+            df_temp = pd.read_excel(
+                file_path,
+                nrows=1,
+                engine="openpyxl" if extension == ".xlsx" else "xlrd"
+            )
+            first_cell = (
+                str(df_temp.columns[0]).strip()
+                if df_temp.columns.size > 0 else ""
+                )
+            skip_rows = 5 if first_cell != "Facility" else 0
+
+            df = pd.read_excel(
+                file_path,
+                skiprows=skip_rows,
+                engine="openpyxl" if extension == ".xlsx" else "xlrd"
+            )
+
+        else:
+            raise ValueError("Unsupported file format"
+                             "Only .csv, .xls, and .xlsx are supported."
+                             )
+
+        if len(df) > 2:
+            df = df.iloc[:-2]
+
+        df.columns = [
+            col.strip() if isinstance(col, str) else col for col in df.columns
+        ]
+
+        column_mapping = {
+            "Facility": "facility",
+            "FltDate": "flt_date",
+            "FltNo": "flt_no",
+            "Fl Inv": "flt_inv",
+            "Class": "class_",
+            "Ite Group": "item_group",
+            "Ite code": "itemcode",
+            "Ite Desc": "item_desc",
+            "AlBillCode": "al_bill_code",
+            "AlBillDesc": "al_bill_desc",
+            "BillCatg": "bill_catg",
+            "Unit": "unit",
+            "Pax": "pax",
+            "Qty": "qty",
+            "UnitPrice": "unit_price",
+            "TotalAmount": "total_amount",
+        }
+
+        df = df.rename(columns=column_mapping)
+
+        if "flt_no" in df.columns:
+            df["flt_no"] = df["flt_no"].apply(
+                lambda x: (f"0{x}" 
+                           if isinstance(x, (int, float)) and x < 100 else x
+                           )
+            )
+
+        if "flt_date" in df.columns:
+            df["flt_date"] = df["flt_date"].apply(format_date)
+
+        for col in ["pax", "qty", "unit_price", "total_amount"]:
+            if col in df.columns:
+                df[col] = df[col].astype(str)
+
+        df = df.replace({np.nan: None})
+
+        data = df.to_dict(orient="records")
+        print("first record", data[0])
+
+        try:
+            model_instances = [CateringInvoiceReport(**item) for item in data]
+            self.billing_recon_repository.bulk_insert(model_instances)
+            print(f"Successfully inserted {len(data)} billing reconciliation records into the database")
+        except Exception as e:
+            print(f"Error inserting billing reconciliation data: {e}")
+            import traceback
+            print(traceback.format_exc())
+
+        return data
+
+    def pricing_read_inflair(self, file_path: str) -> List[Dict[str, Any]]:
+        df = pd.read_excel(file_path, skiprows=8)
+
+        df.columns = [
+            "id",
+            "airline_code",
+            "item_code",
+            "start_date",
+            "end_date",
+            "cost_center",
+            "unit",
+            "price",
+            "currency",
+            "created_date",
+            "created_time",
+            "created_by",
+            "type_of_change",
+            "statement_period",
+        ]
+
+        df = df[df["item_code"].notna()]
+        df = df[~df["id"].astype(str).str.match(r"^-+$", na=False)]
+
+        df["price"] = pd.to_numeric(df["price"], errors="coerce").round(3)
+        df["start_date"] = df["start_date"].apply(format_date)
+        df["end_date"] = df["end_date"].apply(format_date)
+        df["created_date"] = df["created_date"].apply(format_date)
+
+        df = df.replace({np.nan: None})
+
+        result = df.to_dict(orient="records")
+        # save_json(result, "pricing_inflair.json")
+        return result
+
     def pricing_read_promeus_with_flight_classes(
         self, file_path: str
     ) -> List[Dict[str, Any]]:
@@ -223,125 +368,6 @@ class FileReadersService:
 
         # save_json(records, "pricing_promeus.json")
         return records
-
-    def pricing_read_inflair(self, file_path: str) -> List[Dict[str, Any]]:
-        df = pd.read_excel(file_path, skiprows=8)
-
-        df.columns = [
-            "id",
-            "airline_code",
-            "item_code",
-            "start_date",
-            "end_date",
-            "cost_center",
-            "unit",
-            "price",
-            "currency",
-            "created_date",
-            "created_time",
-            "created_by",
-            "type_of_change",
-            "statement_period",
-        ]
-
-        df = df[df["item_code"].notna()]
-        df = df[~df["id"].astype(str).str.match(r"^-+$", na=False)]
-
-        df["price"] = pd.to_numeric(df["price"], errors="coerce").round(3)
-        df["start_date"] = df["start_date"].apply(format_date)
-        df["end_date"] = df["end_date"].apply(format_date)
-        df["created_date"] = df["created_date"].apply(format_date)
-
-        df = df.replace({np.nan: None})
-
-        result = df.to_dict(orient="records")
-        # save_json(result, "pricing_inflair.json")
-        return result
-
-    # Airline billing history
-    def billing_inflair_recon_report(
-        self,
-        file_path: str
-    ) -> List[Dict[str, Any]]:
-        """
-        This method reads the Inflair Airline Billing Recon Report CSV
-        file and returns an array of objects and saves a JSON file.
-
-        Parameters
-        ----------
-        file_path : str
-            Path to the CSV file
-
-        Returns
-        -------
-        List[Dict[str, Any]]
-            List of records from the CSV file
-        """
-        df = pd.read_csv(file_path)
-        # corrigir problema de leitura do arquivo
-        if len(df) > 2:
-            df = df.iloc[:-2]
-
-        df.columns = [
-            col.strip() if isinstance(col, str) else col for col in df.columns
-        ]
-
-        column_mapping = {
-            "Facility": "facility",
-            "FltDate": "flt_date",
-            "FltNo": "flt_no",
-            "Fl Inv": "flt_inv",
-            "Class": "class_",
-            "Ite Group": "item_group",
-            "Ite code": "itemcode",
-            "Ite Desc": "item_desc",
-            "AlBillCode": "al_bill_code",
-            "AlBillDesc": "al_bill_desc",
-            "BillCatg": "bill_catg",
-            "Unit": "unit",
-            "Pax": "pax",
-            "Qty": "qty",
-            "UnitPrice": "unit_price",
-            "TotalAmount": "total_amount",
-        }
-
-        df = df.rename(columns=column_mapping)
-
-        if "flt_no" in df.columns:
-            df["flt_no"] = df["flt_no"].apply(
-                lambda x: (f"0{x}" if isinstance(x, (int, float))
-                           and x < 100 else x)
-            )
-
-        if "flt_date" in df.columns:
-            df["flt_date"] = df["flt_date"].apply(format_date)
-
-        for col in ["pax", "qty", "unit_price", "total_amount"]:
-            if col in df.columns:
-                df[col] = df[col].astype(str)
-
-        df = df.replace({np.nan: None})
-
-        data = df.to_dict(orient="records")
-        print("first record", data[0])
-
-        try:
-            model_instances = []
-            for item in data:
-                model_instance = BillingRecon(**item)
-                model_instances.append(model_instance)
-
-            self.billing_recon_repository.bulk_insert(model_instances)
-            print(
-                f"Successfully inserted {len(data)} \
-                billing reconciliation records into the database"
-            )
-        except Exception as e:
-            print(f"Error inserting billing reconciliation data: {e}")
-            import traceback
-            print(traceback.format_exc())
-
-        return data
 
 
 def format_date(date_value) -> date:
