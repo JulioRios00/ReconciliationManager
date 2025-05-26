@@ -5,7 +5,7 @@ import logging
 import traceback
 from decimal import Decimal
 from common.conexao_banco import get_session
-from services.reconciliation_service import ReconciliationService
+from src.services.reconciliation_service import ReconciliationService
 
 logging.basicConfig(level=os.environ.get('LOG_LEVEL', 'INFO'))
 logger = logging.getLogger()
