@@ -1,5 +1,6 @@
-handler: app.reconciliation_api.reconciliation.main
-memorySize: 3072  
+image:
+  name: reconciliation_api
+memorySize: 3072
 timeout: 60
 events:
   - httpApi:

@@ -95,8 +95,7 @@ provider:
         - Effect: Allow
           Action:
             - lambda:InvokeFunction
-          Resource:
-            - '*'
+          Resource: '*'
   vpc:
     securityGroupIds:
       - Ref: LambdaSecurityGroup
@@ -157,42 +156,42 @@ functions:
   analyze_price_report: ${file(src/app/extract_data_app/analyze_price_report/analyze_tp_100.yml)}
   analyze_invoice: ${file(src/app/extract_data_app/analyze_invoice/analyze_invoice.yml)}
   read_files_recon: ${file(src/app/extract_data_app/read_files_recon/read_files_recon.yml)}
-reconciliation_api:
-  image:
-    name: reconciliation_api
-  package:
-    patterns:
-      - src/**
-      - '!**/__pycache__/**'
-      - '!**/*.pyc'
-  memorySize: 3072
-  timeout: 60
-  events:
-    - httpApi:
-        path: /api/reconciliation/data
-        method: get
-        cors: true
-        authorizer:
-          name: CognitoAuthorizer
-        request:
-          parameters:
-            querystrings:
-              limit: false
-              offset: false
-              filter_type: false
-  environment:
-    LOG_LEVEL: INFO
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - secretsmanager:GetSecretValue
-        - secretsmanager:DescribeSecret
-      Resource:
-        - ${param:ELEMENTAR_SECRETS_MANAGER_ARN}
-    - Effect: Allow
-      Action:
-        - lambda:InvokeFunction
-      Resource: '*'
+  reconciliation_api:
+    image:
+      name: reconciliation_api
+    package:
+      patterns:
+        - src/**
+        - '!**/__pycache__/**'
+        - '!**/*.pyc'
+    memorySize: 3072
+    timeout: 60
+    events:
+      - httpApi:
+          path: /api/reconciliation/data
+          method: get
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+          request:
+            parameters:
+              querystrings:
+                limit: false
+                offset: false
+                filter_type: false
+    environment:
+      LOG_LEVEL: INFO
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - secretsmanager:GetSecretValue
+          - secretsmanager:DescribeSecret
+        Resource:
+          - ${param:ELEMENTAR_SECRETS_MANAGER_ARN}
+      - Effect: Allow
+        Action:
+          - lambda:InvokeFunction
+        Resource: '*'
 
 resources:
   - Conditions:
