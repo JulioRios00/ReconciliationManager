@@ -1001,7 +1001,7 @@
   "invokeTarget": {
     "target": "code",
     "projectRoot": "${workspaceFolder}/src",
-    "lambdaHandler": "app/reconciliation-api/reconciliation.main"
+    "lambdaHandler": "app/reconciliation_api/reconciliation.main"
   },
   "lambda": {
 	"memoryMb": 3000, 
