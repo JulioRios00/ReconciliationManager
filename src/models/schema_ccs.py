@@ -705,3 +705,37 @@ class FlightClassMapping(Base):
             c.name: str(getattr(self, c.name))
             for c in self.__table__.columns
         }
+
+
+class ReconAnnotation(Base):
+    __tablename__ = 'ReconAnnotation'
+    __table_args__ = {'schema': 'ccs'}
+
+    Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    DataCriacao = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP")
+    )
+    DataAtualizacao = Column(TIMESTAMP)
+    Ativo = Column(Boolean, nullable=False, default=True)
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+    ReconciliationId = Column(
+        UUID(as_uuid=True),
+        ForeignKey('ccs.Reconciliation.Id'),
+        nullable=False
+    )
+    Reconciliation = relationship("Reconciliation", backref="annotations")
+
+    Annotation = Column(String, nullable=False)
+
+    def __init__(self, reconciliation_id, annotation):
+        self.ReconciliationId = reconciliation_id
+        self.Annotation = annotation
+
+    def serialize(self):
+        return {
+            c.name: str(getattr(self, c.name))
+            for c in self.__table__.columns
+        }
