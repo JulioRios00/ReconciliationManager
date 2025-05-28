@@ -10,12 +10,14 @@ from sqlalchemy import (
     DECIMAL,
     ForeignKey,
     Date,
+    Enum,
     func)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy import DateTime
 
 import uuid
+import enum
 
 
 class Flight(Base):
@@ -707,6 +709,11 @@ class FlightClassMapping(Base):
         }
 
 
+class AnnotationStatus(enum.Enum):
+    PENDING = "Pending"
+    DONE = "Done"
+
+
 class ReconAnnotation(Base):
     __tablename__ = 'ReconAnnotation'
     __table_args__ = {'schema': 'ccs'}
@@ -729,10 +736,12 @@ class ReconAnnotation(Base):
     Reconciliation = relationship("Reconciliation", backref="annotations")
 
     Annotation = Column(String, nullable=False)
+    Status = Column(Enum(AnnotationStatus), nullable=True, default=None)
 
-    def __init__(self, reconciliation_id, annotation):
+    def __init__(self, reconciliation_id, annotation, status=None):
         self.ReconciliationId = reconciliation_id
         self.Annotation = annotation
+        self.Status = status
 
     def serialize(self):
         return {
