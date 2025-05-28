@@ -1,5 +1,5 @@
 import uuid
-from typing import  Optional, Dict, Any, Tuple
+from typing import Optional, Dict, Any, Tuple
 import logging
 from sqlalchemy.orm import Session
 from repositories.recon_annotation_repository import ReconAnnotationRepository
@@ -89,15 +89,16 @@ class ReconAnnotationService:
             return True, None, None
 
         try:
-            status_enum = StatusEnum(status)
-            return True, status_enum, None
+            # Try to get the enum value
+            enum_value = StatusEnum(status)
+            return {"valid": True, "enum_value": enum_value}
         except ValueError:
-            return False, None, {
-                "success": False,
-                "error": f"Invalid status. Valid options are: {
-                    [e.value for e in StatusEnum]
-                }",
-                "data": None
+            valid_statuses = [e.value for e in StatusEnum]
+            return {
+                "valid": False, 
+                "error": f"Invalid status. Valid options are: {', '.join(
+                    valid_statuses
+                )}"
             }
 
     def _validate_reconciliation_exists(
