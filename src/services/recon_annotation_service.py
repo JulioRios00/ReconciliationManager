@@ -1,140 +1,51 @@
-import uuid
-from typing import Optional, Dict, Any, Tuple
-import logging
 from sqlalchemy.orm import Session
+import uuid
+from typing import Dict, Any, Optional
+import logging
+
 from repositories.recon_annotation_repository import ReconAnnotationRepository
-from models.schema_ccs import Reconciliation
+from repositories.ccs_repository import ReconciliationRepository
 from enums.status_enum import StatusEnum
+from models.schema_ccs import Reconciliation
+
+
+logger = logging.getLogger(__name__)
 
 
 class ReconAnnotationService:
-    """Service class for handling reconciliation annotation business logic"""
+    """Service layer for reconciliation annotations"""
 
     def __init__(self, db_session: Session):
         self.db_session = db_session
         self.annotation_repository = ReconAnnotationRepository(db_session)
+        self.reconciliation_repository = ReconciliationRepository(db_session)
 
-    def _validate_uuid(
-        self,
-        uuid_string: str,
-        field_name: str
-    ) -> Tuple[bool, Optional[uuid.UUID], Optional[Dict[str, Any]]]:
+    def _validate_status(self, status: str) -> Dict[str, Any]:
         """
-        Validate UUID format
-
-        Args:
-            uuid_string: String to validate as UUID
-            field_name: Name of the field for error message
-
-        Returns:
-            Tuple of (is_valid, uuid_object, error_response)
-        """
-        try:
-            uuid_obj = uuid.UUID(uuid_string)
-            return True, uuid_obj, None
-        except ValueError:
-            return False, None, {
-                "success": False,
-                "error": f"Invalid {field_name} format",
-                "data": None
-            }
-
-    def _validate_annotation_text(
-        self,
-        annotation_text: Optional[str],
-        required: bool = True
-    ) -> Tuple[bool, Optional[Dict[str, Any]]]:
-        """
-        Validate annotation text
-
-        Args:
-            annotation_text: Text to validate
-            required: Whether the text is required
-
-        Returns:
-            Tuple of (is_valid, error_response)
-        """
-        if annotation_text is None:
-            if required:
-                return False, {
-                    "success": False,
-                    "error": "Annotation text is required",
-                    "data": None
-                }
-            return True, None
-
-        if not annotation_text.strip():
-            return False, {
-                "success": False,
-                "error": "Annotation text cannot be empty",
-                "data": None
-            }
-
-        return True, None
-
-    def _validate_and_convert_status(
-        self,
-        status: Optional[str]
-    ) -> Tuple[bool, Optional[StatusEnum], Optional[Dict[str, Any]]]:
-        """
-        Validate and convert status string to StatusEnum
-
+        Validate status enum value
+        
         Args:
             status: Status string to validate
-
+            
         Returns:
-            Tuple of (is_valid, status_enum, error_response)
+            Dictionary with validation result
         """
         if status is None:
-            return True, None, None
-
+            return {"valid": True, "enum_value": None}
+        
         try:
-            # Try to get the enum value
             enum_value = StatusEnum(status)
             return {"valid": True, "enum_value": enum_value}
         except ValueError:
             valid_statuses = [e.value for e in StatusEnum]
+            error_msg = (
+                f"Invalid status. Valid options are: "
+                f"{', '.join(valid_statuses)}"
+            )
+            logger.error(f"Status validation failed: {error_msg}")
             return {
-                "valid": False, 
-                "error": f"Invalid status. Valid options are: {', '.join(
-                    valid_statuses
-                )}"
-            }
-
-    def _validate_reconciliation_exists(
-        self,
-        reconciliation_id: uuid.UUID
-    ) -> Tuple[bool, Optional[Dict[str, Any]]]:
-        """
-        Validate that reconciliation item exists
-
-        Args:
-            reconciliation_id: UUID of the reconciliation item
-
-        Returns:
-            Tuple of (exists, error_response)
-        """
-        try:
-            reconciliation = self.db_session.query(Reconciliation).filter(
-                Reconciliation.Id == reconciliation_id,
-                Reconciliation.Ativo is True,
-                Reconciliation.Excluido is False
-            ).first()
-
-            if reconciliation is None:
-                return False, {
-                    "success": False,
-                    "error": "Reconciliation item not found",
-                    "data": None
-                }
-
-            return True, None
-        except Exception as e:
-            logging.error(f"Error checking reconciliation existence: {str(e)}")
-            return False, {
-                "success": False,
-                "error": "Error validating reconciliation item",
-                "data": None
+                "valid": False,
+                "error": error_msg
             }
 
     def create_annotation(
@@ -145,107 +56,102 @@ class ReconAnnotationService:
     ) -> Dict[str, Any]:
         """
         Create a new annotation for a reconciliation item
+
+        Args:
+            reconciliation_id: UUID of the reconciliation item
+            annotation_text: Text of the annotation
+            status: Optional status of the annotation
+
+        Returns:
+            Dictionary with operation result
         """
+
         try:
-            is_valid, reconciliation_uuid, error = self._validate_uuid(
-                reconciliation_id, "reconciliation ID"
-            )
-            if not is_valid:
-                return error
-
-            exists, error = self._validate_reconciliation_exists(
-                reconciliation_uuid
-            )
-            if not exists:
-                return error
-
-            is_valid, error = self._validate_annotation_text(
-                annotation_text,
-                required=True
+            try:
+                reconciliation_uuid = uuid.UUID(reconciliation_id)
+            except ValueError as e:
+                logger.error(
+                    f"Invalid UUID format: {reconciliation_id}, error: {e}"
                 )
-            if not is_valid:
-                return error
+                return {
+                    "success": False,
+                    "error": "Invalid reconciliation_id format",
+                    "data": None
+                }
 
-            is_valid, status_enum, error = self._validate_and_convert_status(
-                status
-            )
-            if not is_valid:
-                return error
+            reconciliation = self.db_session.query(Reconciliation).filter(
+                Reconciliation.Id == reconciliation_uuid,
+                Reconciliation.Ativo.is_(True),
+                Reconciliation.Excluido.is_(False)
+            ).first()
 
-            new_annotation = self.annotation_repository.create(
+            if not reconciliation:
+                logger.error(
+                    f"Reconciliation item not found: {reconciliation_uuid}"
+                )
+                return {
+                    "success": False,
+                    "error": "Reconciliation item not found",
+                    "data": None
+                }
+
+            if status is not None:
+                status_validation = self._validate_status(status)
+                if not status_validation["valid"]:
+                    return {
+                        "success": False,
+                        "error": status_validation["error"],
+                        "data": None
+                    }
+                status_enum = status_validation["enum_value"]
+            else:
+                status_enum = None
+
+            annotation = self.annotation_repository.create(
                 reconciliation_id=reconciliation_uuid,
-                annotation=annotation_text.strip(),
+                annotation=annotation_text,
                 status=status_enum
             )
 
             return {
                 "success": True,
                 "error": None,
-                "data": new_annotation.serialize()
+                "data": annotation.serialize()
             }
 
         except Exception as e:
-            logging.error(f"Error creating annotation: {str(e)}")
+            logger.error(f"Error creating annotation: {str(e)}", exc_info=True)
             return {
                 "success": False,
-                "error": "Internal server error while creating annotation",
-                "data": None
-            }
-
-    def get_annotations_by_reconciliation_id(
-        self,
-        reconciliation_id: str
-    ) -> Dict[str, Any]:
-        """
-        Get all annotations for a specific reconciliation item
-        """
-        try:
-            is_valid, reconciliation_uuid, error = self._validate_uuid(
-                reconciliation_id, "reconciliation ID"
-            )
-            if not is_valid:
-                return error
-
-            annotations = self.annotation_repository.get_by_reconciliation_id(
-                reconciliation_uuid
-            )
-            
-            annotations_data = [
-                annotation.serialize() for annotation in annotations
-            ]
-
-            return {
-                "success": True,
-                "error": None,
-                "data": {
-                    "reconciliation_id": reconciliation_id,
-                    "annotations": annotations_data,
-                    "total_count": len(annotations_data)
-                }
-            }
-
-        except Exception as e:
-            logging.error(f"Error getting annotations: {str(e)}")
-            return {
-                "success": False,
-                "error": "Internal server error while retrieving annotations",
+                "error": f"Failed to create annotation: {str(e)}",
                 "data": None
             }
 
     def get_annotation_by_id(self, annotation_id: str) -> Dict[str, Any]:
         """
-        Get a specific annotation by its ID
+        Get an annotation by its ID
+
+        Args:
+            annotation_id: UUID of the annotation
+
+        Returns:
+            Dictionary with operation result
         """
         try:
-            is_valid, annotation_uuid, error = self._validate_uuid(
-                annotation_id, "annotation ID"
-            )
-            if not is_valid:
-                return error
+            try:
+                annotation_uuid = uuid.UUID(annotation_id)
+            except ValueError:
+                logger.error(f"Invalid annotation UUID format: {annotation_id}")
+                return {
+                    "success": False,
+                    "error": "Invalid annotation_id format",
+                    "data": None
+                }
+
 
             annotation = self.annotation_repository.get_by_id(annotation_uuid)
-
             if not annotation:
+                logger.error(f"Annotation not found: {annotation_uuid}")
                 return {
                     "success": False,
                     "error": "Annotation not found",
@@ -259,51 +165,130 @@ class ReconAnnotationService:
             }
 
         except Exception as e:
-            logging.error(f"Error getting annotation by ID: {str(e)}")
+            logger.error(f"Error getting annotation: {str(e)}", exc_info=True)
             return {
                 "success": False,
-                "error": "Internal server error while retrieving annotation",
+                "error": "Failed to get annotation",
+                "data": None
+            }
+
+    def get_annotations_by_reconciliation_id(
+        self,
+        reconciliation_id: str
+    ) -> Dict[str, Any]:
+        """
+        Get all annotations for a reconciliation item
+
+        Args:
+            reconciliation_id: UUID of the reconciliation item
+
+        Returns:
+            Dictionary with operation result
+        """
+        try:
+            try:
+                reconciliation_uuid = uuid.UUID(reconciliation_id)
+            except ValueError:
+                logger.error(
+                    f"Invalid reconciliation UUID format: {reconciliation_id}"
+                )
+                return {
+                    "success": False,
+                    "error": "Invalid reconciliation_id format",
+                    "data": None
+                }
+
+            reconciliation = self.db_session.query(Reconciliation).filter(
+                Reconciliation.Id == reconciliation_uuid,
+                Reconciliation.Ativo.is_(True),
+                Reconciliation.Excluido.is_(False)
+            ).first()
+
+            if not reconciliation:
+                logger.error(
+                    f"Reconciliation item not found: {reconciliation_uuid}"
+                )
+                return {
+                    "success": False,
+                    "error": "Reconciliation item not found",
+                    "data": None
+                }
+
+            annotations = self.annotation_repository.get_by_reconciliation_id(
+                reconciliation_uuid
+            )
+
+            return {
+                "success": True,
+                "error": None,
+                "data": {
+                    "reconciliation_id": reconciliation_id,
+                    "annotations": [
+                        annotation.serialize() for annotation in annotations
+                    ],
+                    "total_count": len(annotations)
+                }
+            }
+
+        except Exception as e:
+            logger.error(f"Error getting annotations: {str(e)}", exc_info=True)
+            return {
+                "success": False,
+                "error": "Failed to get annotations",
                 "data": None
             }
 
     def update_annotation(
-        self,
-        annotation_id: str,
-        annotation_text: Optional[str] = None,
+        self, 
+        annotation_id: str, 
+        annotation_text: Optional[str] = None, 
         status: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Update an existing annotation
+        
+        Args:
+            annotation_id: UUID of the annotation
+            annotation_text: New text for the annotation (optional)
+            status: New status for the annotation (optional)
+            
+        Returns:
+            Dictionary with operation result
         """
         try:
-            is_valid, annotation_uuid, error = self._validate_uuid(
-                annotation_id, "annotation ID"
-            )
-            if not is_valid:
-                return error
+            try:
+                annotation_uuid = uuid.UUID(annotation_id)
+            except ValueError:
+                logger.error(
+                    f"Invalid annotation UUID format: {annotation_id}"
+                )
+                return {
+                    "success": False,
+                    "error": "Invalid annotation_id format",
+                    "data": None
+                }
 
-            is_valid, error = self._validate_annotation_text(
-                annotation_text,
-                required=False
-            )
-            if not is_valid:
-                return error
+            status_enum = None
+            if status is not None:
+                status_validation = self._validate_status(status)
+                if not status_validation["valid"]:
+                    return {
+                        "success": False,
+                        "error": status_validation["error"],
+                        "data": None
+                    }
+                status_enum = status_validation["enum_value"]
 
-            is_valid, status_enum, error = self._validate_and_convert_status(
-                status
-            )
-            if not is_valid:
-                return error
-
-            updated_annotation = self.annotation_repository.update(
+            annotation = self.annotation_repository.update(
                 annotation_id=annotation_uuid,
-                annotation=(
-                    annotation_text.strip() if annotation_text else None
-                ),
+                annotation=annotation_text,
                 status=status_enum
             )
 
-            if not updated_annotation:
+            if not annotation:
+                logger.error(
+                    f"Annotation not found for update: {annotation_uuid}"
+                )
                 return {
                     "success": False,
                     "error": "Annotation not found",
@@ -313,31 +298,46 @@ class ReconAnnotationService:
             return {
                 "success": True,
                 "error": None,
-                "data": updated_annotation.serialize()
+                "data": annotation.serialize()
             }
 
         except Exception as e:
-            logging.error(f"Error updating annotation: {str(e)}")
+            logger.error(f"Error updating annotation: {str(e)}", exc_info=True)
             return {
                 "success": False,
-                "error": "Internal server error while updating annotation",
+                "error": "Failed to update annotation",
                 "data": None
             }
 
     def delete_annotation(self, annotation_id: str) -> Dict[str, Any]:
         """
         Delete an annotation (soft delete)
+        
+        Args:
+            annotation_id: UUID of the annotation
+            
+        Returns:
+            Dictionary with operation result
         """
         try:
-            is_valid, annotation_uuid, error = self._validate_uuid(
-                annotation_id, "annotation ID"
-            )
-            if not is_valid:
-                return error
+            try:
+                annotation_uuid = uuid.UUID(annotation_id)
+            except ValueError:
+                logger.error(
+                    f"Invalid annotation UUID format: {annotation_id}"
+                )
+                return {
+                    "success": False,
+                    "error": "Invalid annotation_id format",
+                    "data": None
+                }
 
-            deleted = self.annotation_repository.delete(annotation_uuid)
+            success = self.annotation_repository.delete(annotation_uuid)
 
-            if not deleted:
+            if not success:
+                logger.error(
+                    f"Annotation not found for deletion: {annotation_uuid}"
+                )
                 return {
                     "success": False,
                     "error": "Annotation not found",
@@ -347,13 +347,15 @@ class ReconAnnotationService:
             return {
                 "success": True,
                 "error": None,
-                "data": {"message": "Annotation deleted successfully"}
+                "data": {
+                    "message": "Annotation deleted successfully"
+                }
             }
 
         except Exception as e:
-            logging.error(f"Error deleting annotation: {str(e)}")
+            logger.error(f"Error deleting annotation: {str(e)}", exc_info=True)
             return {
                 "success": False,
-                "error": "Internal server error while deleting annotation",
+                "error": "Failed to delete annotation",
                 "data": None
             }
