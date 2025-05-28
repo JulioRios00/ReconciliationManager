@@ -131,6 +131,9 @@ provider:
       reconciliation_api:
         path: "./src"
         file: Dockerfile.reconciliation
+      recon_annotation_api:
+        path: "./src"
+        file: Dockerfile.reconannotationapi
   tracing:
     apiGateway: true
     lambda: true
@@ -156,6 +159,7 @@ functions:
   analyze_price_report: ${file(src/app/extract_data_app/analyze_price_report/analyze_tp_100.yml)}
   analyze_invoice: ${file(src/app/extract_data_app/analyze_invoice/analyze_invoice.yml)}
   read_files_recon: ${file(src/app/extract_data_app/read_files_recon/read_files_recon.yml)}
+  recon_annotation_api: ${file(src/app/recon_annotation_api/recon_annotation_api.yml)}
   reconciliation_api:
     image:
       name: reconciliation_api
