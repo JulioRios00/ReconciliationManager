@@ -15,7 +15,10 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy import DateTime
-from src.enums.status_enum import StatusEnum
+try:
+    from src.enums.status_enum import StatusEnum
+except ImportError:
+    from enums.status_enum import StatusEnum
 
 import uuid
 
