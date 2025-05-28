@@ -731,7 +731,7 @@ class ReconAnnotation(Base):
     Reconciliation = relationship("Reconciliation", backref="annotations")
 
     Annotation = Column(String, nullable=False)
-    Status = Column(String(20), nullable=True, default=None)
+    Status = Column(Enum(StatusEnum), nullable=True, default=None)
 
     def __init__(self, reconciliation_id, annotation, status=None):
         self.ReconciliationId = reconciliation_id
