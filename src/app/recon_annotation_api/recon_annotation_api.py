@@ -3,9 +3,7 @@ from flask_authorize import Authorize
 from flask_parameter_validation import ValidateParameters, Route
 import serverless_wsgi
 
-from common.error_handling import (
-    flask_parameter_validation_handler
-)
+from common.error_handling import flask_parameter_validation_handler
 from common.conexao_banco import get_session
 from common.authorization import get_current_user
 from common.custom_exception import CustomException
@@ -15,77 +13,83 @@ from services.recon_annotation_service import ReconAnnotationService
 app = Flask(__name__)
 authorize = Authorize(current_user=get_current_user, app=app)
 
-ROUTE_PREFIX = '/api/annotations'
+ROUTE_PREFIX = "/api/annotations"
 
 
-@app.route(ROUTE_PREFIX + '/reconciliation/<string:reconciliation_id>',
-           methods=['POST'])
-@authorize.in_group('admin')
+@app.route(
+    ROUTE_PREFIX + "/reconciliation/<string:reconciliation_id>", methods=["POST"]
+)
+@authorize.in_group("admin")
 @ValidateParameters(flask_parameter_validation_handler)
-def create_annotation(reconciliation_id: str = Route(
-    min_str_length=30,
-    max_str_length=60
-    )
+def create_annotation(
+    reconciliation_id: str = Route(min_str_length=30, max_str_length=60)
 ):
     with get_session() as session:
         try:
             data = request.get_json()
 
             if not data:
-                return jsonify({
-                    "success": False,
-                    "error": "Request body is required",
-                    "data": None
-                }), 400
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "error": "Request body is required",
+                            "data": None,
+                        }
+                    ),
+                    400,
+                )
 
-            annotation_text = data.get('annotation')
+            annotation_text = data.get("annotation")
             if not annotation_text:
-                return jsonify({
-                    "success": False,
-                    "error": "Field 'annotation' is required and cannot be "
-                             "empty",
-                    "data": None
-                }), 400
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "error": "Field 'annotation' is required and cannot be "
+                            "empty",
+                            "data": None,
+                        }
+                    ),
+                    400,
+                )
 
-            status = data.get('status')
+            status = data.get("status")
 
             annotation_service = ReconAnnotationService(session)
             result = annotation_service.create_annotation(
                 reconciliation_id=reconciliation_id,
                 annotation_text=annotation_text,
-                status=status
+                status=status,
             )
 
             if result["success"]:
                 return jsonify(result), 201
             else:
-                status_code = (
-                    404 if "not found" in result["error"].lower() else 400
-                )
+                status_code = 404 if "not found" in result["error"].lower() else 400
                 return jsonify(result), status_code
 
         except CustomException as e:
-            return jsonify({
-                'success': False,
-                'error': str(e),
-                'data': None
-            }), 400
+            return jsonify({"success": False, "error": str(e), "data": None}), 400
         except Exception as e:
-            return jsonify({
-                'success': False,
-                'error': f'Internal server error: {str(e)}',
-                'data': None
-            }), 500
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": f"Internal server error: {str(e)}",
+                        "data": None,
+                    }
+                ),
+                500,
+            )
 
 
-@app.route(ROUTE_PREFIX + '/reconciliation/<string:reconciliation_id>',
-           methods=['GET'])
-@authorize.in_group('admin')
+@app.route(ROUTE_PREFIX + "/reconciliation/<string:reconciliation_id>", methods=["GET"])
+@authorize.in_group("admin")
 @ValidateParameters(flask_parameter_validation_handler)
-def get_annotations_by_reconciliation(reconciliation_id: str = Route(
-    min_str_length=30,
-    max_str_length=60
-)):
+def get_annotations_by_reconciliation(
+    reconciliation_id: str = Route(min_str_length=30, max_str_length=60)
+):
     with get_session() as session:
         try:
             annotation_service = ReconAnnotationService(session)
@@ -96,32 +100,30 @@ def get_annotations_by_reconciliation(reconciliation_id: str = Route(
             if result["success"]:
                 return jsonify(result), 200
             else:
-                status_code = (
-                    404 if "not found" in result["error"].lower() else 400
-                )
+                status_code = 404 if "not found" in result["error"].lower() else 400
                 return jsonify(result), status_code
 
         except CustomException as e:
-            return jsonify({
-                'success': False,
-                'error': str(e),
-                'data': None
-            }), 400
+            return jsonify({"success": False, "error": str(e), "data": None}), 400
         except Exception as e:
-            return jsonify({
-                'success': False,
-                'error': f'Internal server error: {str(e)}',
-                'data': None
-            }), 500
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": f"Internal server error: {str(e)}",
+                        "data": None,
+                    }
+                ),
+                500,
+            )
 
 
-@app.route(ROUTE_PREFIX + '/<string:annotation_id>', methods=['GET'])
-@authorize.in_group('admin')
+@app.route(ROUTE_PREFIX + "/<string:annotation_id>", methods=["GET"])
+@authorize.in_group("admin")
 @ValidateParameters(flask_parameter_validation_handler)
-def get_annotation_by_id(annotation_id: str = Route(
-    min_str_length=30,
-    max_str_length=60
-)):
+def get_annotation_by_id(
+    annotation_id: str = Route(min_str_length=30, max_str_length=60)
+):
     with get_session() as session:
         try:
             annotation_service = ReconAnnotationService(session)
@@ -130,90 +132,92 @@ def get_annotation_by_id(annotation_id: str = Route(
             if result["success"]:
                 return jsonify(result), 200
             else:
-                status_code = (
-                    404 if "not found" in result["error"].lower() else 400
-                )
+                status_code = 404 if "not found" in result["error"].lower() else 400
                 return jsonify(result), status_code
 
         except CustomException as e:
-            return jsonify({
-                'success': False,
-                'error': str(e),
-                'data': None
-            }), 400
+            return jsonify({"success": False, "error": str(e), "data": None}), 400
         except Exception as e:
-            return jsonify({
-                'success': False,
-                'error': f'Internal server error: {str(e)}',
-                'data': None
-            }), 500
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": f"Internal server error: {str(e)}",
+                        "data": None,
+                    }
+                ),
+                500,
+            )
 
 
-@app.route(ROUTE_PREFIX + '/<string:annotation_id>', methods=['PUT'])
-@authorize.in_group('admin')
+@app.route(ROUTE_PREFIX + "/<string:annotation_id>", methods=["PUT"])
+@authorize.in_group("admin")
 @ValidateParameters(flask_parameter_validation_handler)
-def update_annotation(annotation_id: str = Route(
-    min_str_length=30,
-    max_str_length=60
-)):
+def update_annotation(annotation_id: str = Route(min_str_length=30, max_str_length=60)):
     with get_session() as session:
         try:
             data = request.get_json()
 
             if not data:
-                return jsonify({
-                    "success": False,
-                    "error": "Request body is required",
-                    "data": None
-                }), 400
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "error": "Request body is required",
+                            "data": None,
+                        }
+                    ),
+                    400,
+                )
 
-            annotation_text = data.get('annotation')
-            status = data.get('status')
+            annotation_text = data.get("annotation")
+            status = data.get("status")
 
             if annotation_text is None and status is None:
-                return jsonify({
-                    "success": False,
-                    "error": "At least one field ('annotation' or 'status') "
-                             "must be provided for update",
-                    "data": None
-                }), 400
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "error": "At least one field ('annotation' or 'status') "
+                            "must be provided for update",
+                            "data": None,
+                        }
+                    ),
+                    400,
+                )
 
             annotation_service = ReconAnnotationService(session)
             result = annotation_service.update_annotation(
                 annotation_id=annotation_id,
                 annotation_text=annotation_text,
-                status=status
+                status=status,
             )
 
             if result["success"]:
                 return jsonify(result), 200
             else:
-                status_code = (
-                    404 if "not found" in result["error"].lower() else 400
-                )
+                status_code = 404 if "not found" in result["error"].lower() else 400
                 return jsonify(result), status_code
 
         except CustomException as e:
-            return jsonify({
-                'success': False,
-                'error': str(e),
-                'data': None
-            }), 400
+            return jsonify({"success": False, "error": str(e), "data": None}), 400
         except Exception as e:
-            return jsonify({
-                'success': False,
-                'error': f'Internal server error: {str(e)}',
-                'data': None
-            }), 500
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": f"Internal server error: {str(e)}",
+                        "data": None,
+                    }
+                ),
+                500,
+            )
 
 
-@app.route(ROUTE_PREFIX + '/<string:annotation_id>', methods=['DELETE'])
-@authorize.in_group('admin')
+@app.route(ROUTE_PREFIX + "/<string:annotation_id>", methods=["DELETE"])
+@authorize.in_group("admin")
 @ValidateParameters(flask_parameter_validation_handler)
-def delete_annotation(annotation_id: str = Route(
-    min_str_length=30,
-    max_str_length=60
-)):
+def delete_annotation(annotation_id: str = Route(min_str_length=30, max_str_length=60)):
     with get_session() as session:
         try:
             annotation_service = ReconAnnotationService(session)
@@ -222,30 +226,29 @@ def delete_annotation(annotation_id: str = Route(
             if result["success"]:
                 return jsonify(result), 200
             else:
-                status_code = (
-                    404 if "not found" in result["error"].lower() else 400
-                )
+                status_code = 404 if "not found" in result["error"].lower() else 400
                 return jsonify(result), status_code
 
         except CustomException as e:
-            return jsonify({
-                'success': False,
-                'error': str(e),
-                'data': None
-            }), 400
+            return jsonify({"success": False, "error": str(e), "data": None}), 400
         except Exception as e:
-            return jsonify({
-                'success': False,
-                'error': f'Internal server error: {str(e)}',
-                'data': None
-            }), 500
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": f"Internal server error: {str(e)}",
+                        "data": None,
+                    }
+                ),
+                500,
+            )
 
 
 def add_body(event):
-    if 'body' not in event:
-        event['body'] = '{}'
-        headers = event['headers']
-        headers['content-type'] = 'application/json'
+    if "body" not in event:
+        event["body"] = "{}"
+        headers = event["headers"]
+        headers["content-type"] = "application/json"
     return event
 
 
