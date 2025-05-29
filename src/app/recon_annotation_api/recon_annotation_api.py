@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-from flask_authorize import Authorize
 from flask_parameter_validation import ValidateParameters, Route
 import serverless_wsgi
 
@@ -11,13 +10,11 @@ from services.recon_annotation_service import ReconAnnotationService
 
 
 app = Flask(__name__)
-authorize = Authorize(current_user=get_current_user, app=app)
 
 ROUTE_PREFIX = "/api/annotations"
 
 
 @app.route(ROUTE_PREFIX, methods=["POST"])
-@authorize.in_group("admin")
 @ValidateParameters(flask_parameter_validation_handler)
 def create_annotation():
     with get_session() as session:
@@ -112,7 +109,6 @@ def create_annotation():
     ROUTE_PREFIX + "/by-reconciliation/<string:reconciliation_id>",
     methods=["GET"]
 )
-@authorize.in_group("admin")
 @ValidateParameters(flask_parameter_validation_handler)
 def get_annotations_by_reconciliation(
     reconciliation_id: str = Route(min_str_length=30, max_str_length=60)
@@ -152,7 +148,6 @@ def get_annotations_by_reconciliation(
 
 
 @app.route(ROUTE_PREFIX + "/by-id/<string:annotation_id>", methods=["GET"])
-@authorize.in_group("admin")
 @ValidateParameters(flask_parameter_validation_handler)
 def get_annotation_by_id(
     annotation_id: str = Route(min_str_length=30, max_str_length=60)
@@ -190,7 +185,6 @@ def get_annotation_by_id(
 
 
 @app.route(ROUTE_PREFIX, methods=["PUT"])
-@authorize.in_group("admin")
 @ValidateParameters(flask_parameter_validation_handler)
 def update_annotation():
     with get_session() as session:
@@ -286,7 +280,6 @@ def update_annotation():
 
 
 @app.route(ROUTE_PREFIX + "/<string:annotation_id>", methods=["DELETE"])
-@authorize.in_group("admin")
 @ValidateParameters(flask_parameter_validation_handler)
 def delete_annotation(
     annotation_id: str = Route(min_str_length=30, max_str_length=60)
