@@ -9,3 +9,4 @@ python-dotenv==1.0.0
 boto3==1.28.25
 botocore==1.31.25
 PyJWT
+sqlalchemy_pagination
