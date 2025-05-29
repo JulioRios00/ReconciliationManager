@@ -1,0 +1,9 @@
+flask==2.3.3
+flask-authorize==0.2.4
+flask-parameter-validation==1.2.0
+serverless-wsgi==3.0.3
+sqlalchemy==1.4.48
+psycopg2-binary==2.9.7
+python-dotenv==1.0.0
+boto3==1.28.25
+botocore==1.31.25

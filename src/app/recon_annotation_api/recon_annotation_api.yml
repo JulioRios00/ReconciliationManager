@@ -1,0 +1,14 @@
+image: recon_annotation_api
+description: reconciliation annotation api
+memorySize: 1024
+timeout: 60
+iamRoleStatementsInherit: true
+events:
+  - httpApi:
+      method: '*'
+      path: '/api/annotations/{proxy+}'
+      authorizer: 
+        name: CognitoAuthorizer
+  - httpApi:
+      method: 'OPTIONS'
+      path: '/api/annotations/{proxy+}'
