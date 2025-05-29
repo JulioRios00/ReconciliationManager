@@ -585,6 +585,14 @@ class Reconciliation(Base):
     AmountDif = Column(String)
     QtyDif = Column(String)
     
+    Annotations = relationship(
+        "ReconAnnotation",
+        back_populates="Reconciliation",
+        cascade="all, delete-orphan",
+        order_by="ReconAnnotation.DataCriacao"
+    )
+
+    
     def serialize(self):
         """Return object data in easily serializable format"""
         return {
@@ -636,7 +644,8 @@ class Reconciliation(Base):
             'DifQty': self.DifQty,
             'DifPrice': self.DifPrice,
             'AmountDif': self.AmountDif,
-            'QtyDif': self.QtyDif
+            'QtyDif': self.QtyDif,
+            'Annotations': [a.serialize() for a in self.Annotations] if self.Annotations else []
         }
 
 
@@ -731,7 +740,10 @@ class ReconAnnotation(Base):
         ForeignKey('ccs.Reconciliation.Id'),
         nullable=False
     )
-    Reconciliation = relationship("Reconciliation", backref="annotations")
+    Reconciliation = relationship(
+        "Reconciliation",
+        back_populates="Annotations"
+    )
 
     Annotation = Column(String, nullable=False)
     Status = Column(Enum(StatusEnum), nullable=True, default=None)
