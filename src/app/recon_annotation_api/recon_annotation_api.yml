@@ -6,9 +6,17 @@ iamRoleStatementsInherit: true
 events:
   - httpApi:
       method: '*'
+      path: '/api/annotations'
+      authorizer: 
+        name: CognitoAuthorizer
+  - httpApi:
+      method: '*'
       path: '/api/annotations/{proxy+}'
       authorizer: 
         name: CognitoAuthorizer
+  - httpApi:
+      method: 'OPTIONS'
+      path: '/api/annotations'
   - httpApi:
       method: 'OPTIONS'
       path: '/api/annotations/{proxy+}'
