@@ -39,7 +39,7 @@ class ReconciliationService:
         filter_type='all'
     ):
         """
-        Retrieve paginated data from the 
+        Retrieve paginated data from the
         ccs.Reconciliation table using SQLAlchemy
 
         Args:
@@ -63,11 +63,13 @@ class ReconciliationService:
                     )
                 total_count = self.reconciliation_repository.get_count()
             else:
-                records = (self.reconciliation_repository.
-                           get_filtered(filter_type)
-                           )
-                if limit and offset:
-                    records = records[offset:offset+limit]
+                records = (
+                    self.reconciliation_repository.get_filtered_paginated(
+                        filter_type,
+                        limit,
+                        offset
+                    )
+                )
                 total_count = (
                     self.reconciliation_repository.
                     get_filtered_count(filter_type)

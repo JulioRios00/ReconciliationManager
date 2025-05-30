@@ -288,21 +288,21 @@ class BillingReconRepository(Repository):
         pax=None, qty=None, unit_price=None, total_amount=None
     ):
         billing_recon = CateringInvoiceReport(
-            facility=facility, 
-            flt_date=flt_date, 
-            flt_no=flt_no, 
+            facility=facility,
+            flt_date=flt_date,
+            flt_no=flt_no,
             flt_inv=flt_inv,
-            class_=class_, 
-            item_group=item_group, 
-            itemcode=itemcode, 
+            class_=class_,
+            item_group=item_group,
+            itemcode=itemcode,
             item_desc=item_desc,
-            al_bill_code=al_bill_code, 
-            al_bill_desc=al_bill_desc, 
-            bill_catg=bill_catg, 
+            al_bill_code=al_bill_code,
+            al_bill_desc=al_bill_desc,
+            bill_catg=bill_catg,
             unit=unit,
-            pax=pax, 
-            qty=qty, 
-            unit_price=unit_price, 
+            pax=pax,
+            qty=qty,
+            unit_price=unit_price,
             total_amount=total_amount
         )
         self.session.add(billing_recon)
@@ -511,3 +511,35 @@ class ReconciliationRepository:
                                  (Reconciliation.Cat == 'Yes'))
 
         return query.count()
+
+    def get_filtered_paginated(self, filter_type, limit, offset):
+        """
+        Get filtered records with pagination applied at database level
+
+        Args:
+            filter_type: Type of filter ('discrepancies', 'air_only', 'cat_only')
+            limit: Number of records to return
+            offset: Offset for pagination
+
+        Returns:
+            Query result with pagination applied
+        """
+        query = self.session.query(Reconciliation)
+
+        if filter_type == 'discrepancies':
+            query = query.filter(
+                (Reconciliation.DifQty == 'Yes') |
+                (Reconciliation.DifPrice == 'Yes')
+            )
+        elif filter_type == 'air_only':
+            query = query.filter(
+                (Reconciliation.Air == 'Yes') &
+                (Reconciliation.Cat == 'No')
+            )
+        elif filter_type == 'cat_only':
+            query = query.filter(
+                (Reconciliation.Air == 'No') &
+                (Reconciliation.Cat == 'Yes')
+            )
+
+        return query.offset(offset).limit(limit).all()
