@@ -190,49 +190,52 @@ class FileReadersService:
             List of records from the file
         """
         extension = os.path.splitext(file_path)[1].lower()
+        MAX_HEADER_SEARCH_LINES = 15
+        DEFAULT_HEADER_FALLBACK = 8
         skip_rows = 0
         df = None
 
         if extension == ".csv":
             with open(file_path, 'r', encoding='utf-8') as f:
                 lines = []
-                for i in range(15):  # Read first 15 lines to find header
+                for i in range(MAX_HEADER_SEARCH_LINES):
                     try:
                         line = f.readline()
                         if not line:
                             break
                         lines.append(line.strip())
-                    except:
+                    except (EOFError, IOError):
                         break
-            
-                # Find the line that starts with "Facility"
+
                 for i, line in enumerate(lines):
                     if line.startswith("Facility"):
                         skip_rows = i
                         break
                 else:
-                    skip_rows = 8  # Default fallback
+                    skip_rows = DEFAULT_HEADER_FALLBACK
 
             df = pd.read_csv(file_path, skiprows=skip_rows)
 
         elif extension in [".xls", ".xlsx"]:
             engine = "openpyxl" if extension == ".xlsx" else "xlrd"
-        
-            # Read first 15 rows to find the header
+
             try:
-                df_temp = pd.read_excel(file_path, nrows=15, engine=engine, header=None)
-            
-                # Find the row where first column contains "Facility"
+                df_temp = pd.read_excel(
+                    file_path, nrows=15,
+                    engine=engine,
+                    header=None
+                )
+
                 for idx, row in df_temp.iterrows():
                     if str(row[0]).strip() == "Facility":
                         skip_rows = idx
                         break
                 else:
-                    skip_rows = 8  # Default fallback
+                    skip_rows = DEFAULT_HEADER_FALLBACK
                 
             except Exception as e:
                 print(f"Error reading header: {e}")
-                skip_rows = 8  # Default fallback
+                skip_rows = DEFAULT_HEADER_FALLBACK
 
             df = pd.read_excel(file_path, skiprows=skip_rows, engine=engine)
 
@@ -240,23 +243,18 @@ class FileReadersService:
             raise ValueError("Unsupported file format. "
                              "Only .csv, .xls, and .xlsx are supported.")
 
-        # Remove footer rows if they exist
         if len(df) > 2:
-            # Remove rows that might be totals or empty
-            df = df.dropna(how='all')  # Remove completely empty rows
-        
-            # Check if last few rows contain summary data and remove them
+            df = df.dropna(how='all')
+
             if len(df) > 2:
                 df = df.iloc[:-2]
 
-        # Clean column names - remove any extra spaces
         df.columns = [
             col.strip() if isinstance(col, str) else col for col in df.columns
         ]
 
         print("Detected columns:", df.columns.tolist())
 
-        # Column mapping based on your file sample
         column_mapping = {
             "Facility": "facility",
             "Flt Date": "flt_date",
@@ -274,7 +272,6 @@ class FileReadersService:
             "Qty": "qty",
             "Unit Price": "unit_price",
             "Total Amount": "total_amount",
-            # Fallback mappings for variations
             "FltDate": "flt_date",
             "FltNo": "flt_no",
             "Fl Inv": "flt_inv",
@@ -291,7 +288,6 @@ class FileReadersService:
 
         df = df.rename(columns=column_mapping)
 
-        # Format flight number - pad with zero if less than 100
         if "flt_no" in df.columns:
             df["flt_no"] = df["flt_no"].apply(
                 lambda x: (f"0{x}" 
@@ -299,19 +295,15 @@ class FileReadersService:
                            )
             )
 
-        # Format flight date
         if "flt_date" in df.columns:
             df["flt_date"] = df["flt_date"].apply(format_date)
 
-        # Convert numeric columns to string for consistency
         for col in ["pax", "qty", "unit_price", "total_amount"]:
             if col in df.columns:
                 df[col] = df[col].astype(str)
 
-        # Replace NaN values with None
         df = df.replace({np.nan: None})
 
-        # Remove any rows where facility is None (likely header remnants)
         df = df[df['facility'].notna()]
 
         data = df.to_dict(orient="records")
@@ -324,9 +316,14 @@ class FileReadersService:
 
         try:
             if data:
-                model_instances = [CateringInvoiceReport(**item) for item in data]
+                model_instances = [
+                    CateringInvoiceReport(**item) for item in data
+                ]
                 self.billing_recon_repository.bulk_insert(model_instances)
-                print(f"Successfully inserted {len(data)} billing reconciliation records into the database")
+                print(
+                    f"Successfully inserted {len(data)} "
+                    "billing reconciliation records into the database"
+                    )
             else:
                 print("No data to insert")
         except Exception as e:
