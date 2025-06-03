@@ -277,7 +277,7 @@ class InvoiceRepository(Repository):
         return {'message': f'Deleted all {filename} invoices.'}
 
 
-class BillingReconRepository(Repository):
+class CateringInvoiceRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, CateringInvoiceReport)
 
@@ -313,31 +313,44 @@ class BillingReconRepository(Repository):
     def insert_package_billing_recon(self, billing_data, filename=None):
         for record in billing_data:
             billing_recon = CateringInvoiceReport(
-                facility=record.get('Facility'),
-                flt_date=record.get('FltDate'),
-                flt_no=record.get('FltNo'),
-                flt_inv=record.get('FltInv'),
-                class_=record.get('Class'),
-                item_group=record.get('ItemGroup'),
-                itemcode=record.get('Itemcode'),
-                item_desc=record.get('ItemDesc'),
-                al_bill_code=record.get('AlBillCode'),
-                al_bill_desc=record.get('AlBillDesc'),
-                bill_catg=record.get('BillCatg'),
-                unit=record.get('Unit'),
-                pax=record.get('Pax'),
-                qty=record.get('Qty'),
-                unit_price=record.get('UnitPrice'),
-                total_amount=record.get('TotalAmount')
+                facility=record.get('facility'),
+                flt_date=record.get('flt_date'),
+                flt_no=record.get('flt_no'),
+                flt_inv=record.get('flt_inv'),
+                class_=record.get('class_'),
+                item_group=record.get('item_group'),
+                itemcode=record.get('itemcode'),
+                item_desc=record.get('item_desc'),
+                al_bill_code=record.get('al_bill_code'),
+                al_bill_desc=record.get('al_bill_desc'),
+                bill_catg=record.get('bill_catg'),
+                unit=record.get('unit'),
+                pax=record.get('pax'),
+                qty=record.get('qty'),
+                unit_price=record.get('unit_price'),
+                total_amount=record.get('total_amount')
             )
             self.session.add(billing_recon)
             self.session.flush()
-            print(f"{billing_recon.Id} has been succededly inserted")
+            print(f"{billing_recon.Id} has been successfully inserted")
         self.session.commit()
 
         print(f"Inserted {len(billing_data)} billing reconciliation records")
-
         return True
+
+    def bulk_insert(self, model_instances):
+        """
+        Bulk insert CateringInvoiceReport instances
+        """
+        try:
+            self.session.add_all(model_instances)
+            self.session.commit()
+            print(f"Successfully bulk inserted {len(model_instances)} records")
+            return True
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error during bulk insert: {e}")
+            raise e
 
     def delete_billing_recon(self, id):
         billing_recon = self.session.query(CateringInvoiceReport).filter(CateringInvoiceReport.Id == id).first()
@@ -348,16 +361,85 @@ class BillingReconRepository(Repository):
         self.session.commit()
         return {'message': f'Deleted CateringInvoiceReport id {id}'}
 
+    def delete_billing_recon_by_filename(self, filename):
+        """
+        Delete billing reconciliation records by source filename
+        """
+        billing_recons = self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.SourceFile == filename,
+            CateringInvoiceReport.Excluido == False
+        ).all()
+        
+        if not billing_recons:
+            raise CustomException(f"No CateringInvoiceReport records found for filename {filename}")
+
+        for billing_recon in billing_recons:
+            billing_recon.Excluido = True
+        
+        self.session.commit()
+        return {'message': f'Deleted {len(billing_recons)} CateringInvoiceReport records for filename {filename}'}
+
     def get_by_id(self, id):
-        return self.session.query(CateringInvoiceReport).filter(CateringInvoiceReport.Id == id, CateringInvoiceReport.Excluido == False).first()
+        return self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.Id == id, 
+            CateringInvoiceReport.Excluido == False
+        ).first()
 
     def get_by_flight_no(self, flight_no):
-        return self.session.query(CateringInvoiceReport).filter(CateringInvoiceReport.FltNo == flight_no, CateringInvoiceReport.Excluido == False).all()
+        return self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.FltNo == flight_no, 
+            CateringInvoiceReport.Excluido == False
+        ).all()
+
+    def get_by_facility(self, facility):
+        return self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.Facility == facility,
+            CateringInvoiceReport.Excluido == False
+        ).all()
+
+    def get_by_date_range(self, start_date, end_date):
+        return self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.FltDate >= start_date,
+            CateringInvoiceReport.FltDate <= end_date,
+            CateringInvoiceReport.Excluido == False
+        ).all()
+
+    def get_all_active(self):
+        return self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.Excluido == False
+        ).all()
+
+    def check_duplicate_record(self, facility, flt_date, flt_no, itemcode, al_bill_code):
+        """
+        Check if a record with the same key fields already exists
+        """
+        return self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.Facility == facility,
+            CateringInvoiceReport.FltDate == flt_date,
+            CateringInvoiceReport.FltNo == flt_no,
+            CateringInvoiceReport.Itemcode == itemcode,
+            CateringInvoiceReport.AlBillCode == al_bill_code,
+            CateringInvoiceReport.Excluido == False
+        ).first()
 
 
-class ErpInvoiceReportRepository(Repository):
+class AirCompanyInvoiceRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, AirCompanyInvoiceReport)
+
+    def bulk_insert(self, model_instances):
+        """
+        Bulk insert AirCompanyInvoiceReport instances
+        """
+        try:
+            self.session.add_all(model_instances)
+            self.session.commit()
+            print(f"Successfully bulk inserted {len(model_instances)} records")
+            return True
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error during bulk insert: {e}")
+            raise e
 
     def insert_erp_invoice_report(
         self, supplier=None, flight_date=None, flight_no=None, dep=None,
@@ -397,7 +479,7 @@ class ErpInvoiceReportRepository(Repository):
         print(f"Inserted ERP invoice report for flight {flight_no}")
         return erp_invoice.Id
 
-    def insert_package_erp_invoice(self, invoice_data, filename=None):
+    def insert_air_company_invoice(self, invoice_data, filename=None):
         inserted_count = 0
         for record in invoice_data:
             # Check if record exists based on key fields

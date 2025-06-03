@@ -6,16 +6,20 @@ import numpy as np
 from typing import List, Dict, Any
 from datetime import datetime, date
 from repositories.ccs_repository import (
-    BillingReconRepository,
-    ErpInvoiceReportRepository,
+    CateringInvoiceRepository,
+    AirCompanyInvoiceRepository,
 )
-from models.schema_ccs import CateringInvoiceReport
+from models.schema_ccs import CateringInvoiceReport, AirCompanyInvoiceReport
 
 
 class FileReadersService:
     def __init__(self, db_session):
-        self.billing_recon_repository = BillingReconRepository(db_session)
-        self.erp_invoice_repository = ErpInvoiceReportRepository(db_session)
+        self.catering_invoice_repository = CateringInvoiceRepository(
+            db_session
+            )
+        self.air_company_invoice_repository = AirCompanyInvoiceRepository(
+            db_session
+            )
         self.session = db_session
 
     def billing_inflair_invoice_report(
@@ -156,11 +160,10 @@ class FileReadersService:
         data = df.to_dict(orient="records")
 
         try:
-            self.erp_invoice_repository.insert_package_erp_invoice(data)
-            print(
-                f"Successfully inserted {len(data)} \
-                ERP invoice records into the database"
+            self.air_company_invoice_repository.insert_air_company_invoice(
+                data
             )
+            print(f"Successfully inserted {len(data)} air company invoice records into the database")
         except Exception as e:
             print(f"Error inserting ERP invoice data: {e}")
 
@@ -187,62 +190,98 @@ class FileReadersService:
             List of records from the file
         """
         extension = os.path.splitext(file_path)[1].lower()
+        MAX_HEADER_SEARCH_LINES = 15
+        DEFAULT_HEADER_FALLBACK = 8
         skip_rows = 0
         df = None
 
         if extension == ".csv":
             with open(file_path, 'r', encoding='utf-8') as f:
-                first_line = f.readline()
-                first_cell = first_line.split(",")[0].strip()
-                skip_rows = 5 if first_cell != "Facility" else 0
+                lines = []
+                for i in range(MAX_HEADER_SEARCH_LINES):
+                    try:
+                        line = f.readline()
+                        if not line:
+                            break
+                        lines.append(line.strip())
+                    except (EOFError, IOError):
+                        break
+
+                for i, line in enumerate(lines):
+                    if line.startswith("Facility"):
+                        skip_rows = i
+                        break
+                else:
+                    skip_rows = DEFAULT_HEADER_FALLBACK
 
             df = pd.read_csv(file_path, skiprows=skip_rows)
 
         elif extension in [".xls", ".xlsx"]:
-            df_temp = pd.read_excel(
-                file_path,
-                nrows=1,
-                engine="openpyxl" if extension == ".xlsx" else "xlrd"
-            )
-            first_cell = (
-                str(df_temp.columns[0]).strip()
-                if df_temp.columns.size > 0 else ""
-                )
-            skip_rows = 5 if first_cell != "Facility" else 0
+            engine = "openpyxl" if extension == ".xlsx" else "xlrd"
 
-            df = pd.read_excel(
-                file_path,
-                skiprows=skip_rows,
-                engine="openpyxl" if extension == ".xlsx" else "xlrd"
-            )
+            try:
+                df_temp = pd.read_excel(
+                    file_path, nrows=15,
+                    engine=engine,
+                    header=None
+                )
+
+                for idx, row in df_temp.iterrows():
+                    if str(row[0]).strip() == "Facility":
+                        skip_rows = idx
+                        break
+                else:
+                    skip_rows = DEFAULT_HEADER_FALLBACK
+                
+            except Exception as e:
+                print(f"Error reading header: {e}")
+                skip_rows = DEFAULT_HEADER_FALLBACK
+
+            df = pd.read_excel(file_path, skiprows=skip_rows, engine=engine)
 
         else:
-            raise ValueError("Unsupported file format"
-                             "Only .csv, .xls, and .xlsx are supported."
-                             )
+            raise ValueError("Unsupported file format. "
+                             "Only .csv, .xls, and .xlsx are supported.")
 
         if len(df) > 2:
-            df = df.iloc[:-2]
+            df = df.dropna(how='all')
+
+            if len(df) > 2:
+                df = df.iloc[:-2]
 
         df.columns = [
             col.strip() if isinstance(col, str) else col for col in df.columns
         ]
 
+        print("Detected columns:", df.columns.tolist())
+
         column_mapping = {
             "Facility": "facility",
+            "Flt Date": "flt_date",
+            "Flt No.": "flt_no",
+            "Flt Inv": "flt_inv",
+            "Class": "class_",
+            "Item Group": "item_group",
+            "Item code": "itemcode",
+            "Item Desc": "item_desc",
+            "A/L Bill Code": "al_bill_code",
+            "A/L Bill Desc": "al_bill_desc",
+            "Bill Catg": "bill_catg",
+            "Unit": "unit",
+            "PAX": "pax",
+            "Qty": "qty",
+            "Unit Price": "unit_price",
+            "Total Amount": "total_amount",
             "FltDate": "flt_date",
             "FltNo": "flt_no",
             "Fl Inv": "flt_inv",
-            "Class": "class_",
             "Ite Group": "item_group",
             "Ite code": "itemcode",
             "Ite Desc": "item_desc",
             "AlBillCode": "al_bill_code",
             "AlBillDesc": "al_bill_desc",
             "BillCatg": "bill_catg",
-            "Unit": "unit",
             "Pax": "pax",
-            "Qty": "qty",
             "UnitPrice": "unit_price",
             "TotalAmount": "total_amount",
         }
@@ -252,7 +291,7 @@ class FileReadersService:
         if "flt_no" in df.columns:
             df["flt_no"] = df["flt_no"].apply(
                 lambda x: (f"0{x}" 
-                           if isinstance(x, (int, float)) and x < 100 else x
+                           if isinstance(x, (int, float)) and x < 100 else str(x)
                            )
             )
 
@@ -265,13 +304,28 @@ class FileReadersService:
 
         df = df.replace({np.nan: None})
 
+        df = df[df['facility'].notna()]
+
         data = df.to_dict(orient="records")
-        print("first record", data[0])
+        
+        if data:
+            print("First record:", data[0])
+            print(f"Total records found: {len(data)}")
+        else:
+            print("No data records found")
 
         try:
-            model_instances = [CateringInvoiceReport(**item) for item in data]
-            self.billing_recon_repository.bulk_insert(model_instances)
-            print(f"Successfully inserted {len(data)} billing reconciliation records into the database")
+            if data:
+                model_instances = [
+                    CateringInvoiceReport(**item) for item in data
+                ]
+                self.billing_recon_repository.bulk_insert(model_instances)
+                print(
+                    f"Successfully inserted {len(data)} "
+                    "billing reconciliation records into the database"
+                    )
+            else:
+                print("No data to insert")
         except Exception as e:
             print(f"Error inserting billing reconciliation data: {e}")
             import traceback

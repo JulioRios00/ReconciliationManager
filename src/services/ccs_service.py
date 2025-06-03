@@ -9,8 +9,8 @@ from repositories.ccs_repository import (
     SourceRepository,
     PriceReportRepository,
     InvoiceRepository,
-    ErpInvoiceReportRepository,
-    BillingReconRepository
+    AirCompanyInvoiceRepository,
+    CateringInvoiceRepository
 )
 
 from models.schema_ccs import (
@@ -254,7 +254,7 @@ class InvoiceService:
 
 class BillingReconService:
     def __init__(self, db_session):
-        self.billing_recon_repository = BillingReconRepository(db_session)
+        self.billing_recon_repository = CateringInvoiceRepository(db_session)
 
     def process_billing_recon(self, data, filename=None):
         """
@@ -390,7 +390,7 @@ class BillingReconService:
 
 class ErpInvoiceReportService:
     def __init__(self, db_session):
-        self.erp_invoice_repository = ErpInvoiceReportRepository(db_session)
+        self.erp_invoice_repository = AirCompanyInvoiceRepository(db_session)
 
     def process_erp_invoice(self, data, filename=None):
         """
@@ -407,7 +407,7 @@ class ErpInvoiceReportService:
             # Assuming data is already in the correct format for processing
             # If data needs transformation, add that logic here
             invoice_data = self._prepare_invoice_data(data)
-            self.erp_invoice_repository.insert_package_erp_invoice(
+            self.erp_invoice_repository.insert_air_company_invoice(
                 invoice_data, filename
             )
 
