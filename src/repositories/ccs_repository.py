@@ -4,6 +4,8 @@ from typing import List, Dict
 from decimal import Decimal
 from datetime import datetime
 from sqlalchemy.orm import Session
+from sqlalchemy import func
+
 #Tables
 from models.schema_ccs import (
     Flight,
@@ -523,7 +525,7 @@ class AirCompanyInvoiceRepository(Repository):
         return True
 
     def delete_erp_invoice(self, id):
-        erp_invoice = self.session.query(AirCompanyInvoiceReport).filter(AirCompanyInvoiceReport.Id == id).first()
+        erp_invoice = self.session.query(AirCompanyInvoiceReport).id == id).first()
         if not erp_invoice:
             raise CustomException(f"AirCompanyInvoiceReport with ID {id} not found")
 
@@ -563,18 +565,28 @@ class ReconciliationRepository:
     def get_by_date_range(self, start_date, end_date, limit=None, offset=None):
         """
         Get reconciliation records filtered by FLIGHT DATE range
-        Using pure SQLAlchemy syntax without or_/and_ functions
+        Handles datetime columns by comparing just the date part
         """
+        # Convert input dates to datetime objects for the start and end of day
+        if isinstance(start_date, date) and not isinstance(start_date, datetime):
+            start_datetime = datetime.combine(start_date, datetime.min.time())
+            end_datetime = datetime.combine(end_date, datetime.max.time())
+        else:
+            start_datetime = start_date
+            end_datetime = end_date
+
+        # Query using date extraction to compare only the date part
         air_query = self.session.query(Reconciliation).filter(
-            Reconciliation.AirFlightDate >= start_date,
-            Reconciliation.AirFlightDate <= end_date
+            func.date(Reconciliation.AirFlightDate) >= start_date,
+            func.date(Reconciliation.AirFlightDate) <= end_date
         )
         
         cat_query = self.session.query(Reconciliation).filter(
-            Reconciliation.CatFltDate >= start_date,
-            Reconciliation.CatFltDate <= end_date
+            func.date(Reconciliation.CatFltDate) >= start_date,
+            func.date(Reconciliation.CatFltDate) <= end_date
         )
         
+        # Union the queries and remove duplicates
         combined_query = air_query.union(cat_query).order_by(
             Reconciliation.AirFlightDate,
             Reconciliation.AirFlightNo
@@ -590,13 +602,13 @@ class ReconciliationRepository:
     def get_count_by_date_range(self, start_date, end_date):
         """Get count of records in flight date range"""
         air_query = self.session.query(Reconciliation).filter(
-            Reconciliation.AirFlightDate >= start_date,
-            Reconciliation.AirFlightDate <= end_date
+            func.date(Reconciliation.AirFlightDate) >= start_date,
+            func.date(Reconciliation.AirFlightDate) <= end_date
         )
         
         cat_query = self.session.query(Reconciliation).filter(
-            Reconciliation.CatFltDate >= start_date,
-            Reconciliation.CatFltDate <= end_date
+            func.date(Reconciliation.CatFltDate) >= start_date,
+            func.date(Reconciliation.CatFltDate) <= end_date
         )
         
         # Count union results
@@ -607,15 +619,15 @@ class ReconciliationRepository:
         """
         Get filtered reconciliation records within flight date range
         """
-        # Base queries for flight date filtering
+        # Base queries for flight date filtering using date extraction
         air_base_query = self.session.query(Reconciliation).filter(
-            Reconciliation.AirFlightDate >= start_date,
-            Reconciliation.AirFlightDate <= end_date
+            func.date(Reconciliation.AirFlightDate) >= start_date,
+            func.date(Reconciliation.AirFlightDate) <= end_date
         )
         
         cat_base_query = self.session.query(Reconciliation).filter(
-            Reconciliation.CatFltDate >= start_date,
-            Reconciliation.CatFltDate <= end_date
+            func.date(Reconciliation.CatFltDate) >= start_date,
+            func.date(Reconciliation.CatFltDate) <= end_date
         )
 
         # Apply additional filters to both queries
@@ -667,23 +679,20 @@ class ReconciliationRepository:
             
         return combined_query.all()
 
-    def get_filtered_count_by_date_range(
-        self,
-        filter_type,
-        start_date,
-        end_date
-    ):
+    def get_filtered_count_by_date_range(self, filter_type, start_date, end_date):
         """Get count of filtered records in flight date range"""
+        # Base queries for flight date filtering
         air_base_query = self.session.query(Reconciliation).filter(
-            Reconciliation.AirFlightDate >= start_date,
-            Reconciliation.AirFlightDate <= end_date
+            func.date(Reconciliation.AirFlightDate) >= start_date,
+            func.date(Reconciliation.AirFlightDate) <= end_date
         )
         
         cat_base_query = self.session.query(Reconciliation).filter(
-            Reconciliation.CatFltDate >= start_date,
-            Reconciliation.CatFltDate <= end_date
+            func.date(Reconciliation.CatFltDate) >= start_date,
+            func.date(Reconciliation.CatFltDate) <= end_date
         )
 
+        # Apply additional filters
         if filter_type == 'discrepancies':
             air_query = air_base_query.filter(
                 (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
@@ -719,6 +728,7 @@ class ReconciliationRepository:
             air_query = air_base_query
             cat_query = cat_base_query
 
+        # Count union results
         combined_query = air_query.union(cat_query)
         return combined_query.count()
 
@@ -728,8 +738,7 @@ class ReconciliationRepository:
 
         if filter_type == 'discrepancies':
             query = query.filter(
-                (Reconciliation.DifQty == 'Yes')
-                | (Reconciliation.DifPrice == 'Yes')
+                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
             )
         elif filter_type == 'quantity_difference':
             query = query.filter(Reconciliation.DifQty == 'Yes')
