@@ -48,6 +48,8 @@ class ReconciliationService:
             filter_type: Type of filter to apply (
                 'all',
                 'discrepancies',
+                'quantity_difference',
+                'price_difference',
                 'air_only',
                 'cat_only'
                 )
@@ -126,6 +128,9 @@ class ReconciliationService:
             price_discrepancies = sum(
                 1 for r in records if r.DifPrice == 'Yes'
                 )
+            total_discrepancies = sum(
+                1 for r in records if r.DifQty == 'Yes' or r.DifPrice == 'Yes'
+            )
 
             total_amount_difference = 0
             for record in records:
@@ -143,6 +148,7 @@ class ReconciliationService:
                     "cat_only_records": cat_only_records,
                     "quantity_discrepancies": quantity_discrepancies,
                     "price_discrepancies": price_discrepancies,
+                    "total_discrepancies": total_discrepancies,
                     "total_amount_difference": total_amount_difference
                 }
             }

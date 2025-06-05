@@ -567,6 +567,10 @@ class ReconciliationRepository:
         if filter_type == 'discrepancies':
             query = query.filter((Reconciliation.DifQty == 'Yes') |
                                  (Reconciliation.DifPrice == 'Yes'))
+        elif filter_type == 'quantity_difference':
+            query = query.filter(Reconciliation.DifQty == 'Yes')
+        elif filter_type == 'price_difference':
+            query = query.filter(Reconciliation.DifPrice == 'Yes')
         elif filter_type == 'air_only':
             query = query.filter((Reconciliation.Air == 'Yes') &
                                  (Reconciliation.Cat == 'No'))
@@ -585,6 +589,10 @@ class ReconciliationRepository:
         if filter_type == 'discrepancies':
             query = query.filter((Reconciliation.DifQty == 'Yes') |
                                  (Reconciliation.DifPrice == 'Yes'))
+        elif filter_type == 'quantity_difference':
+            query = query.filter(Reconciliation.DifQty == 'Yes')
+        elif filter_type == 'price_difference':
+            query = query.filter(Reconciliation.DifPrice == 'Yes')
         elif filter_type == 'air_only':
             query = query.filter((Reconciliation.Air == 'Yes') &
                                  (Reconciliation.Cat == 'No'))
@@ -599,7 +607,7 @@ class ReconciliationRepository:
         Get filtered records with pagination applied at database level
 
         Args:
-            filter_type: Type of filter ('discrepancies', 'air_only', 'cat_only')
+            filter_type: Type of filter ('discrepancies', 'quantity_difference', 'price_difference', 'air_only', 'cat_only')
             limit: Number of records to return
             offset: Offset for pagination
 
@@ -613,6 +621,10 @@ class ReconciliationRepository:
                 (Reconciliation.DifQty == 'Yes') |
                 (Reconciliation.DifPrice == 'Yes')
             )
+        elif filter_type == 'quantity_difference':
+            query = query.filter(Reconciliation.DifQty == 'Yes')
+        elif filter_type == 'price_difference':
+            query = query.filter(Reconciliation.DifPrice == 'Yes')
         elif filter_type == 'air_only':
             query = query.filter(
                 (Reconciliation.Air == 'Yes') &
