@@ -2,7 +2,7 @@
 from repositories.repository import Repository
 from typing import List, Dict
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -567,7 +567,6 @@ class ReconciliationRepository:
         Get reconciliation records filtered by FLIGHT DATE range
         Handles datetime columns by comparing just the date part
         """
-        # Convert input dates to datetime objects for the start and end of day
         if isinstance(start_date, date) and not isinstance(start_date, datetime):
             start_datetime = datetime.combine(start_date, datetime.min.time())
             end_datetime = datetime.combine(end_date, datetime.max.time())
