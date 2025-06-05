@@ -748,116 +748,146 @@ class ReconciliationRepository:
 
     def get_filtered_by_date_range(self, filter_type, start_date, end_date, limit=None, offset=None):
         """
-        Get filtered reconciliation records within flight date range
+        Get filtered reconciliation records within flight date range with logging
         """
-        # Base queries for flight date filtering using date extraction
-        air_base_query = self.session.query(Reconciliation).filter(
-            func.date(Reconciliation.AirFlightDate) >= start_date,
-            func.date(Reconciliation.AirFlightDate) <= end_date
-        )
+        try:
+            self.logger.info(f"=== get_filtered_by_date_range called ===")
+            self.logger.info(f"filter_type: {filter_type}, start_date: {start_date}, end_date: {end_date}")
+            
+            # Base queries for flight date filtering using date extraction
+            air_base_query = self.session.query(Reconciliation).filter(
+                func.date(Reconciliation.AirFlightDate) >= start_date,
+                func.date(Reconciliation.AirFlightDate) <= end_date
+            )
+            
+            cat_base_query = self.session.query(Reconciliation).filter(
+                func.date(Reconciliation.CatFltDate) >= start_date,
+                func.date(Reconciliation.CatFltDate) <= end_date
+            )
 
-        cat_base_query = self.session.query(Reconciliation).filter(
-            func.date(Reconciliation.CatFltDate) >= start_date,
-            func.date(Reconciliation.CatFltDate) <= end_date
-        )
+            # Apply additional filters to both queries
+            if filter_type == 'discrepancies':
+                air_query = air_base_query.filter(
+                    (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+                )
+                cat_query = cat_base_query.filter(
+                    (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+                )
+            elif filter_type == 'quantity_difference':
+                air_query = air_base_query.filter(Reconciliation.DifQty == 'Yes')
+                cat_query = cat_base_query.filter(Reconciliation.DifQty == 'Yes')
+            elif filter_type == 'price_difference':
+                air_query = air_base_query.filter(Reconciliation.DifPrice == 'Yes')
+                cat_query = cat_base_query.filter(Reconciliation.DifPrice == 'Yes')
+            elif filter_type == 'air_only':
+                air_query = air_base_query.filter(
+                    Reconciliation.Air == 'Yes',
+                    Reconciliation.Cat == 'No'
+                )
+                cat_query = cat_base_query.filter(
+                    Reconciliation.Air == 'Yes',
+                    Reconciliation.Cat == 'No'
+                )
+            elif filter_type == 'cat_only':
+                air_query = air_base_query.filter(
+                    Reconciliation.Air == 'No',
+                    Reconciliation.Cat == 'Yes'
+                )
+                cat_query = cat_base_query.filter(
+                    Reconciliation.Air == 'No',
+                    Reconciliation.Cat == 'Yes'
+                )
+            else:
+                air_query = air_base_query
+                cat_query = cat_base_query
 
-        if filter_type == 'discrepancies':
-            air_query = air_base_query.filter(
-                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
-            )
-            cat_query = cat_base_query.filter(
-                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
-            )
-        elif filter_type == 'quantity_difference':
-            air_query = air_base_query.filter(Reconciliation.DifQty == 'Yes')
-            cat_query = cat_base_query.filter(Reconciliation.DifQty == 'Yes')
-        elif filter_type == 'price_difference':
-            air_query = air_base_query.filter(Reconciliation.DifPrice == 'Yes')
-            cat_query = cat_base_query.filter(Reconciliation.DifPrice == 'Yes')
-        elif filter_type == 'air_only':
-            air_query = air_base_query.filter(
-                Reconciliation.Air == 'Yes',
-                Reconciliation.Cat == 'No'
-            )
-            cat_query = cat_base_query.filter(
-                Reconciliation.Air == 'Yes',
-                Reconciliation.Cat == 'No'
-            )
-        elif filter_type == 'cat_only':
-            air_query = air_base_query.filter(
-                Reconciliation.Air == 'No',
-                Reconciliation.Cat == 'Yes'
-            )
-            cat_query = cat_base_query.filter(
-                Reconciliation.Air == 'No',
-                Reconciliation.Cat == 'Yes'
-            )
-        else:
-            air_query = air_base_query
-            cat_query = cat_base_query
+            air_count = air_query.count()
+            cat_count = cat_query.count()
+            self.logger.info(f"Filtered counts - Air: {air_count}, Cat: {cat_count}")
 
-        combined_query = air_query.union(cat_query).order_by(
-            Reconciliation.AirFlightDate,
-            Reconciliation.AirFlightNo
-        )
-        
-        if offset is not None:
-            combined_query = combined_query.offset(offset)
-        if limit is not None:
-            combined_query = combined_query.limit(limit)
-
-        return combined_query.all()
+            # Union and apply pagination
+            combined_query = air_query.union(cat_query).order_by(
+                Reconciliation.AirFlightDate,
+                Reconciliation.AirFlightNo
+            )
+            
+            if offset is not None:
+                combined_query = combined_query.offset(offset)
+            if limit is not None:
+                combined_query = combined_query.limit(limit)
+                
+            results = combined_query.all()
+            self.logger.info(f"Filtered results returned: {len(results)}")
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"Error in get_filtered_by_date_range: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+            return []
 
     def get_filtered_count_by_date_range(self, filter_type, start_date, end_date):
-        """Get count of filtered records in flight date range"""
-        air_base_query = self.session.query(Reconciliation).filter(
-            func.date(Reconciliation.AirFlightDate) >= start_date,
-            func.date(Reconciliation.AirFlightDate) <= end_date
-        )
+        """Get count of filtered records in flight date range with logging"""
+        try:
+            self.logger.info(f"=== get_filtered_count_by_date_range called ===")
+            self.logger.info(f"filter_type: {filter_type}")
+            
+            # Base queries for flight date filtering
+            air_base_query = self.session.query(Reconciliation).filter(
+                func.date(Reconciliation.AirFlightDate) >= start_date,
+                func.date(Reconciliation.AirFlightDate) <= end_date
+            )
+            
+            cat_base_query = self.session.query(Reconciliation).filter(
+                func.date(Reconciliation.CatFltDate) >= start_date,
+                func.date(Reconciliation.CatFltDate) <= end_date
+            )
 
-        cat_base_query = self.session.query(Reconciliation).filter(
-            func.date(Reconciliation.CatFltDate) >= start_date,
-            func.date(Reconciliation.CatFltDate) <= end_date
-        )
+            # Apply additional filters
+            if filter_type == 'discrepancies':
+                air_query = air_base_query.filter(
+                    (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+                )
+                cat_query = cat_base_query.filter(
+                    (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+                )
+            elif filter_type == 'quantity_difference':
+                air_query = air_base_query.filter(Reconciliation.DifQty == 'Yes')
+                cat_query = cat_base_query.filter(Reconciliation.DifQty == 'Yes')
+            elif filter_type == 'price_difference':
+                air_query = air_base_query.filter(Reconciliation.DifPrice == 'Yes')
+                cat_query = cat_base_query.filter(Reconciliation.DifPrice == 'Yes')
+            elif filter_type == 'air_only':
+                air_query = air_base_query.filter(
+                    Reconciliation.Air == 'Yes',
+                    Reconciliation.Cat == 'No'
+                )
+                cat_query = cat_base_query.filter(
+                    Reconciliation.Air == 'Yes',
+                    Reconciliation.Cat == 'No'
+                )
+            elif filter_type == 'cat_only':
+                air_query = air_base_query.filter(
+                    Reconciliation.Air == 'No',
+                    Reconciliation.Cat == 'Yes'
+                )
+                cat_query = cat_base_query.filter(
+                    Reconciliation.Air == 'No',
+                    Reconciliation.Cat == 'Yes'
+                )
+            else:
+                air_query = air_base_query
+                cat_query = cat_base_query
 
-        if filter_type == 'discrepancies':
-            air_query = air_base_query.filter(
-                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
-            )
-            cat_query = cat_base_query.filter(
-                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
-            )
-        elif filter_type == 'quantity_difference':
-            air_query = air_base_query.filter(Reconciliation.DifQty == 'Yes')
-            cat_query = cat_base_query.filter(Reconciliation.DifQty == 'Yes')
-        elif filter_type == 'price_difference':
-            air_query = air_base_query.filter(Reconciliation.DifPrice == 'Yes')
-            cat_query = cat_base_query.filter(Reconciliation.DifPrice == 'Yes')
-        elif filter_type == 'air_only':
-            air_query = air_base_query.filter(
-                Reconciliation.Air == 'Yes',
-                Reconciliation.Cat == 'No'
-            )
-            cat_query = cat_base_query.filter(
-                Reconciliation.Air == 'Yes',
-                Reconciliation.Cat == 'No'
-            )
-        elif filter_type == 'cat_only':
-            air_query = air_base_query.filter(
-                Reconciliation.Air == 'No',
-                Reconciliation.Cat == 'Yes'
-            )
-            cat_query = cat_base_query.filter(
-                Reconciliation.Air == 'No',
-                Reconciliation.Cat == 'Yes'
-            )
-        else:
-            air_query = air_base_query
-            cat_query = cat_base_query
-
-        # Count union results
-        combined_query = air_query.union(cat_query)
-        return combined_query.count()
+            # Count union results
+            combined_query = air_query.union(cat_query)
+            total_count = combined_query.count()
+            self.logger.info(f"Filtered count result: {total_count}")
+            return total_count
+            
+        except Exception as e:
+            self.logger.error(f"Error in get_filtered_count_by_date_range: {e}")
+            return 0
 
     def get_filtered(self, filter_type):
         """Get filtered reconciliation records"""
