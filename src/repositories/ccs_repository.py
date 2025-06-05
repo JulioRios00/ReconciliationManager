@@ -525,7 +525,7 @@ class AirCompanyInvoiceRepository(Repository):
         return True
 
     def delete_erp_invoice(self, id):
-        erp_invoice = self.session.query(AirCompanyInvoiceReport).id == id).first()
+        erp_invoice = self.session.query(AirCompanyInvoiceReport).filter(AirCompanyInvoiceReport.Id == id).first()
         if not erp_invoice:
             raise CustomException(f"AirCompanyInvoiceReport with ID {id} not found")
 
