@@ -2,7 +2,7 @@
 from repositories.repository import Repository
 from typing import List, Dict
 from decimal import Decimal
-from datetime import datetime, date
+from datetime import date, datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -543,76 +543,205 @@ class AirCompanyInvoiceRepository(Repository):
 class ReconciliationRepository:
     def __init__(self, session: Session):
         self.session = session
+        self.logger = logging.getLogger(__name__)
     
-    def get_all(self):
-        """Get all reconciliation records"""
-        return self.session.query(Reconciliation).order_by(
-            Reconciliation.AirFlightDate, 
-            Reconciliation.AirFlightNo
-        ).all()
-
-    def get_paginated(self, limit=100, offset=0):
-        """Get paginated reconciliation records"""
-        return self.session.query(Reconciliation).order_by(
-            Reconciliation.AirFlightDate, 
-            Reconciliation.AirFlightNo
-        ).limit(limit).offset(offset).all()
-
-    def get_count(self):
-        """Get total count of reconciliation records"""
-        return self.session.query(Reconciliation).count()
+    def debug_database_content(self):
+        """Debug method to see what's actually in the database"""
+        try:
+            # Get total count
+            total_count = self.session.query(Reconciliation).count()
+            self.logger.info(f"Total records in Reconciliation table: {total_count}")
+            
+            # Get first 5 records to see date formats
+            sample_records = self.session.query(Reconciliation).limit(5).all()
+            self.logger.info(f"Sample records found: {len(sample_records)}")
+            
+            for i, record in enumerate(sample_records):
+                self.logger.info(f"Record {i+1}:")
+                self.logger.info(f"  AirFlightDate: '{record.AirFlightDate}' (type: {type(record.AirFlightDate)})")
+                self.logger.info(f"  CatFltDate: '{record.CatFltDate}' (type: {type(record.CatFltDate)})")
+                self.logger.info(f"  AirFlightNo: '{record.AirFlightNo}'")
+                
+                # Extract just the date part to see what func.date() would return
+                if record.AirFlightDate:
+                    air_date_only = record.AirFlightDate.date() if hasattr(record.AirFlightDate, 'date') else record.AirFlightDate
+                    self.logger.info(f"  AirFlightDate (date only): {air_date_only}")
+                
+                if record.CatFltDate:
+                    cat_date_only = record.CatFltDate.date() if hasattr(record.CatFltDate, 'date') else record.CatFltDate
+                    self.logger.info(f"  CatFltDate (date only): {cat_date_only}")
+            
+            # Check for any records in 2025
+            records_2025 = self.session.query(Reconciliation).filter(
+                func.extract('year', Reconciliation.AirFlightDate) == 2025
+            ).count()
+            self.logger.info(f"Records with AirFlightDate in 2025: {records_2025}")
+            
+            records_2025_cat = self.session.query(Reconciliation).filter(
+                func.extract('year', Reconciliation.CatFltDate) == 2025
+            ).count()
+            self.logger.info(f"Records with CatFltDate in 2025: {records_2025_cat}")
+            
+            # Check for April 2025 specifically
+            april_2025_air = self.session.query(Reconciliation).filter(
+                func.extract('year', Reconciliation.AirFlightDate) == 2025,
+                func.extract('month', Reconciliation.AirFlightDate) == 4
+            ).count()
+            self.logger.info(f"Records with AirFlightDate in April 2025: {april_2025_air}")
+            
+            april_2025_cat = self.session.query(Reconciliation).filter(
+                func.extract('year', Reconciliation.CatFltDate) == 2025,
+                func.extract('month', Reconciliation.CatFltDate) == 4
+            ).count()
+            self.logger.info(f"Records with CatFltDate in April 2025: {april_2025_cat}")
+            
+        except Exception as e:
+            self.logger.error(f"Debug database content error: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
 
     def get_by_date_range(self, start_date, end_date, limit=None, offset=None):
         """
-        Get reconciliation records filtered by FLIGHT DATE range
-        Handles datetime columns by comparing just the date part
+        Get reconciliation records filtered by FLIGHT DATE range with detailed logging
         """
-        if isinstance(start_date, date) and not isinstance(start_date, datetime):
+        try:
+            self.logger.info(f"=== get_by_date_range called ===")
+            self.logger.info(f"start_date: {start_date} (type: {type(start_date)})")
+            self.logger.info(f"end_date: {end_date} (type: {type(end_date)})")
+            self.logger.info(f"limit: {limit}, offset: {offset}")
+            
+            # Debug database content first
+            self.debug_database_content()
+            
+            # Test different query approaches
+            self.logger.info("=== Testing different query approaches ===")
+            
+            # Approach 1: Using func.date()
+            self.logger.info("Approach 1: Using func.date()")
+            air_query_1 = self.session.query(Reconciliation).filter(
+                func.date(Reconciliation.AirFlightDate) >= start_date,
+                func.date(Reconciliation.AirFlightDate) <= end_date
+            )
+            air_count_1 = air_query_1.count()
+            self.logger.info(f"Air records found with func.date(): {air_count_1}")
+            
+            cat_query_1 = self.session.query(Reconciliation).filter(
+                func.date(Reconciliation.CatFltDate) >= start_date,
+                func.date(Reconciliation.CatFltDate) <= end_date
+            )
+            cat_count_1 = cat_query_1.count()
+            self.logger.info(f"Cat records found with func.date(): {cat_count_1}")
+            
+            # Approach 2: Using extract for year/month/day
+            self.logger.info("Approach 2: Using extract for year/month/day")
+            start_year, start_month, start_day = start_date.year, start_date.month, start_date.day
+            end_year, end_month, end_day = end_date.year, end_date.month, end_date.day
+            
+            self.logger.info(f"Looking for dates between {start_year}-{start_month:02d}-{start_day:02d} and {end_year}-{end_month:02d}-{end_day:02d}")
+            
+            # For April 2025, let's check if there are any records in that month
+            april_2025_query = self.session.query(Reconciliation).filter(
+                func.extract('year', Reconciliation.AirFlightDate) == 2025,
+                func.extract('month', Reconciliation.AirFlightDate) == 4
+            )
+            april_2025_count = april_2025_query.count()
+            self.logger.info(f"Records in April 2025 (Air): {april_2025_count}")
+            
+            if april_2025_count > 0:
+                # Get a sample record to see the actual date
+                sample_april = april_2025_query.first()
+                self.logger.info(f"Sample April 2025 record: AirFlightDate = {sample_april.AirFlightDate}")
+            
+            # Approach 3: Direct datetime comparison (convert dates to datetime)
+            self.logger.info("Approach 3: Direct datetime comparison")
             start_datetime = datetime.combine(start_date, datetime.min.time())
             end_datetime = datetime.combine(end_date, datetime.max.time())
-        else:
-            start_datetime = start_date
-            end_datetime = end_date
-
-        # Query using date extraction to compare only the date part
-        air_query = self.session.query(Reconciliation).filter(
-            func.date(Reconciliation.AirFlightDate) >= start_date,
-            func.date(Reconciliation.AirFlightDate) <= end_date
-        )
-        
-        cat_query = self.session.query(Reconciliation).filter(
-            func.date(Reconciliation.CatFltDate) >= start_date,
-            func.date(Reconciliation.CatFltDate) <= end_date
-        )
-        
-        # Union the queries and remove duplicates
-        combined_query = air_query.union(cat_query).order_by(
-            Reconciliation.AirFlightDate,
-            Reconciliation.AirFlightNo
-        )
-        
-        if offset is not None:
-            combined_query = combined_query.offset(offset)
-        if limit is not None:
-            combined_query = combined_query.limit(limit)
             
-        return combined_query.all()
+            self.logger.info(f"Converted to datetime: {start_datetime} to {end_datetime}")
+            
+            air_query_3 = self.session.query(Reconciliation).filter(
+                Reconciliation.AirFlightDate >= start_datetime,
+                Reconciliation.AirFlightDate <= end_datetime
+            )
+            air_count_3 = air_query_3.count()
+            self.logger.info(f"Air records found with datetime comparison: {air_count_3}")
+            
+            # Use the approach that finds records
+            if air_count_1 > 0 or cat_count_1 > 0:
+                self.logger.info("Using func.date() approach")
+                combined_query = air_query_1.union(cat_query_1)
+            elif air_count_3 > 0:
+                self.logger.info("Using datetime comparison approach")
+                cat_query_3 = self.session.query(Reconciliation).filter(
+                    Reconciliation.CatFltDate >= start_datetime,
+                    Reconciliation.CatFltDate <= end_datetime
+                )
+                combined_query = air_query_3.union(cat_query_3)
+            else:
+                self.logger.warning("No records found with any approach")
+                return []
+            
+            # Apply ordering and pagination
+            combined_query = combined_query.order_by(
+                Reconciliation.AirFlightDate,
+                Reconciliation.AirFlightNo
+            )
+            
+            total_before_pagination = combined_query.count()
+            self.logger.info(f"Total records before pagination: {total_before_pagination}")
+            
+            if offset is not None:
+                combined_query = combined_query.offset(offset)
+            if limit is not None:
+                combined_query = combined_query.limit(limit)
+                
+            results = combined_query.all()
+            self.logger.info(f"Final results returned: {len(results)}")
+            
+            # Log first result for verification
+            if results:
+                first_result = results[0]
+                self.logger.info(f"First result: AirFlightDate={first_result.AirFlightDate}, AirFlightNo={first_result.AirFlightNo}")
+            
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"Error in get_by_date_range: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+            return []
 
     def get_count_by_date_range(self, start_date, end_date):
-        """Get count of records in flight date range"""
-        air_query = self.session.query(Reconciliation).filter(
-            func.date(Reconciliation.AirFlightDate) >= start_date,
-            func.date(Reconciliation.AirFlightDate) <= end_date
-        )
-        
-        cat_query = self.session.query(Reconciliation).filter(
-            func.date(Reconciliation.CatFltDate) >= start_date,
-            func.date(Reconciliation.CatFltDate) <= end_date
-        )
-        
-        # Count union results
-        combined_query = air_query.union(cat_query)
-        return combined_query.count()
+        """Get count of records in flight date range with logging"""
+        try:
+            self.logger.info(f"=== get_count_by_date_range called ===")
+            self.logger.info(f"start_date: {start_date}, end_date: {end_date}")
+            
+            # Try the same approaches as get_by_date_range
+            air_query = self.session.query(Reconciliation).filter(
+                func.date(Reconciliation.AirFlightDate) >= start_date,
+                func.date(Reconciliation.AirFlightDate) <= end_date
+            )
+            
+            cat_query = self.session.query(Reconciliation).filter(
+                func.date(Reconciliation.CatFltDate) >= start_date,
+                func.date(Reconciliation.CatFltDate) <= end_date
+            )
+            
+            air_count = air_query.count()
+            cat_count = cat_query.count()
+            
+            self.logger.info(f"Air count: {air_count}, Cat count: {cat_count}")
+            
+            combined_query = air_query.union(cat_query)
+            total_count = combined_query.count()
+            
+            self.logger.info(f"Total count after union: {total_count}")
+            return total_count
+            
+        except Exception as e:
+            self.logger.error(f"Error in get_count_by_date_range: {e}")
+            return 0
 
     def get_filtered_by_date_range(self, filter_type, start_date, end_date, limit=None, offset=None):
         """
@@ -623,13 +752,12 @@ class ReconciliationRepository:
             func.date(Reconciliation.AirFlightDate) >= start_date,
             func.date(Reconciliation.AirFlightDate) <= end_date
         )
-        
+
         cat_base_query = self.session.query(Reconciliation).filter(
             func.date(Reconciliation.CatFltDate) >= start_date,
             func.date(Reconciliation.CatFltDate) <= end_date
         )
 
-        # Apply additional filters to both queries
         if filter_type == 'discrepancies':
             air_query = air_base_query.filter(
                 (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
@@ -665,7 +793,6 @@ class ReconciliationRepository:
             air_query = air_base_query
             cat_query = cat_base_query
 
-        # Union and apply pagination
         combined_query = air_query.union(cat_query).order_by(
             Reconciliation.AirFlightDate,
             Reconciliation.AirFlightNo
@@ -675,23 +802,21 @@ class ReconciliationRepository:
             combined_query = combined_query.offset(offset)
         if limit is not None:
             combined_query = combined_query.limit(limit)
-            
+
         return combined_query.all()
 
     def get_filtered_count_by_date_range(self, filter_type, start_date, end_date):
         """Get count of filtered records in flight date range"""
-        # Base queries for flight date filtering
         air_base_query = self.session.query(Reconciliation).filter(
             func.date(Reconciliation.AirFlightDate) >= start_date,
             func.date(Reconciliation.AirFlightDate) <= end_date
         )
-        
+
         cat_base_query = self.session.query(Reconciliation).filter(
             func.date(Reconciliation.CatFltDate) >= start_date,
             func.date(Reconciliation.CatFltDate) <= end_date
         )
 
-        # Apply additional filters
         if filter_type == 'discrepancies':
             air_query = air_base_query.filter(
                 (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
