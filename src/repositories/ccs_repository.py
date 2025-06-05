@@ -562,165 +562,229 @@ class ReconciliationRepository:
 
     def get_by_date_range(self, start_date, end_date, limit=None, offset=None):
         """
-        Get reconciliation records filtered by date range
-        
-        Args:
-            start_date: Start date (datetime or string in YYYY-MM-DD format)
-            end_date: End date (datetime or string in YYYY-MM-DD format)
-            limit: Optional limit for pagination
-            offset: Optional offset for pagination
+        Get reconciliation records filtered by FLIGHT DATE range
+        Using pure SQLAlchemy syntax without or_/and_ functions
         """
-        query = self.session.query(Reconciliation).filter(
+        air_query = self.session.query(Reconciliation).filter(
             Reconciliation.AirFlightDate >= start_date,
             Reconciliation.AirFlightDate <= end_date
-        ).order_by(
+        )
+        
+        cat_query = self.session.query(Reconciliation).filter(
+            Reconciliation.CatFltDate >= start_date,
+            Reconciliation.CatFltDate <= end_date
+        )
+        
+        combined_query = air_query.union(cat_query).order_by(
             Reconciliation.AirFlightDate,
             Reconciliation.AirFlightNo
         )
         
         if offset is not None:
-            query = query.offset(offset)
+            combined_query = combined_query.offset(offset)
         if limit is not None:
-            query = query.limit(limit)
+            combined_query = combined_query.limit(limit)
             
-        return query.all()
+        return combined_query.all()
 
     def get_count_by_date_range(self, start_date, end_date):
-        """Get count of records in date range"""
-        return self.session.query(Reconciliation).filter(
+        """Get count of records in flight date range"""
+        air_query = self.session.query(Reconciliation).filter(
             Reconciliation.AirFlightDate >= start_date,
             Reconciliation.AirFlightDate <= end_date
-        ).count()
+        )
+        
+        cat_query = self.session.query(Reconciliation).filter(
+            Reconciliation.CatFltDate >= start_date,
+            Reconciliation.CatFltDate <= end_date
+        )
+        
+        # Count union results
+        combined_query = air_query.union(cat_query)
+        return combined_query.count()
 
     def get_filtered_by_date_range(self, filter_type, start_date, end_date, limit=None, offset=None):
         """
-        Get filtered reconciliation records within date range
-        
-        Args:
-            filter_type: Type of filter to apply
-            start_date: Start date
-            end_date: End date
-            limit: Optional limit for pagination
-            offset: Optional offset for pagination
+        Get filtered reconciliation records within flight date range
         """
-        query = self.session.query(Reconciliation).filter(
+        # Base queries for flight date filtering
+        air_base_query = self.session.query(Reconciliation).filter(
             Reconciliation.AirFlightDate >= start_date,
             Reconciliation.AirFlightDate <= end_date
         )
+        
+        cat_base_query = self.session.query(Reconciliation).filter(
+            Reconciliation.CatFltDate >= start_date,
+            Reconciliation.CatFltDate <= end_date
+        )
 
+        # Apply additional filters to both queries
         if filter_type == 'discrepancies':
-            query = query.filter((Reconciliation.DifQty == 'Yes') |
-                                 (Reconciliation.DifPrice == 'Yes'))
+            air_query = air_base_query.filter(
+                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+            )
+            cat_query = cat_base_query.filter(
+                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+            )
         elif filter_type == 'quantity_difference':
-            query = query.filter(Reconciliation.DifQty == 'Yes')
+            air_query = air_base_query.filter(Reconciliation.DifQty == 'Yes')
+            cat_query = cat_base_query.filter(Reconciliation.DifQty == 'Yes')
         elif filter_type == 'price_difference':
-            query = query.filter(Reconciliation.DifPrice == 'Yes')
+            air_query = air_base_query.filter(Reconciliation.DifPrice == 'Yes')
+            cat_query = cat_base_query.filter(Reconciliation.DifPrice == 'Yes')
         elif filter_type == 'air_only':
-            query = query.filter((Reconciliation.Air == 'Yes') &
-                                 (Reconciliation.Cat == 'No'))
+            air_query = air_base_query.filter(
+                Reconciliation.Air == 'Yes',
+                Reconciliation.Cat == 'No'
+            )
+            cat_query = cat_base_query.filter(
+                Reconciliation.Air == 'Yes',
+                Reconciliation.Cat == 'No'
+            )
         elif filter_type == 'cat_only':
-            query = query.filter((Reconciliation.Air == 'No') &
-                                 (Reconciliation.Cat == 'Yes'))
+            air_query = air_base_query.filter(
+                Reconciliation.Air == 'No',
+                Reconciliation.Cat == 'Yes'
+            )
+            cat_query = cat_base_query.filter(
+                Reconciliation.Air == 'No',
+                Reconciliation.Cat == 'Yes'
+            )
+        else:
+            air_query = air_base_query
+            cat_query = cat_base_query
 
-        query = query.order_by(
+        # Union and apply pagination
+        combined_query = air_query.union(cat_query).order_by(
             Reconciliation.AirFlightDate,
             Reconciliation.AirFlightNo
         )
         
         if offset is not None:
-            query = query.offset(offset)
+            combined_query = combined_query.offset(offset)
         if limit is not None:
-            query = query.limit(limit)
+            combined_query = combined_query.limit(limit)
             
-        return query.all()
+        return combined_query.all()
 
-    def get_filtered_count_by_date_range(self,
-                                         filter_type,
-                                         start_date,
-                                         end_date
-                                         ):
-        """Get count of filtered records in date range"""
-        query = self.session.query(Reconciliation).filter(
+    def get_filtered_count_by_date_range(
+        self,
+        filter_type,
+        start_date,
+        end_date
+    ):
+        """Get count of filtered records in flight date range"""
+        air_base_query = self.session.query(Reconciliation).filter(
             Reconciliation.AirFlightDate >= start_date,
             Reconciliation.AirFlightDate <= end_date
         )
+        
+        cat_base_query = self.session.query(Reconciliation).filter(
+            Reconciliation.CatFltDate >= start_date,
+            Reconciliation.CatFltDate <= end_date
+        )
 
         if filter_type == 'discrepancies':
-            query = query.filter((Reconciliation.DifQty == 'Yes') |
-                                 (Reconciliation.DifPrice == 'Yes'))
+            air_query = air_base_query.filter(
+                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+            )
+            cat_query = cat_base_query.filter(
+                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+            )
         elif filter_type == 'quantity_difference':
-            query = query.filter(Reconciliation.DifQty == 'Yes')
+            air_query = air_base_query.filter(Reconciliation.DifQty == 'Yes')
+            cat_query = cat_base_query.filter(Reconciliation.DifQty == 'Yes')
         elif filter_type == 'price_difference':
-            query = query.filter(Reconciliation.DifPrice == 'Yes')
+            air_query = air_base_query.filter(Reconciliation.DifPrice == 'Yes')
+            cat_query = cat_base_query.filter(Reconciliation.DifPrice == 'Yes')
         elif filter_type == 'air_only':
-            query = query.filter((Reconciliation.Air == 'Yes') &
-                                 (Reconciliation.Cat == 'No'))
+            air_query = air_base_query.filter(
+                Reconciliation.Air == 'Yes',
+                Reconciliation.Cat == 'No'
+            )
+            cat_query = cat_base_query.filter(
+                Reconciliation.Air == 'Yes',
+                Reconciliation.Cat == 'No'
+            )
         elif filter_type == 'cat_only':
-            query = query.filter((Reconciliation.Air == 'No') &
-                                 (Reconciliation.Cat == 'Yes'))
+            air_query = air_base_query.filter(
+                Reconciliation.Air == 'No',
+                Reconciliation.Cat == 'Yes'
+            )
+            cat_query = cat_base_query.filter(
+                Reconciliation.Air == 'No',
+                Reconciliation.Cat == 'Yes'
+            )
+        else:
+            air_query = air_base_query
+            cat_query = cat_base_query
 
-        return query.count()
+        combined_query = air_query.union(cat_query)
+        return combined_query.count()
 
     def get_filtered(self, filter_type):
         """Get filtered reconciliation records"""
         query = self.session.query(Reconciliation)
 
         if filter_type == 'discrepancies':
-            query = query.filter((Reconciliation.DifQty == 'Yes') |
-                                 (Reconciliation.DifPrice == 'Yes'))
+            query = query.filter(
+                (Reconciliation.DifQty == 'Yes')
+                | (Reconciliation.DifPrice == 'Yes')
+            )
         elif filter_type == 'quantity_difference':
             query = query.filter(Reconciliation.DifQty == 'Yes')
         elif filter_type == 'price_difference':
             query = query.filter(Reconciliation.DifPrice == 'Yes')
         elif filter_type == 'air_only':
-            query = query.filter((Reconciliation.Air == 'Yes') &
-                                 (Reconciliation.Cat == 'No'))
+            query = query.filter(
+                Reconciliation.Air == 'Yes',
+                Reconciliation.Cat == 'No'
+            )
         elif filter_type == 'cat_only':
-            query = query.filter((Reconciliation.Air == 'No') &
-                                 (Reconciliation.Cat == 'Yes'))
+            query = query.filter(
+                Reconciliation.Air == 'No',
+                Reconciliation.Cat == 'Yes'
+            )
 
         return query.order_by(
             Reconciliation.AirFlightDate,
-            Reconciliation.AirFlightNo).all()
+            Reconciliation.AirFlightNo
+        ).all()
 
     def get_filtered_count(self, filter_type):
         """Get count of filtered reconciliation records"""
         query = self.session.query(Reconciliation)
 
         if filter_type == 'discrepancies':
-            query = query.filter((Reconciliation.DifQty == 'Yes') |
-                                 (Reconciliation.DifPrice == 'Yes'))
+            query = query.filter(
+                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+            )
         elif filter_type == 'quantity_difference':
             query = query.filter(Reconciliation.DifQty == 'Yes')
         elif filter_type == 'price_difference':
             query = query.filter(Reconciliation.DifPrice == 'Yes')
         elif filter_type == 'air_only':
-            query = query.filter((Reconciliation.Air == 'Yes') &
-                                 (Reconciliation.Cat == 'No'))
+            query = query.filter(
+                Reconciliation.Air == 'Yes',
+                Reconciliation.Cat == 'No'
+            )
         elif filter_type == 'cat_only':
-            query = query.filter((Reconciliation.Air == 'No') &
-                                 (Reconciliation.Cat == 'Yes'))
+            query = query.filter(
+                Reconciliation.Air == 'No',
+                Reconciliation.Cat == 'Yes'
+            )
 
         return query.count()
 
     def get_filtered_paginated(self, filter_type, limit, offset):
         """
         Get filtered records with pagination applied at database level
-
-        Args:
-            filter_type: Type of filter ('discrepancies', 'quantity_difference', 'price_difference', 'air_only', 'cat_only')
-            limit: Number of records to return
-            offset: Offset for pagination
-
-        Returns:
-            Query result with pagination applied
         """
         query = self.session.query(Reconciliation)
 
         if filter_type == 'discrepancies':
             query = query.filter(
-                (Reconciliation.DifQty == 'Yes') |
-                (Reconciliation.DifPrice == 'Yes')
+                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
             )
         elif filter_type == 'quantity_difference':
             query = query.filter(Reconciliation.DifQty == 'Yes')
@@ -728,13 +792,16 @@ class ReconciliationRepository:
             query = query.filter(Reconciliation.DifPrice == 'Yes')
         elif filter_type == 'air_only':
             query = query.filter(
-                (Reconciliation.Air == 'Yes') &
-                (Reconciliation.Cat == 'No')
+                Reconciliation.Air == 'Yes',
+                Reconciliation.Cat == 'No'
             )
         elif filter_type == 'cat_only':
             query = query.filter(
-                (Reconciliation.Air == 'No') &
-                (Reconciliation.Cat == 'Yes')
+                Reconciliation.Air == 'No',
+                Reconciliation.Cat == 'Yes'
             )
 
-        return query.offset(offset).limit(limit).all()
+        return query.order_by(
+            Reconciliation.AirFlightDate,
+            Reconciliation.AirFlightNo
+        ).offset(offset).limit(limit).all()
