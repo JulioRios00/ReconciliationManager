@@ -546,7 +546,7 @@ class AirCompanyInvoiceRepository(Repository):
 class ReconciliationRepository:
     def __init__(self, session: Session):
         self.session = session
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger(__name__)  # This will now work
     
     def debug_database_content(self):
         """Debug method to see what's actually in the database"""
