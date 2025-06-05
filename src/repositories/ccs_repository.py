@@ -560,6 +560,107 @@ class ReconciliationRepository:
         """Get total count of reconciliation records"""
         return self.session.query(Reconciliation).count()
 
+    def get_by_date_range(self, start_date, end_date, limit=None, offset=None):
+        """
+        Get reconciliation records filtered by date range
+        
+        Args:
+            start_date: Start date (datetime or string in YYYY-MM-DD format)
+            end_date: End date (datetime or string in YYYY-MM-DD format)
+            limit: Optional limit for pagination
+            offset: Optional offset for pagination
+        """
+        query = self.session.query(Reconciliation).filter(
+            Reconciliation.AirFlightDate >= start_date,
+            Reconciliation.AirFlightDate <= end_date
+        ).order_by(
+            Reconciliation.AirFlightDate,
+            Reconciliation.AirFlightNo
+        )
+        
+        if offset is not None:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+            
+        return query.all()
+
+    def get_count_by_date_range(self, start_date, end_date):
+        """Get count of records in date range"""
+        return self.session.query(Reconciliation).filter(
+            Reconciliation.AirFlightDate >= start_date,
+            Reconciliation.AirFlightDate <= end_date
+        ).count()
+
+    def get_filtered_by_date_range(self, filter_type, start_date, end_date, limit=None, offset=None):
+        """
+        Get filtered reconciliation records within date range
+        
+        Args:
+            filter_type: Type of filter to apply
+            start_date: Start date
+            end_date: End date
+            limit: Optional limit for pagination
+            offset: Optional offset for pagination
+        """
+        query = self.session.query(Reconciliation).filter(
+            Reconciliation.AirFlightDate >= start_date,
+            Reconciliation.AirFlightDate <= end_date
+        )
+
+        if filter_type == 'discrepancies':
+            query = query.filter((Reconciliation.DifQty == 'Yes') |
+                                 (Reconciliation.DifPrice == 'Yes'))
+        elif filter_type == 'quantity_difference':
+            query = query.filter(Reconciliation.DifQty == 'Yes')
+        elif filter_type == 'price_difference':
+            query = query.filter(Reconciliation.DifPrice == 'Yes')
+        elif filter_type == 'air_only':
+            query = query.filter((Reconciliation.Air == 'Yes') &
+                                 (Reconciliation.Cat == 'No'))
+        elif filter_type == 'cat_only':
+            query = query.filter((Reconciliation.Air == 'No') &
+                                 (Reconciliation.Cat == 'Yes'))
+
+        query = query.order_by(
+            Reconciliation.AirFlightDate,
+            Reconciliation.AirFlightNo
+        )
+        
+        if offset is not None:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+            
+        return query.all()
+
+    def get_filtered_count_by_date_range(self,
+                                         filter_type,
+                                         start_date,
+                                         end_date
+                                         ):
+        """Get count of filtered records in date range"""
+        query = self.session.query(Reconciliation).filter(
+            Reconciliation.AirFlightDate >= start_date,
+            Reconciliation.AirFlightDate <= end_date
+        )
+
+        if filter_type == 'discrepancies':
+            query = query.filter((Reconciliation.DifQty == 'Yes') |
+                                 (Reconciliation.DifPrice == 'Yes'))
+        elif filter_type == 'quantity_difference':
+            query = query.filter(Reconciliation.DifQty == 'Yes')
+        elif filter_type == 'price_difference':
+            query = query.filter(Reconciliation.DifPrice == 'Yes')
+        elif filter_type == 'air_only':
+            query = query.filter((Reconciliation.Air == 'Yes') &
+                                 (Reconciliation.Cat == 'No'))
+        elif filter_type == 'cat_only':
+            query = query.filter((Reconciliation.Air == 'No') &
+                                 (Reconciliation.Cat == 'Yes'))
+
+        return query.count()
+
     def get_filtered(self, filter_type):
         """Get filtered reconciliation records"""
         query = self.session.query(Reconciliation)
