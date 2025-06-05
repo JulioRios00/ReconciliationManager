@@ -319,7 +319,7 @@ class FileReadersService:
                 model_instances = [
                     CateringInvoiceReport(**item) for item in data
                 ]
-                self.billing_recon_repository.bulk_insert(model_instances)
+                self.catering_invoice_repository.bulk_insert(model_instances)
                 print(
                     f"Successfully inserted {len(data)} "
                     "billing reconciliation records into the database"
