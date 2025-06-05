@@ -6,6 +6,8 @@ from datetime import date, datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
+import logging
+import os
 #Tables
 from models.schema_ccs import (
     Flight,
@@ -21,7 +23,8 @@ from models.schema_ccs import (
 # Application-Specific Common Utilities
 from common.custom_exception import CustomException
 
-
+logging.basicConfig(level=os.environ.get('LOG_LEVEL', 'INFO'))
+logger = logging.getLogger()
 class FlightRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, Flight)       
