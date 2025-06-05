@@ -35,7 +35,14 @@ def main(event, context):
         offset = int(query_params.get('offset', 0))
         filter_type = query_params.get('filter_type', 'all')
 
-        valid_filter_types = ['all', 'discrepancies', 'air_only', 'cat_only']
+        valid_filter_types = [
+            'all',
+            'discrepancies',
+            'air_only',
+            'cat_only',
+            'quantity_difference',
+            'price_difference'
+        ]
         if filter_type not in valid_filter_types:
             return {
                 "statusCode": 400,
