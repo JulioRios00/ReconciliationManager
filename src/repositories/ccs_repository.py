@@ -826,6 +826,213 @@ class ReconciliationRepository:
         """Get total count of reconciliation records"""
         return self.session.query(Reconciliation).count()
 
+    def get_by_flight_number(self, flight_number, limit=None, offset=None):
+        """
+        Get reconciliation records filtered by flight number
+        """
+        try:
+            self.logger.info(f"=== get_by_flight_number called ===")
+            self.logger.info(f"flight_number: {flight_number}")
+            self.logger.info(f"limit: {limit}, offset: {offset}")
+
+            # Query both AirFlightNo and CatFlightNo fields
+            air_query = self.session.query(Reconciliation).filter(
+                Reconciliation.AirFlightNo.ilike(f"%{flight_number}%")
+            )
+
+            cat_query = self.session.query(Reconciliation).filter(
+                Reconciliation.CatFlightNo.ilike(f"%{flight_number}%")
+            )
+
+            air_count = air_query.count()
+            cat_count = cat_query.count()
+            self.logger.info(f"Air flight matches: {air_count}, Cat flight matches: {cat_count}")
+
+            # Union the queries and apply ordering
+            combined_query = air_query.union(cat_query).order_by(
+                Reconciliation.AirFlightDate, Reconciliation.AirFlightNo
+            )
+
+            total_before_pagination = combined_query.count()
+            self.logger.info(f"Total records before pagination: {total_before_pagination}")
+
+            # Apply pagination
+            if offset is not None:
+                combined_query = combined_query.offset(offset)
+            if limit is not None:
+                combined_query = combined_query.limit(limit)
+
+            results = combined_query.all()
+            self.logger.info(f"Final results returned: {len(results)}")
+
+            return results
+
+        except Exception as e:
+            self.logger.error(f"Error in get_by_flight_number: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+            return []
+
+    def get_count_by_flight_number(self, flight_number):
+        """Get count of records matching flight number"""
+        try:
+            self.logger.info(f"=== get_count_by_flight_number called ===")
+            self.logger.info(f"flight_number: {flight_number}")
+
+            air_query = self.session.query(Reconciliation).filter(
+                Reconciliation.AirFlightNo.ilike(f"%{flight_number}%")
+            )
+
+            cat_query = self.session.query(Reconciliation).filter(
+                Reconciliation.CatFlightNo.ilike(f"%{flight_number}%")
+            )
+
+            combined_query = air_query.union(cat_query)
+            total_count = combined_query.count()
+
+            self.logger.info(f"Total count for flight number {flight_number}: {total_count}")
+            return total_count
+
+        except Exception as e:
+            self.logger.error(f"Error in get_count_by_flight_number: {e}")
+            return 0
+
+    def get_filtered_by_flight_number(
+        self, filter_type, flight_number, limit=None, offset=None
+    ):
+        """
+        Get filtered reconciliation records by flight number
+        """
+        try:
+            self.logger.info(f"=== get_filtered_by_flight_number called ===")
+            self.logger.info(f"filter_type: {filter_type}, flight_number: {flight_number}")
+
+            # Base queries for flight number filtering
+            air_base_query = self.session.query(Reconciliation).filter(
+                Reconciliation.AirFlightNo.ilike(f"%{flight_number}%")
+            )
+
+            cat_base_query = self.session.query(Reconciliation).filter(
+                Reconciliation.CatFlightNo.ilike(f"%{flight_number}%")
+            )
+
+            # Apply additional filters to both queries
+            if filter_type == "discrepancies":
+                air_query = air_base_query.filter(
+                    (Reconciliation.DifQty == "Yes")
+                    | (Reconciliation.DifPrice == "Yes")
+                )
+                cat_query = cat_base_query.filter(
+                    (Reconciliation.DifQty == "Yes")
+                    | (Reconciliation.DifPrice == "Yes")
+                )
+            elif filter_type == "quantity_difference":
+                air_query = air_base_query.filter(Reconciliation.DifQty == "Yes")
+                cat_query = cat_base_query.filter(Reconciliation.DifQty == "Yes")
+            elif filter_type == "price_difference":
+                air_query = air_base_query.filter(Reconciliation.DifPrice == "Yes")
+                cat_query = cat_base_query.filter(Reconciliation.DifPrice == "Yes")
+            elif filter_type == "air_only":
+                air_query = air_base_query.filter(
+                    Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+                )
+                cat_query = cat_base_query.filter(
+                    Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+                )
+            elif filter_type == "cat_only":
+                air_query = air_base_query.filter(
+                    Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+                )
+                cat_query = cat_base_query.filter(
+                    Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+                )
+            else:
+                air_query = air_base_query
+                cat_query = cat_base_query
+
+            air_count = air_query.count()
+            cat_count = cat_query.count()
+            self.logger.info(f"Filtered counts - Air: {air_count}, Cat: {cat_count}")
+
+            # Union and apply pagination
+            combined_query = air_query.union(cat_query).order_by(
+                Reconciliation.AirFlightDate, Reconciliation.AirFlightNo
+            )
+
+            if offset is not None:
+                combined_query = combined_query.offset(offset)
+            if limit is not None:
+                combined_query = combined_query.limit(limit)
+
+            results = combined_query.all()
+            self.logger.info(f"Filtered results returned: {len(results)}")
+            return results
+
+        except Exception as e:
+            self.logger.error(f"Error in get_filtered_by_flight_number: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+            return []
+
+    def get_filtered_count_by_flight_number(self, filter_type, flight_number):
+        """Get count of filtered records by flight number"""
+        try:
+            self.logger.info(f"=== get_filtered_count_by_flight_number called ===")
+            self.logger.info(f"filter_type: {filter_type}, flight_number: {flight_number}")
+
+            # Base queries for flight number filtering
+            air_base_query = self.session.query(Reconciliation).filter(
+                Reconciliation.AirFlightNo.ilike(f"%{flight_number}%")
+            )
+
+            cat_base_query = self.session.query(Reconciliation).filter(
+                Reconciliation.CatFlightNo.ilike(f"%{flight_number}%")
+            )
+
+            # Apply additional filters
+            if filter_type == "discrepancies":
+                air_query = air_base_query.filter(
+                    (Reconciliation.DifQty == "Yes")
+                    | (Reconciliation.DifPrice == "Yes")
+                )
+                cat_query = cat_base_query.filter(
+                    (Reconciliation.DifQty == "Yes")
+                    | (Reconciliation.DifPrice == "Yes")
+                )
+            elif filter_type == "quantity_difference":
+                air_query = air_base_query.filter(Reconciliation.DifQty == "Yes")
+                cat_query = cat_base_query.filter(Reconciliation.DifQty == "Yes")
+            elif filter_type == "price_difference":
+                air_query = air_base_query.filter(Reconciliation.DifPrice == "Yes")
+                cat_query = cat_base_query.filter(Reconciliation.DifPrice == "Yes")
+            elif filter_type == "air_only":
+                air_query = air_base_query.filter(
+                    Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+                )
+                cat_query = cat_base_query.filter(
+                    Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+                )
+            elif filter_type == "cat_only":
+                air_query = air_base_query.filter(
+                    Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+                )
+                cat_query = cat_base_query.filter(
+                    Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+                )
+            else:
+                air_query = air_base_query
+                cat_query = cat_base_query
+
+            # Count union results
+            combined_query = air_query.union(cat_query)
+            total_count = combined_query.count()
+            self.logger.info(f"Filtered count result: {total_count}")
+            return total_count
+
+        except Exception as e:
+            self.logger.error(f"Error in get_filtered_count_by_flight_number: {e}")
+            return 0
+
     def debug_database_content(self):
         """Debug method to see what's actually in the database"""
         try:
