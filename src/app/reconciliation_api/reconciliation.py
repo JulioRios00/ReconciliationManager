@@ -23,7 +23,7 @@ class DecimalEncoder(json.JSONEncoder):
 
 def main(event, context):
     """
-    Lambda handler for retrieving reconciliation data with pagination and date filtering
+    Lambda handler for retrieving reconciliation data with pagination and filtering
     """
     logger.info("Received request for reconciliation data")
     logger.info(f"Event: {json.dumps(event)}")
@@ -35,11 +35,13 @@ def main(event, context):
         limit = int(query_params.get('limit', 100))
         offset = int(query_params.get('offset', 0))
         filter_type = query_params.get('filter_type', 'all')
-        start_date = query_params.get('start_date')  # Add this
-        end_date = query_params.get('end_date')      # Add this
+        start_date = query_params.get('start_date')
+        end_date = query_params.get('end_date')
+        flight_number = query_params.get('flight_number')
 
         logger.info(f"Parsed parameters: limit={limit}, offset={offset}, filter_type={filter_type}")
         logger.info(f"Date range: start_date={start_date}, end_date={end_date}")
+        logger.info(f"Flight number: flight_number={flight_number}")
 
         valid_filter_types = [
             'all',
@@ -47,7 +49,9 @@ def main(event, context):
             'air_only',
             'cat_only',
             'quantity_difference',
-            'price_difference'
+            'price_difference',
+            'flight_date',
+            'flight_number'
         ]
         if filter_type not in valid_filter_types:
             return {
@@ -64,15 +68,16 @@ def main(event, context):
             }
 
         with get_session() as session:
-            # Pass the date parameters to the service
+            # Pass all parameters to the service
             result = (
                 ReconciliationService(session)
                 .get_paginated_reconciliation_data(
                     limit=limit, 
                     offset=offset, 
                     filter_type=filter_type,
-                    start_date=start_date,  # Add this
-                    end_date=end_date       # Add this
+                    start_date=start_date,
+                    end_date=end_date,
+                    flight_number=flight_number
                 )
             )
             
