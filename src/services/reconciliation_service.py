@@ -14,22 +14,30 @@ class ReconciliationService:
         self.reconciliation_repository = ReconciliationRepository(db_session)
 
     def _parse_date(self, date_str):
-        """Parse date string to datetime object"""
+        """Parse date string to datetime object, handling YYYY-DD-MM format"""
         if not date_str:
             return None
 
         try:
+            # First try standard YYYY-MM-DD format
             parsed = datetime.strptime(date_str, "%Y-%m-%d").date()
-            logger.info(f"Parsed date '{date_str}' to {parsed}")
+            logger.info(f"Parsed date '{date_str}' as standard YYYY-MM-DD to {parsed}")
             return parsed
         except ValueError:
             try:
-                parsed = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").date()
-                logger.info(f"Parsed datetime '{date_str}' to {parsed}")
-                return parsed
+                # Try YYYY-DD-MM format (your database format)
+                parsed_ddmm = datetime.strptime(date_str, "%Y-%d-%m").date()
+                logger.info(f"Parsed date '{date_str}' as YYYY-DD-MM to {parsed_ddmm}")
+                return parsed_ddmm
             except ValueError:
-                logger.error(f"Could not parse date: {date_str}")
-                return None
+                try:
+                    # Try with datetime string
+                    parsed = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").date()
+                    logger.info(f"Parsed datetime '{date_str}' to {parsed}")
+                    return parsed
+                except ValueError:
+                    logger.error(f"Could not parse date: {date_str}")
+                    return None
 
     def get_all_reconciliation_data(self):
         """
