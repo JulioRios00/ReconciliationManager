@@ -28,6 +28,7 @@ def main(event, context):
         start_date = query_params.get('start_date')
         end_date = query_params.get('end_date')
         flight_number = query_params.get('flight_number')
+        item_name = query_params.get('item_name')
 
         valid_filter_types = [
             'all',
@@ -60,7 +61,8 @@ def main(event, context):
                     filter_type=filter_type,
                     start_date=start_date,
                     end_date=end_date,
-                    flight_number=flight_number
+                    flight_number=flight_number,
+                    item_name=item_name
                 )
             )
         

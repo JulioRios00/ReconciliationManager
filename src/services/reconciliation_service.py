@@ -40,7 +40,8 @@ class ReconciliationService:
         filter_type='all',
         start_date=None,
         end_date=None,
-        flight_number=None
+        flight_number=None,
+        item_name=None
     ):
         """Retrieve paginated data from the ccs.Reconciliation table using SQLAlchemy"""
         try:
@@ -49,8 +50,8 @@ class ReconciliationService:
             parsed_end_date = self._parse_date(end_date) if end_date else None
 
             # Handle different filtering scenarios
-            if parsed_start_date and parsed_end_date and flight_number:
-                # Date range + flight number filtering (not implemented yet)
+            if parsed_start_date and parsed_end_date and flight_number and item_name:
+                # Date range + flight number + item name filtering (complex scenario)
                 if filter_type == 'all':
                     records = self.reconciliation_repository.get_by_date_range(
                         parsed_start_date, parsed_end_date, limit, offset
@@ -64,6 +65,40 @@ class ReconciliationService:
                     )
                     total_count = self.reconciliation_repository.get_filtered_count_by_date_range(
                         filter_type, parsed_start_date, parsed_end_date
+                    )
+            elif parsed_start_date and parsed_end_date and item_name:
+                # Date range + item name filtering
+                if filter_type == 'all':
+                    records = self.reconciliation_repository.get_by_item_name_and_date_range(
+                        item_name, parsed_start_date, parsed_end_date, limit, offset
+                    )
+                    total_count = self.reconciliation_repository.get_count_by_item_name_and_date_range(
+                        item_name, parsed_start_date, parsed_end_date
+                    )
+                else:
+                    # For filtered + date + item, we'll use the basic date range filter for now
+                    records = self.reconciliation_repository.get_filtered_by_date_range(
+                        filter_type, parsed_start_date, parsed_end_date, limit, offset
+                    )
+                    total_count = self.reconciliation_repository.get_filtered_count_by_date_range(
+                        filter_type, parsed_start_date, parsed_end_date
+                    )
+            elif flight_number and item_name:
+                # Flight number + item name filtering
+                if filter_type == 'all':
+                    records = self.reconciliation_repository.get_by_item_name_and_flight_number(
+                        item_name, flight_number, limit, offset
+                    )
+                    total_count = self.reconciliation_repository.get_count_by_item_name_and_flight_number(
+                        item_name, flight_number
+                    )
+                else:
+                    # For filtered + flight + item, we'll use the basic flight filter for now
+                    records = self.reconciliation_repository.get_filtered_by_flight_number(
+                        filter_type, flight_number, limit, offset
+                    )
+                    total_count = self.reconciliation_repository.get_filtered_count_by_flight_number(
+                        filter_type, flight_number
                     )
             elif parsed_start_date and parsed_end_date:
                 # Date range filtering only
@@ -97,8 +132,24 @@ class ReconciliationService:
                     total_count = self.reconciliation_repository.get_filtered_count_by_flight_number(
                         filter_type, flight_number
                     )
+            elif item_name:
+                # Item name filtering only
+                if filter_type == 'all':
+                    records = self.reconciliation_repository.get_by_item_name(
+                        item_name, limit, offset
+                    )
+                    total_count = self.reconciliation_repository.get_count_by_item_name(
+                        item_name
+                    )
+                else:
+                    records = self.reconciliation_repository.get_filtered_by_item_name(
+                        filter_type, item_name, limit, offset
+                    )
+                    total_count = self.reconciliation_repository.get_filtered_count_by_item_name(
+                        filter_type, item_name
+                    )
             else:
-                # No date or flight number filtering
+                # No filtering
                 if filter_type == 'all':
                     records = self.reconciliation_repository.get_paginated(limit, offset)
                     total_count = self.reconciliation_repository.get_count()
@@ -125,7 +176,8 @@ class ReconciliationService:
                     "filter_type": filter_type,
                     "start_date": start_date,
                     "end_date": end_date,
-                    "flight_number": flight_number
+                    "flight_number": flight_number,
+                    "item_name": item_name
                 }
             }
         except Exception as e:
