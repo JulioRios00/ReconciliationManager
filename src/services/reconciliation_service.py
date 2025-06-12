@@ -71,9 +71,8 @@ class ReconciliationService:
                 f"Parameters: limit={limit}, offset={offset}, filter_type={filter_type}"
             )
             logger.info(f"Date range: start_date='{start_date}', end_date='{end_date}'")
-            logger.info(f"Flight number: flight_number='{flight_number}'")  # Add this
+            logger.info(f"Flight number: flight_number='{flight_number}'")
 
-            # Parse dates if provided
             parsed_start_date = self._parse_date(start_date) if start_date else None
             parsed_end_date = self._parse_date(end_date) if end_date else None
 
@@ -85,29 +84,38 @@ class ReconciliationService:
             if flight_number:
                 logger.info("Applying flight number filter")
                 if filter_type == "all":
-                    records = self.reconciliation_repository.get_by_flight_number(
-                        flight_number, limit, offset
+                    records = (
+                        self.reconciliation_repository.get_by_flight_number(
+                            flight_number, limit, offset
+                        )
                     )
                     total_count = (
-                        self.reconciliation_repository.get_count_by_flight_number(
+                        self.reconciliation_repository
+                        .get_count_by_flight_number(
                             flight_number
                         )
                     )
                 else:
                     logger.info(
-                        f"Applying filter_type: {filter_type} with flight number"
+                        "Applying filter_type: "
+                        f"{filter_type} with flight number"
                     )
                     records = (
-                        self.reconciliation_repository.get_filtered_by_flight_number(
+                        self.reconciliation_repository.
+                        get_filtered_by_flight_number(
                             filter_type, flight_number, limit, offset
                         )
                     )
-                    total_count = self.reconciliation_repository.get_filtered_count_by_flight_number(
-                        filter_type, flight_number
+                    total_count = (
+                        self.reconciliation_repository.
+                        get_filtered_count_by_flight_number(
+                            filter_type, flight_number
+                        )
                     )
 
                 logger.info(
-                    f"Flight number query returned {len(records)} records, total_count={total_count}"
+                    f"Flight number query returned {len(records)} "
+                    f"records, total_count={total_count}"
                 )
 
             # Handle date range filtering
@@ -124,21 +132,33 @@ class ReconciliationService:
                     )
                 else:
                     logger.info(f"Applying filter_type: {filter_type}")
-                    records = self.reconciliation_repository.get_filtered_by_date_range(
-                        filter_type, parsed_start_date, parsed_end_date, limit, offset
+                    records = (
+                        self.reconciliation_repository
+                        .get_filtered_by_date_range(
+                            filter_type,
+                            parsed_start_date,
+                            parsed_end_date,
+                            limit,
+                            offset
+                        )
                     )
                     total_count = (
-                        self.reconciliation_repository.get_filtered_count_by_date_range(
-                            filter_type, parsed_start_date, parsed_end_date
+                        self.reconciliation_repository
+                        .get_filtered_count_by_date_range(
+                            filter_type,
+                            parsed_start_date,
+                            parsed_end_date
                         )
                     )
 
                 logger.info(
-                    f"Date range query returned {len(records)} records, total_count={total_count}"
+                    f"Date range query returned {len(records)} "
+                    f"records, total_count={total_count}"
                 )
             else:
                 logger.info(
-                    "No date range or flight number filter, using original logic"
+                    "No date range or flight number filter,"
+                    " using original logic"
                 )
                 if filter_type == "all":
                     records = self.reconciliation_repository.get_paginated(
@@ -146,11 +166,14 @@ class ReconciliationService:
                     )
                     total_count = self.reconciliation_repository.get_count()
                 else:
-                    records = self.reconciliation_repository.get_filtered_paginated(
-                        filter_type, limit, offset
+                    records = (
+                        self.reconciliation_repository.get_filtered_paginated(
+                            filter_type, limit, offset
+                        )
                     )
-                    total_count = self.reconciliation_repository.get_filtered_count(
-                        filter_type
+                    total_count = (
+                        self.reconciliation_repository
+                        .get_filtered_count(filter_type)
                     )
 
             result_list = [record.serialize() for record in records]
@@ -163,7 +186,8 @@ class ReconciliationService:
                     "limit": limit,
                     "offset": offset,
                     "next_offset": (
-                        offset + limit if offset + limit < total_count else None
+                        offset + limit
+                        if offset + limit < total_count else None
                     ),
                 },
                 "filters": {
@@ -202,8 +226,12 @@ class ReconciliationService:
             cat_only_records = sum(
                 1 for r in records if r.Air == "No" and r.Cat == "Yes"
             )
-            quantity_discrepancies = sum(1 for r in records if r.DifQty == "Yes")
-            price_discrepancies = sum(1 for r in records if r.DifPrice == "Yes")
+            quantity_discrepancies = sum(
+                1 for r in records if r.DifQty == "Yes"
+            )
+            price_discrepancies = sum(
+                1 for r in records if r.DifPrice == "Yes"
+            )
             total_discrepancies = sum(
                 1 for r in records if r.DifQty == "Yes" or r.DifPrice == "Yes"
             )
@@ -217,7 +245,8 @@ class ReconciliationService:
                         pass
 
             logger.info(
-                f"Summary calculated: total={total_records}, matching={matching_records}"
+                f"Summary calculated: total={total_records}, "
+                f"matching={matching_records}"
             )
 
             return {
