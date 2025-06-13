@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 import uuid
 from typing import List, Optional
 import logging
+from datetime import datetime
 
 from models.schema_ccs import ReconAnnotation
 from enums.status_enum import StatusEnum
@@ -18,6 +19,8 @@ class ReconAnnotationRepository:
         reconciliation_id: uuid.UUID,
         annotation: str,
         status: Optional[StatusEnum] = None,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
     ) -> ReconAnnotation:
         """
         Create a new annotation for a reconciliation item
@@ -26,19 +29,35 @@ class ReconAnnotationRepository:
             reconciliation_id: UUID of the reconciliation item
             annotation: Text of the annotation
             status: Optional status of the annotation
+            created_at: Optional creation datetime (defaults to current UTC time)
+            updated_at: Optional update datetime (defaults to current UTC time)
 
         Returns:
             The created ReconAnnotation object
         """
         try:
+            # Set default datetime if not provided
+            current_time = datetime.utcnow()
+            if created_at is None:
+                created_at = current_time
+            if updated_at is None:
+                updated_at = current_time
+
             new_annotation = ReconAnnotation(
                 reconciliation_id=reconciliation_id,
                 annotation=annotation,
                 status=status,
             )
+            
+            # Set the DataCriacao and DataAtualizacao fields
+            new_annotation.DataCriacao = created_at
+            new_annotation.DataAtualizacao = updated_at
+            
             self.db_session.add(new_annotation)
             self.db_session.commit()
             self.db_session.refresh(new_annotation)
+            
+            logging.info(f"Created annotation {new_annotation.Id} at {created_at}")
             return new_annotation
         except Exception as e:
             self.db_session.rollback()
@@ -89,6 +108,7 @@ class ReconAnnotationRepository:
                     ReconAnnotation.Ativo.is_(True),
                     ReconAnnotation.Excluido.is_(False),
                 )
+                .order_by(ReconAnnotation.DataCriacao.desc())  # Order by creation date, newest first
                 .all()
             )
         except Exception as e:
@@ -100,6 +120,7 @@ class ReconAnnotationRepository:
         annotation_id: uuid.UUID,
         annotation: Optional[str] = None,
         status: Optional[StatusEnum] = None,
+        updated_at: Optional[datetime] = None,
     ) -> Optional[ReconAnnotation]:
         """
         Update an annotation
@@ -108,6 +129,7 @@ class ReconAnnotationRepository:
             annotation_id: UUID of the annotation
             annotation: New text for the annotation (optional)
             status: New status for the annotation (optional)
+            updated_at: Optional update datetime (defaults to current UTC time)
 
         Returns:
             The updated ReconAnnotation object if found, None otherwise
@@ -117,14 +139,24 @@ class ReconAnnotationRepository:
             if not annotation_obj:
                 return None
 
+            # Set default datetime if not provided
+            if updated_at is None:
+                updated_at = datetime.utcnow()
+
+            # Update fields if provided
             if annotation is not None:
                 annotation_obj.Annotation = annotation
 
             if status is not None:
                 annotation_obj.Status = status
 
+            # Always update the DataAtualizacao timestamp (only update, don't touch DataCriacao)
+            annotation_obj.DataAtualizacao = updated_at
+
             self.db_session.commit()
             self.db_session.refresh(annotation_obj)
+            
+            logging.info(f"Updated annotation {annotation_id} at {updated_at}")
             return annotation_obj
         except Exception as e:
             self.db_session.rollback()
@@ -146,9 +178,13 @@ class ReconAnnotationRepository:
             if not annotation_obj:
                 return False
 
+            # Update the DataAtualizacao timestamp when soft deleting
             annotation_obj.Ativo = False
             annotation_obj.Excluido = True
+            annotation_obj.DataAtualizacao = datetime.utcnow()
+            
             self.db_session.commit()
+            logging.info(f"Soft deleted annotation {annotation_id} at {datetime.utcnow()}")
             return True
         except Exception as e:
             self.db_session.rollback()
@@ -172,6 +208,7 @@ class ReconAnnotationRepository:
 
             self.db_session.delete(annotation_obj)
             self.db_session.commit()
+            logging.info(f"Hard deleted annotation {annotation_id}")
             return True
         except Exception as e:
             self.db_session.rollback()

@@ -999,7 +999,7 @@
     "runtime": "python3.8",
     "payload": {
       "json": {
-        "body": "{\"reconciliation_id\":\"622a916f-3820-428c-952d-90f92f0cd64d\",\"annotation\":\"This is a test annotation for the BGI-LHR flight with quantity and price discrepancies\",\"status\":\"PENDING\"}",
+        "body": "{\"reconciliation_id\":\"c5e1e619-a248-4dee-85b1-1a67b130fe2f\",\"annotation\":\"This is a test annotation for the BGI-LHR flight with quantity and price discrepancies\",\"status\":\"PENDING\"}",
         "resource": "/{proxy+}",
         "path": "/api/annotations",
         "httpMethod": "POST",
@@ -1079,12 +1079,12 @@
     "payload": {
       "json": {
         "resource": "/{proxy+}",
-        "path": "/api/annotations/by-id/6b0db600-f282-4579-ab78-6226aeffab36",
+        "path": "/api/annotations/by-id/0a94f304-3927-42cb-b1d7-c12a071ba5ec",
         "httpMethod": "GET",
         "queryStringParameters": {},
         "pathParameters": {
-          "proxy": "by-id/6b0db600-f282-4579-ab78-6226aeffab36",
-          "annotation_id": "6b0db600-f282-4579-ab78-6226aeffab36"
+          "proxy": "by-id/0a94f304-3927-42cb-b1d7-c12a071ba5ec",
+          "annotation_id": "0a94f304-3927-42cb-b1d7-c12a071ba5ec"
         },
         "headers": {
           "Authorization": "Bearer eyJraWQiOiJ1QUU5c2NXOWo4a09wT1FkK0pjUzRDTlVMcVhiNGg0WUF6cXk0Y2c1dE1ZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJjNGI4ODQwOC1mMDMxLTcwMTMtMDQ2Ny1iMTI0YjBlYTNjNTIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KUndROXk0SmciLCJjbGllbnRfaWQiOiI1dmxpbG90a3I5bXRkcHZiNDdmanY5ZmQ3MyIsIm9yaWdpbl9qdGkiOiJiMzFlZjlkYi1hMjNmLTQ4MDgtYmZhNC04YjBkMWQ4MjA4N2YiLCJldmVudF9pZCI6Ijg0ZmViNTgzLTI3MWUtNDlmYi05MDNmLTNiMzNjYWY1ZTEzMyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MjEzMDkxNzIsImV4cCI6MTcyMTMyNTUxNywiaWF0IjoxNzIxMzIxOTE3LCJqdGkiOiJhODQ4MzFjZi1kZTA2LTQ3NDctYTAyOS04OTgyODIzM2E5MzUiLCJ1c2VybmFtZSI6ImM0Yjg4NDA4LWYwMzEtNzAxMy0wNDY3LWIxMjRiMGVhM2M1MiJ9.e2HVshTdy1ExtUYpgSxaRPGbjbncapHdgOPUdeebE1GqMWFxNQya9RCdxyB3yjxDp_L6ZeJiw9lgkSNeNqZ06rpmWxmXAkTmfWOCt3m9Hx4SieATFArDyiVssze2gNYm4tL1uYWQgL7Qop5RzPKWn_XrhgJ_dm8a-Sao98sSbhLYinI9JTGXJ8Yfg3irTcJSSVf1xvhUup4DvKX4aJU8WckyVYUo0J9qnCmS8dkt_IstIvnWoxtJLVt-UA_v0IFt5miowWqAzsali3okyOxOyQ4-7rBlnFrN0ZjiQEU4uDyG2vBC18g0QruGRgiNU1CHa4LqZ548sor2LCXLabYbHQ",
@@ -1154,7 +1154,7 @@
     "runtime": "python3.8",
     "payload": {
       "json": {
-        "body": "{\"annotation_id\":\"16934be7-66ba-4e9c-b892-7e1eb13404ac\",\"annotation\":\"Updated annotation: Price discrepancy resolved after review\",\"status\":\"COMPLETED\"}",
+        "body": "{\"annotation_id\":\"0a94f304-3927-42cb-b1d7-c12a071ba5ec\",\"annotation\":\"Updated annotation: Make the way testing\",\"status\":\"COMPLETED\"}",
         "resource": "/{proxy+}",
         "path": "/api/annotations",
         "httpMethod": "PUT",

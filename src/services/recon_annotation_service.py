@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 import uuid
 from typing import Dict, Any, Optional, Tuple
 import logging
+from datetime import datetime
 
 from repositories.recon_annotation_repository import ReconAnnotationRepository
 from repositories.ccs_repository import ReconciliationRepository
@@ -123,11 +124,18 @@ class ReconAnnotationService:
             else:
                 status_enum = None
 
+            # Add current datetime for creation
+            current_datetime = datetime.utcnow()
+
             annotation = self.annotation_repository.create(
                 reconciliation_id=reconciliation_uuid,
                 annotation=annotation_text,
                 status=status_enum,
+                created_at=current_datetime,
+                updated_at=current_datetime,
             )
+
+            logger.info(f"Annotation created successfully at {current_datetime} for reconciliation: {reconciliation_uuid}")
 
             return {"success": True, "error": None, "data": annotation.serialize()}
 
@@ -263,15 +271,21 @@ class ReconAnnotationService:
                     }
                 status_enum = status_validation["enum_value"]
 
+            # Add current datetime for update
+            current_datetime = datetime.utcnow()
+
             annotation = self.annotation_repository.update(
                 annotation_id=annotation_uuid,
                 annotation=annotation_text,
                 status=status_enum,
+                updated_at=current_datetime,
             )
 
             if not annotation:
                 logger.error(f"Annotation not found for update: {annotation_uuid}")
                 return {"success": False, "error": "Annotation not found", "data": None}
+
+            logger.info(f"Annotation updated successfully at {current_datetime} for annotation: {annotation_uuid}")
 
             return {"success": True, "error": None, "data": annotation.serialize()}
 
