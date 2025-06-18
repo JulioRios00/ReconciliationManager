@@ -945,7 +945,12 @@ class ReconciliationRepository:
 
         return combined_query.all()
 
-    def get_filtered_count_by_date_range(self, filter_type, start_date, end_date):
+    def get_filtered_count_by_date_range(
+        self,
+        filter_type,
+        start_date,
+        end_date
+    ):
         """Get count of filtered records in flight date range"""
         air_base_query = self.session.query(Reconciliation).filter(
             func.date(Reconciliation.AirFlightDate) >= start_date,
@@ -1130,167 +1135,329 @@ class ReconciliationRepository:
 
     def get_by_item_name(self, item_name, limit=None, offset=None):
         """Get reconciliation records filtered by item name/description"""
-        query = self.session.query(Reconciliation).filter(
-            (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%")) |
-            (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
-        ).order_by(
-            Reconciliation.AirFlightDate,
-            Reconciliation.AirFlightNo
+        query = (
+            self.session.query(Reconciliation)
+            .filter(
+                (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
+                | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+            )
+            .order_by(Reconciliation.AirFlightDate, Reconciliation.AirFlightNo)
         )
-        
+
         if offset is not None:
             query = query.offset(offset)
         if limit is not None:
             query = query.limit(limit)
-        
+
         return query.all()
 
     def get_count_by_item_name(self, item_name):
         """Get count of records filtered by item name/description"""
-        return self.session.query(Reconciliation).filter(
-            (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%")) |
-            (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
-        ).count()
-
-    def get_filtered_by_item_name(self, filter_type, item_name, limit=None, offset=None):
-        """Get filtered reconciliation records by item name/description"""
-        query = self.session.query(Reconciliation).filter(
-            (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%")) |
-            (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+        return (
+            self.session.query(Reconciliation)
+            .filter(
+                (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
+                | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+            )
+            .count()
         )
 
-        if filter_type == 'discrepancies':
+    def get_filtered_by_item_name(
+        self, filter_type, item_name, limit=None, offset=None
+    ):
+        """Get filtered reconciliation records by item name/description"""
+        query = self.session.query(Reconciliation).filter(
+            (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
+            | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+        )
+
+        if filter_type == "discrepancies":
             query = query.filter(
-                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
             )
-        elif filter_type == 'quantity_difference':
-            query = query.filter(Reconciliation.DifQty == 'Yes')
-        elif filter_type == 'price_difference':
-            query = query.filter(Reconciliation.DifPrice == 'Yes')
-        elif filter_type == 'air_only':
+        elif filter_type == "quantity_difference":
+            query = query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            query = query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
             query = query.filter(
-                Reconciliation.Air == 'Yes',
-                Reconciliation.Cat == 'No'
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
             )
-        elif filter_type == 'cat_only':
+        elif filter_type == "cat_only":
             query = query.filter(
-                Reconciliation.Air == 'No',
-                Reconciliation.Cat == 'Yes'
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
             )
 
         query = query.order_by(
             Reconciliation.AirFlightDate,
             Reconciliation.AirFlightNo
         )
-        
+
         if offset is not None:
             query = query.offset(offset)
         if limit is not None:
             query = query.limit(limit)
-        
+
         return query.all()
 
     def get_filtered_count_by_item_name(self, filter_type, item_name):
         """Get count of filtered records by item name/description"""
         query = self.session.query(Reconciliation).filter(
-            (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%")) |
-            (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+            (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
+            | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
         )
 
-        if filter_type == 'discrepancies':
+        if filter_type == "discrepancies":
             query = query.filter(
-                (Reconciliation.DifQty == 'Yes') | (Reconciliation.DifPrice == 'Yes')
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
             )
-        elif filter_type == 'quantity_difference':
-            query = query.filter(Reconciliation.DifQty == 'Yes')
-        elif filter_type == 'price_difference':
-            query = query.filter(Reconciliation.DifPrice == 'Yes')
-        elif filter_type == 'air_only':
+        elif filter_type == "quantity_difference":
+            query = query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            query = query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
             query = query.filter(
-                Reconciliation.Air == 'Yes',
-                Reconciliation.Cat == 'No'
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
             )
-        elif filter_type == 'cat_only':
+        elif filter_type == "cat_only":
             query = query.filter(
-                Reconciliation.Air == 'No',
-                Reconciliation.Cat == 'Yes'
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
             )
 
         return query.count()
 
-    def get_by_item_name_and_date_range(self, item_name, start_date, end_date, limit=None, offset=None):
+    def get_by_item_name_and_date_range(
+        self, item_name, start_date, end_date, limit=None, offset=None
+    ):
         """Get reconciliation records filtered by item name and date range"""
         air_query = self.session.query(Reconciliation).filter(
             func.date(Reconciliation.AirFlightDate) >= start_date,
             func.date(Reconciliation.AirFlightDate) <= end_date,
-            Reconciliation.AirServiceDescription.ilike(f"%{item_name}%")
+            Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"),
         )
-        
+
         cat_query = self.session.query(Reconciliation).filter(
             func.date(Reconciliation.CatFltDate) >= start_date,
             func.date(Reconciliation.CatFltDate) <= end_date,
-            Reconciliation.CatItemDesc.ilike(f"%{item_name}%")
+            Reconciliation.CatItemDesc.ilike(f"%{item_name}%"),
         )
-        
+
         combined_query = air_query.union(cat_query).order_by(
-            Reconciliation.AirFlightDate,
-            Reconciliation.AirFlightNo
+            Reconciliation.AirFlightDate, Reconciliation.AirFlightNo
         )
-        
+
         if offset is not None:
             combined_query = combined_query.offset(offset)
         if limit is not None:
             combined_query = combined_query.limit(limit)
-        
+
         return combined_query.all()
 
-    def get_count_by_item_name_and_date_range(self, item_name, start_date, end_date):
+    def get_count_by_item_name_and_date_range(
+        self,
+        item_name,
+        start_date,
+        end_date
+    ):
         """Get count of records filtered by item name and date range"""
         air_query = self.session.query(Reconciliation).filter(
             func.date(Reconciliation.AirFlightDate) >= start_date,
             func.date(Reconciliation.AirFlightDate) <= end_date,
-            Reconciliation.AirServiceDescription.ilike(f"%{item_name}%")
+            Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"),
         )
-        
+
         cat_query = self.session.query(Reconciliation).filter(
             func.date(Reconciliation.CatFltDate) >= start_date,
             func.date(Reconciliation.CatFltDate) <= end_date,
-            Reconciliation.CatItemDesc.ilike(f"%{item_name}%")
+            Reconciliation.CatItemDesc.ilike(f"%{item_name}%"),
         )
-        
+
         combined_query = air_query.union(cat_query)
         return combined_query.count()
 
-    def get_by_item_name_and_flight_number(self, item_name, flight_number, limit=None, offset=None):
-        """Get reconciliation records filtered by item name and flight number"""
-        query = self.session.query(Reconciliation).filter(
-            (
-                (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%")) |
-                (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
-            ) & (
-                (Reconciliation.AirFlightNo.ilike(f"%{flight_number}%")) |
-                (Reconciliation.CatFltNo.ilike(f"%{flight_number}%"))
+    def get_by_item_name_and_flight_number(
+        self, item_name, flight_number, limit=None, offset=None
+    ):
+        """
+        Get reconciliation records filtered by item name and flight number
+        """
+        query = (
+            self.session.query(Reconciliation)
+            .filter(
+                (
+                    (Reconciliation.AirServiceDescription.ilike(
+                        f"%{item_name}%"
+                    ))
+                    | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+                )
+                & (
+                    (Reconciliation.AirFlightNo.ilike(f"%{flight_number}%"))
+                    | (Reconciliation.CatFltNo.ilike(f"%{flight_number}%"))
+                )
             )
-        ).order_by(
-            Reconciliation.AirFlightDate,
-            Reconciliation.AirFlightNo
+            .order_by(Reconciliation.AirFlightDate, Reconciliation.AirFlightNo)
         )
-        
+
         if offset is not None:
             query = query.offset(offset)
         if limit is not None:
             query = query.limit(limit)
-        
+
         return query.all()
 
-    def get_count_by_item_name_and_flight_number(self, item_name, flight_number):
+    def get_count_by_item_name_and_flight_number(
+        self,
+        item_name,
+        flight_number
+    ):
         """Get count of records filtered by item name and flight number"""
-        return self.session.query(Reconciliation).filter(
-            (
-                (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%")) |
-                (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
-            ) & (
-                (Reconciliation.AirFlightNo.ilike(f"%{flight_number}%")) |
-                (Reconciliation.CatFltNo.ilike(f"%{flight_number}%"))
+        return (
+            self.session.query(Reconciliation)
+            .filter(
+                (
+                    (Reconciliation.AirServiceDescription.ilike(
+                        f"%{item_name}%"
+                    ))
+                    | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+                )
+                & (
+                    (Reconciliation.AirFlightNo.ilike(f"%{flight_number}%"))
+                    | (Reconciliation.CatFltNo.ilike(f"%{flight_number}%"))
+                )
             )
-        ).count()
+            .count()
+        )
+
+    def get_air_company_invoice_reports(
+        self,
+        limit=100,
+        offset=0,
+        start_date=None,
+        end_date=None,
+        flight_number=None
+    ):
+        """Get AirCompanyInvoiceReport records with optional filters"""
+        from models.schema_ccs import AirCompanyInvoiceReport
+
+        query = self.session.query(AirCompanyInvoiceReport).filter(
+            AirCompanyInvoiceReport.Ativo.is_(True),
+            AirCompanyInvoiceReport.Excluido.is_(False),
+        )
+
+        if start_date:
+            query = query.filter(
+                AirCompanyInvoiceReport.FlightDate >= start_date
+            )
+        if end_date:
+            query = query.filter(
+                AirCompanyInvoiceReport.FlightDate <= end_date
+            )
+        if flight_number:
+            query = query.filter(
+                AirCompanyInvoiceReport.FlightNo.ilike(f"%{flight_number}%")
+            )
+
+        return (
+            query.order_by(AirCompanyInvoiceReport.FlightDate.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+    def get_air_company_invoice_reports_count(
+        self, start_date=None, end_date=None, flight_number=None
+    ):
+        """Get count of AirCompanyInvoiceReport records with optional filters"""
+        from models.schema_ccs import AirCompanyInvoiceReport
+
+        query = self.session.query(AirCompanyInvoiceReport).filter(
+            AirCompanyInvoiceReport.Ativo.is_(True),
+            AirCompanyInvoiceReport.Excluido.is_(False),
+        )
+
+        if start_date:
+            query = query.filter(
+                AirCompanyInvoiceReport.FlightDate >= start_date
+            )
+        if end_date:
+            query = query.filter(
+                AirCompanyInvoiceReport.FlightDate <= end_date
+            )
+        if flight_number:
+            query = query.filter(
+                AirCompanyInvoiceReport.FlightNo.ilike(f"%{flight_number}%")
+            )
+
+        return query.count()
+
+    def get_catering_invoice_reports(
+        self,
+        limit=100,
+        offset=0,
+        start_date=None,
+        end_date=None,
+        flight_number=None
+    ):
+        """Get CateringInvoiceReport records with optional filters"""
+        from models.schema_ccs import CateringInvoiceReport
+
+        query = self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.Ativo.is_(True),
+            CateringInvoiceReport.Excluido.is_(False)
+        )
+
+        if start_date:
+            query = query.filter(CateringInvoiceReport.FltDate >= start_date)
+        if end_date:
+            query = query.filter(CateringInvoiceReport.FltDate <= end_date)
+        if flight_number:
+            query = query.filter(
+                CateringInvoiceReport.FltNo.ilike(f"%{flight_number}%")
+            )
+
+        return (
+            query.order_by(CateringInvoiceReport.FltDate.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+    def get_catering_invoice_reports_count(
+        self, start_date=None, end_date=None, flight_number=None
+    ):
+        """Get count of CateringInvoiceReport records with optional filters"""
+        from models.schema_ccs import CateringInvoiceReport
+
+        query = self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.Ativo.is_(True),
+            CateringInvoiceReport.Excluido.is_(False)
+        )
+
+        if start_date:
+            query = query.filter(CateringInvoiceReport.FltDate >= start_date)
+        if end_date:
+            query = query.filter(CateringInvoiceReport.FltDate <= end_date)
+        if flight_number:
+            query = query.filter(
+                CateringInvoiceReport.FltNo.ilike(f"%{flight_number}%")
+            )
+
+        return query.count()
+
+    def get_all_air_company_reports(self):
+        """Get all AirCompanyInvoiceReport records"""
+        from models.schema_ccs import AirCompanyInvoiceReport
+        
+        return self.session.query(AirCompanyInvoiceReport).filter(
+            AirCompanyInvoiceReport.Ativo.is_(True),
+            AirCompanyInvoiceReport.Excluido.is_(False)
+        ).order_by(AirCompanyInvoiceReport.FlightDate.desc()).all()
+
+    def get_all_catering_reports(self):
+        """Get all CateringInvoiceReport records"""
+        from models.schema_ccs import CateringInvoiceReport
+        
+        return self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.Ativo.is_(True),
+            CateringInvoiceReport.Excluido.is_(False)
+        ).order_by(CateringInvoiceReport.FltDate.desc()).all()

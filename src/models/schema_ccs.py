@@ -59,7 +59,6 @@ class Flight(Base):
             ForeignKey('ccs.Configuration.Id'),
             nullable=True)
         )
-    # Fix: Explicitly specify foreign_keys parameter
     Configuracao = relationship("Configuration", foreign_keys=[ConfiguracaoId], overlaps="Flight")
     FlightDateId = Column(
         UUID(as_uuid=True),
@@ -131,9 +130,7 @@ class Configuration(Base):
     Provision2 = Column(String(10))
     Tipo = Column(String(5))
     Svc = Column(Integer)
-    # Foreign Key
     IdFlight = Column(UUID(as_uuid=True), ForeignKey('ccs.Flight.Id'))
-    # Fix: Explicitly specify foreign_keys parameter
     Flight = relationship("Flight", foreign_keys=[IdFlight], overlaps="Configuracao")
 
 
@@ -448,7 +445,6 @@ class CateringInvoiceReport(Base):
         }
 
 
-# mudar para AirCompanyInvoiceReport
 class AirCompanyInvoiceReport(Base):
     __tablename__ = 'AirCompanyInvoiceReport'
     __table_args__ = {'schema': 'ccs'}
