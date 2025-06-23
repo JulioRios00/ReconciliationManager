@@ -137,6 +137,10 @@ provider:
       invoice_reports_api:
         path: "./src"
         file: Dockerfile.invoicereportsapi
+      analyse_data_api:
+        path: "./src"
+        file: Dockerfile.analysedataapi
+
   tracing:
     apiGateway: true
     lambda: true

@@ -1,0 +1,27 @@
+image: analyse_data_api
+description: analyse_data_api
+memorySize: 4096
+timeout: 900
+iamRoleStatementsInherit: true
+iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - s3:ListBucket
+    Resource: "arn:aws:s3:::mtw-elementar-ml-${self:custom.stage}-${aws:accountId}"
+  - Effect: Allow
+    Action:
+      - s3:*Object
+    Resource: "arn:aws:s3:::mtw-elementar-ml-${self:custom.stage}-${aws:accountId}/*"
+  - Effect: Allow
+    Action:
+      - sagemaker:*
+    Resource: "*"
+events:
+  - httpApi:
+      method: '*'
+      path: '/analyse_data_api/{proxy+}'
+      authorizer: 
+        name: CognitoAuthorizer
+  - httpApi:
+      method: 'OPTIONS'
+      path: '/analyse_data_api/{proxy+}'
