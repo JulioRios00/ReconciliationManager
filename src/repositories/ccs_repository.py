@@ -1461,3 +1461,9 @@ class ReconciliationRepository:
             CateringInvoiceReport.Ativo.is_(True),
             CateringInvoiceReport.Excluido.is_(False)
         ).order_by(CateringInvoiceReport.FltDate.desc()).all()
+    
+    def get_flight_class_mapping(self):
+        """Get all FlightClassMapping records"""
+        from models.schema_ccs import FlightClassMapping
+        
+        return self.session.query(FlightClassMapping).all()
