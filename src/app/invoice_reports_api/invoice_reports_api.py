@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 authorize = Authorize(current_user=get_current_user, app=app)
 
-ROUTE_PREFIX = '/invoice-reports'
+ROUTE_PREFIX = '/api/invoice-reports'
 
 
 # Get all Air Company Invoice Reports
