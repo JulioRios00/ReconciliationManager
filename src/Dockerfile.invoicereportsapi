@@ -1,15 +1,14 @@
 FROM public.ecr.aws/lambda/python:3.8
 
-COPY app/invoice_reports_api/requirements.txt .
-RUN  pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
+COPY app/invoice_reports_api/requirements.txt ${LAMBDA_TASK_ROOT}
+RUN pip install -r requirements.txt
 
-COPY app ${LAMBDA_TASK_ROOT}/app
-COPY services ${LAMBDA_TASK_ROOT}/services
-COPY common ${LAMBDA_TASK_ROOT}/common
-COPY models ${LAMBDA_TASK_ROOT}/models
-COPY enums ${LAMBDA_TASK_ROOT}/enums
-COPY repositories ${LAMBDA_TASK_ROOT}/repositories
-COPY response_models ${LAMBDA_TASK_ROOT}/response_models
+COPY app/invoice_reports_api/invoice_reports_api.py ${LAMBDA_TASK_ROOT}
 
-CMD [ "invoice_reports_api.main" ]
+COPY services/ ${LAMBDA_TASK_ROOT}/services/
+COPY repositories/ ${LAMBDA_TASK_ROOT}/repositories/
+COPY models/ ${LAMBDA_TASK_ROOT}/models/
+COPY enums/ ${LAMBDA_TASK_ROOT}/enums/
+COPY common/ ${LAMBDA_TASK_ROOT}/common/
 
+CMD ["invoice_reports_api.main"]
