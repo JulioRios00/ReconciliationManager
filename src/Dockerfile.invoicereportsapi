@@ -1,12 +1,8 @@
 FROM public.ecr.aws/lambda/python:3.8
 
-# Install the function's dependencies using file requirements.txt
-# from your project folder.
-
 COPY app/invoice_reports_api/requirements.txt .
 RUN  pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-# Copy the entire app structure to maintain proper module paths
 COPY app ${LAMBDA_TASK_ROOT}/app
 COPY services ${LAMBDA_TASK_ROOT}/services
 COPY common ${LAMBDA_TASK_ROOT}/common
@@ -15,6 +11,5 @@ COPY enums ${LAMBDA_TASK_ROOT}/enums
 COPY repositories ${LAMBDA_TASK_ROOT}/repositories
 COPY response_models ${LAMBDA_TASK_ROOT}/response_models
 
-# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
 CMD [ "invoice_reports_api.main" ]
 

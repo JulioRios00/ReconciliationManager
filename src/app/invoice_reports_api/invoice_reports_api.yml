@@ -1,11 +1,12 @@
-image:
-  name: invoice_reports_api
+image: invoice_reports_api
+description: invoice reports api
 memorySize: 3072
 timeout: 60
+iamRoleStatementsInherit: true
 events:
   - httpApi:
-      path: /api/invoice-reports/air-company
       method: get
+      path: /api/invoice-reports/air-company
       cors: true
       authorizer:
         name: CognitoAuthorizer
@@ -18,8 +19,8 @@ events:
             end_date: false
             flight_number: false
   - httpApi:
-      path: /api/invoice-reports/catering
       method: get
+      path: /api/invoice-reports/catering
       cors: true
       authorizer:
         name: CognitoAuthorizer
@@ -31,17 +32,3 @@ events:
             start_date: false
             end_date: false
             flight_number: false
-environment:
-  LOG_LEVEL: INFO
-iamRoleStatements:
-  - Effect: Allow
-    Action:
-      - secretsmanager:GetSecretValue
-      - secretsmanager:DescribeSecret
-    Resource:
-      - ${param:ELEMENTAR_SECRETS_MANAGER_ARN}
-  - Effect: Allow
-    Action:
-      - lambda:InvokeFunction
-    Resource:
-      - '*'
