@@ -4,31 +4,19 @@ memorySize: 3072
 timeout: 60
 iamRoleStatementsInherit: true
 events:
-  - httpApi:
-      method: get
-      path: /api/invoice-reports/air-company
-      cors: true
-      authorizer:
-        name: CognitoAuthorizer
-      request:
-        parameters:
-          querystrings:
-            limit: false
-            offset: false
-            start_date: false
-            end_date: false
-            flight_number: false
-  - httpApi:
-      method: get
-      path: /api/invoice-reports/catering
-      cors: true
-      authorizer:
-        name: CognitoAuthorizer
-      request:
-        parameters:
-          querystrings:
-            limit: false
-            offset: false
-            start_date: false
-            end_date: false
-            flight_number: false
+- httpApi:
+    method: get
+    path: /api/invoice-reports/air-company
+    authorizer:
+      name: CognitoAuthorizer
+- httpApi:
+    method: get
+    path: /api/invoice-reports/catering
+    authorizer:
+      name: CognitoAuthorizer
+- httpApi:
+    method: 'OPTIONS'
+    path: /api/invoice-reports/air-company
+- httpApi:
+    method: 'OPTIONS'
+    path: /api/invoice-reports/catering
