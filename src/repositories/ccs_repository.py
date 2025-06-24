@@ -945,12 +945,7 @@ class ReconciliationRepository:
 
         return combined_query.all()
 
-    def get_filtered_count_by_date_range(
-        self,
-        filter_type,
-        start_date,
-        end_date
-    ):
+    def get_filtered_count_by_date_range(self, filter_type, start_date, end_date):
         """Get count of filtered records in flight date range"""
         air_base_query = self.session.query(Reconciliation).filter(
             func.date(Reconciliation.AirFlightDate) >= start_date,
@@ -1188,10 +1183,7 @@ class ReconciliationRepository:
                 Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
             )
 
-        query = query.order_by(
-            Reconciliation.AirFlightDate,
-            Reconciliation.AirFlightNo
-        )
+        query = query.order_by(Reconciliation.AirFlightDate, Reconciliation.AirFlightNo)
 
         if offset is not None:
             query = query.offset(offset)
@@ -1253,12 +1245,7 @@ class ReconciliationRepository:
 
         return combined_query.all()
 
-    def get_count_by_item_name_and_date_range(
-        self,
-        item_name,
-        start_date,
-        end_date
-    ):
+    def get_count_by_item_name_and_date_range(self, item_name, start_date, end_date):
         """Get count of records filtered by item name and date range"""
         air_query = self.session.query(Reconciliation).filter(
             func.date(Reconciliation.AirFlightDate) >= start_date,
@@ -1285,9 +1272,7 @@ class ReconciliationRepository:
             self.session.query(Reconciliation)
             .filter(
                 (
-                    (Reconciliation.AirServiceDescription.ilike(
-                        f"%{item_name}%"
-                    ))
+                    (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
                     | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
                 )
                 & (
@@ -1305,19 +1290,13 @@ class ReconciliationRepository:
 
         return query.all()
 
-    def get_count_by_item_name_and_flight_number(
-        self,
-        item_name,
-        flight_number
-    ):
+    def get_count_by_item_name_and_flight_number(self, item_name, flight_number):
         """Get count of records filtered by item name and flight number"""
         return (
             self.session.query(Reconciliation)
             .filter(
                 (
-                    (Reconciliation.AirServiceDescription.ilike(
-                        f"%{item_name}%"
-                    ))
+                    (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
                     | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
                 )
                 & (
@@ -1329,12 +1308,7 @@ class ReconciliationRepository:
         )
 
     def get_air_company_invoice_reports(
-        self,
-        limit=100,
-        offset=0,
-        start_date=None,
-        end_date=None,
-        flight_number=None
+        self, limit=100, offset=0, start_date=None, end_date=None, flight_number=None
     ):
         """Get AirCompanyInvoiceReport records with optional filters"""
         from models.schema_ccs import AirCompanyInvoiceReport
@@ -1345,13 +1319,9 @@ class ReconciliationRepository:
         )
 
         if start_date:
-            query = query.filter(
-                AirCompanyInvoiceReport.FlightDate >= start_date
-            )
+            query = query.filter(AirCompanyInvoiceReport.FlightDate >= start_date)
         if end_date:
-            query = query.filter(
-                AirCompanyInvoiceReport.FlightDate <= end_date
-            )
+            query = query.filter(AirCompanyInvoiceReport.FlightDate <= end_date)
         if flight_number:
             query = query.filter(
                 AirCompanyInvoiceReport.FlightNo.ilike(f"%{flight_number}%")
@@ -1376,13 +1346,9 @@ class ReconciliationRepository:
         )
 
         if start_date:
-            query = query.filter(
-                AirCompanyInvoiceReport.FlightDate >= start_date
-            )
+            query = query.filter(AirCompanyInvoiceReport.FlightDate >= start_date)
         if end_date:
-            query = query.filter(
-                AirCompanyInvoiceReport.FlightDate <= end_date
-            )
+            query = query.filter(AirCompanyInvoiceReport.FlightDate <= end_date)
         if flight_number:
             query = query.filter(
                 AirCompanyInvoiceReport.FlightNo.ilike(f"%{flight_number}%")
@@ -1391,19 +1357,14 @@ class ReconciliationRepository:
         return query.count()
 
     def get_catering_invoice_reports(
-        self,
-        limit=100,
-        offset=0,
-        start_date=None,
-        end_date=None,
-        flight_number=None
+        self, limit=100, offset=0, start_date=None, end_date=None, flight_number=None
     ):
         """Get CateringInvoiceReport records with optional filters"""
         from models.schema_ccs import CateringInvoiceReport
 
         query = self.session.query(CateringInvoiceReport).filter(
             CateringInvoiceReport.Ativo.is_(True),
-            CateringInvoiceReport.Excluido.is_(False)
+            CateringInvoiceReport.Excluido.is_(False),
         )
 
         if start_date:
@@ -1430,7 +1391,7 @@ class ReconciliationRepository:
 
         query = self.session.query(CateringInvoiceReport).filter(
             CateringInvoiceReport.Ativo.is_(True),
-            CateringInvoiceReport.Excluido.is_(False)
+            CateringInvoiceReport.Excluido.is_(False),
         )
 
         if start_date:
@@ -1447,17 +1408,113 @@ class ReconciliationRepository:
     def get_all_air_company_reports(self):
         """Get all AirCompanyInvoiceReport records"""
         from models.schema_ccs import AirCompanyInvoiceReport
-        
-        return self.session.query(AirCompanyInvoiceReport).filter(
-            AirCompanyInvoiceReport.Ativo.is_(True),
-            AirCompanyInvoiceReport.Excluido.is_(False)
-        ).order_by(AirCompanyInvoiceReport.FlightDate.desc()).all()
+
+        return (
+            self.session.query(AirCompanyInvoiceReport)
+            .filter(
+                AirCompanyInvoiceReport.Ativo.is_(True),
+                AirCompanyInvoiceReport.Excluido.is_(False),
+            )
+            .order_by(AirCompanyInvoiceReport.FlightDate.desc())
+            .all()
+        )
 
     def get_all_catering_reports(self):
         """Get all CateringInvoiceReport records"""
         from models.schema_ccs import CateringInvoiceReport
-        
-        return self.session.query(CateringInvoiceReport).filter(
-            CateringInvoiceReport.Ativo.is_(True),
-            CateringInvoiceReport.Excluido.is_(False)
-        ).order_by(CateringInvoiceReport.FltDate.desc()).all()
+
+        return (
+            self.session.query(CateringInvoiceReport)
+            .filter(
+                CateringInvoiceReport.Ativo.is_(True),
+                CateringInvoiceReport.Excluido.is_(False),
+            )
+            .order_by(CateringInvoiceReport.FltDate.desc())
+            .all()
+        )
+
+    def get_all_flight_class_reports(self):
+        """Get all FlightClassReport records"""
+        from models.schema_ccs import FlightClassMapping
+
+        return (
+            self.session.query(FlightClassMapping)
+            .filter(
+                FlightClassMapping.Ativo.is_(True),
+                FlightClassMapping.Excluido.is_(False),
+            )
+            .order_by(FlightClassMapping.FlightDate.desc())
+            .all()
+        )
+
+
+# Esse repositório só está sendo utilizado devido a um ajuste de
+# classificação enviado pela empresa de Catering
+class FlightClassMappingRepository:
+    def __init__(self, db_session):
+        self.session = db_session
+
+    def bulk_insert(self, model_instances):
+        """
+        Bulk insert FlightClassMapping instances
+
+        Parameters
+        ----------
+        model_instances : List[FlightClassMapping]
+            List of FlightClassMapping model instances to insert
+        """
+        try:
+            self.session.add_all(model_instances)
+            self.session.commit()
+            print(
+                f"Successfully inserted {len(model_instances)} flight class mapping records"
+            )
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error inserting flight class mapping records: {e}")
+            raise
+
+    def insert_flight_class_mapping(self, data):
+        """
+        Insert flight class mapping data
+
+        Parameters
+        ----------
+        data : List[Dict[str, Any]]
+            List of dictionaries containing flight class mapping data
+        """
+        try:
+            from models.schema_ccs import FlightClassMapping
+
+            model_instances = []
+            for item in data:
+                instance = FlightClassMapping(
+                    promeus_class=item.get("promeus_class"),
+                    inflair_class=item.get("inflair_class"),
+                    item_group=item.get("item_group"),
+                    item_code=item.get("item_code"),
+                    item_desc=item.get("item_desc"),
+                    al_bill_code=item.get("al_bill_code"),
+                    al_bill_desc=item.get("al_bill_desc"),
+                    bill_catg=item.get("bill_catg"),
+                )
+                model_instances.append(instance)
+
+            self.bulk_insert(model_instances)
+
+        except Exception as e:
+            print(f"Error processing flight class mapping data: {e}")
+            raise
+
+    def clear_all(self):
+        """Clear all flight class mapping records"""
+        try:
+            from models.schema_ccs import FlightClassMapping
+
+            self.session.query(FlightClassMapping).delete()
+            self.session.commit()
+            print("Successfully cleared all flight class mapping records")
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error clearing flight class mapping records: {e}")
+            raise
