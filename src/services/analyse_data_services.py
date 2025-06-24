@@ -182,9 +182,7 @@ class AnalyseDataServices:
                 ]
 
                 print("The sum of the incove_TotalAmount", df["Invoice_SubTotal"].sum())
-                print(
-                    "The sum of the Billing_TotalAmount",
-                    df["Billing_TotalAmount"].sum(),
+                print("The sum of the Billing_TotalAmount", df["Billing_TotalAmount"].sum(),
                 )
 
                 end_time = time.time()
