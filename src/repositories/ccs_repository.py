@@ -1518,3 +1518,64 @@ class FlightClassMappingRepository:
             self.session.rollback()
             print(f"Error clearing flight class mapping records: {e}")
             raise
+
+
+class FlightNumberMappingRepository:
+    def __init__(self, db_session):
+        self.session = db_session
+
+    def bulk_insert(self, model_instances):
+        """
+        Bulk insert FlightNumberMapping instances
+        
+        Parameters
+        ----------
+        model_instances : List[FlightNumberMapping]
+            List of FlightNumberMapping model instances to insert
+        """
+        try:
+            self.session.add_all(model_instances)
+            self.session.commit()
+            print(f"Successfully inserted {len(model_instances)} flight number mapping records")
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error inserting flight number mapping records: {e}")
+            raise
+
+    def insert_flight_number_mapping(self, data):
+        """
+        Insert flight number mapping data
+        
+        Parameters
+        ----------
+        data : List[Dict[str, Any]]
+            List of dictionaries containing flight number mapping data
+        """
+        try:
+            from models.schema_ccs import FlightNumberMapping
+            
+            model_instances = []
+            for item in data:
+                instance = FlightNumberMapping(
+                    air_company_flight_number=item.get('air_company_flight_number'),
+                    catering_flight_number=item.get('catering_flight_number')
+                )
+                model_instances.append(instance)
+            
+            self.bulk_insert(model_instances)
+            
+        except Exception as e:
+            print(f"Error processing flight number mapping data: {e}")
+            raise
+
+    def clear_all(self):
+        """Clear all flight number mapping records"""
+        try:
+            from models.schema_ccs import FlightNumberMapping
+            self.session.query(FlightNumberMapping).delete()
+            self.session.commit()
+            print("Successfully cleared all flight number mapping records")
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error clearing flight number mapping records: {e}")
+            raise

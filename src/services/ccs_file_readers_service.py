@@ -9,23 +9,33 @@ from repositories.ccs_repository import (
     CateringInvoiceRepository,
     AirCompanyInvoiceRepository,
     FlightClassMappingRepository,
+    FlightNumberMappingRepository,
 )
 
 from models.schema_ccs import (
     CateringInvoiceReport,
-    AirCompanyInvoiceReport,
     FlightClassMapping,
+    FlightNumberMapping,
 )
 
 
 class FileReadersService:
     def __init__(self, db_session):
-        self.catering_invoice_repository = CateringInvoiceRepository(db_session)
-        self.air_company_invoice_repository = AirCompanyInvoiceRepository(db_session)
-        self.flight_class_mapping_repository = FlightClassMappingRepository(db_session)
+        self.catering_invoice_repository = (
+            CateringInvoiceRepository(db_session))
+        self.air_company_invoice_repository = (
+            AirCompanyInvoiceRepository(db_session))
+        self.flight_class_mapping_repository = (
+            FlightClassMappingRepository(db_session))
+        self.flight_number_mapping_repository = FlightNumberMappingRepository(
+            db_session
+        )
         self.session = db_session
 
-    def billing_inflair_invoice_report(self, file_path: str) -> List[Dict[str, Any]]:
+    def billing_inflair_invoice_report(
+        self,
+        file_path: str
+    ) -> List[Dict[str, Any]]:
         """
         This method reads the billing inflair file and returns an array
         of objects and a json file (will be commented in the code)
@@ -57,7 +67,9 @@ class FileReadersService:
         ]
 
         mask = (
-            ~df["Number"].astype(str).str.contains("|".join(footer_patterns), na=False)
+            ~df["Number"].astype(str).str.contains(
+                "|".join(footer_patterns), na=False
+            )
         )
         df = df[mask]
 
@@ -65,7 +77,9 @@ class FileReadersService:
             df[col] = df[col].apply(format_date)
 
         for col in df.select_dtypes(include=["object"]).columns:
-            df[col] = df[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
+            df[col] = (
+                df[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
+            )
 
         df = df.replace({np.nan: None})
 
@@ -75,14 +89,23 @@ class FileReadersService:
 
         return data
 
-    def billing_promeus_invoice_report(self, file_path: str) -> List[Dict[str, Any]]:
+    def billing_promeus_invoice_report(
+        self,
+        file_path: str
+    ) -> List[Dict[str, Any]]:
         """
         This method reads the billing promeus file and returns an
         array of objects and a json file (will be commented in the code)
         """
         df = pd.read_excel(file_path, header=0)
 
-        expected_columns = {"SUPPLIER", "FLIGHT DATE", "FLIGHT NO.", "DEP", "ARR"}
+        expected_columns = {
+            "SUPPLIER",
+            "FLIGHT DATE",
+            "FLIGHT NO.",
+            "DEP",
+            "ARR",
+        }
         if not expected_columns.issubset(df.columns):
             raise ValueError("Please share the correct file.")
 
@@ -119,15 +142,15 @@ class FileReadersService:
         if "FlightNo" in df.columns:
             df["FlightNoRed"] = df["FlightNo"].apply(
                 lambda x: (
-                    "".join(char for char in str(x) if char.isdigit()) if x else None
+                    "".join(char for char in str(x)
+                            if char.isdigit()) if x else None
                 )
             )
 
         if "FlightDate" in df.columns:
             try:
-                df["FlightDate"] = pd.to_datetime(df["FlightDate"]).dt.strftime(
-                    "%Y-%m-%d"
-                )
+                df["FlightDate"] = (
+                    pd.to_datetime(df["FlightDate"]).dt.strftime("%Y-%m-%d"))
                 print(f"Flight date conversion successful: {df['FlightDate']}")
             except Exception as e:
                 print(f"Error converting FlightDate: {e}")
@@ -137,7 +160,9 @@ class FileReadersService:
             df[col] = df[col].apply(format_date)
 
         for col in df.select_dtypes(include=["object"]).columns:
-            df[col] = df[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
+            df[col] = (
+                df[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
+            )
 
         if "InvoicedPax" in df.columns:
             df["InvoicedPax"] = df["InvoicedPax"].astype(str)
@@ -147,9 +172,12 @@ class FileReadersService:
         data = df.to_dict(orient="records")
 
         try:
-            self.air_company_invoice_repository.insert_air_company_invoice(data)
+            self.air_company_invoice_repository.insert_air_company_invoice(
+                data
+            )
             print(
-                f"Successfully inserted {len(data)} air company invoice records into the database"
+                f"Successfully inserted {len(data)} air "
+                "company invoice records into the database"
             )
         except Exception as e:
             print(f"Error inserting ERP invoice data: {e}")
@@ -158,7 +186,10 @@ class FileReadersService:
 
         # return data
 
-    def billing_inflair_recon_report(self, file_path: str) -> List[Dict[str, Any]]:
+    def billing_inflair_recon_report(
+        self,
+        file_path: str
+    ) -> List[Dict[str, Any]]:
         """
         Reads the Inflair Airline Billing Recon Report (CSV or Excel)
         and returns a list of records.
@@ -204,7 +235,12 @@ class FileReadersService:
             engine = "openpyxl" if extension == ".xlsx" else "xlrd"
 
             try:
-                df_temp = pd.read_excel(file_path, nrows=15, engine=engine, header=None)
+                df_temp = pd.read_excel(
+                    file_path,
+                    nrows=15,
+                    engine=engine,
+                    header=None
+                )
 
                 for idx, row in df_temp.iterrows():
                     if str(row[0]).strip() == "Facility":
@@ -221,7 +257,8 @@ class FileReadersService:
 
         else:
             raise ValueError(
-                "Unsupported file format. " "Only .csv, .xls, and .xlsx are supported."
+                "Unsupported file format. "
+                "Only .csv, .xls, and .xlsx are supported."
             )
 
         if len(df) > 2:
@@ -272,7 +309,8 @@ class FileReadersService:
         if "flt_no" in df.columns:
             df["flt_no"] = df["flt_no"].apply(
                 lambda x: (
-                    f"0{x}" if isinstance(x, (int, float)) and x < 100 else str(x)
+                    f"0{x}" if isinstance(x, (int, float))
+                    and x < 100 else str(x)
                 )
             )
 
@@ -297,7 +335,9 @@ class FileReadersService:
 
         try:
             if data:
-                model_instances = [CateringInvoiceReport(**item) for item in data]
+                model_instances = [
+                    CateringInvoiceReport(**item) for item in data
+                ]
                 self.catering_invoice_repository.bulk_insert(model_instances)
                 print(
                     f"Successfully inserted {len(data)} "
@@ -351,7 +391,10 @@ class FileReadersService:
         self, file_path: str
     ) -> List[Dict[str, Any]]:
         df = pd.read_excel(
-            file_path, sheet_name="Price History Report", engine="openpyxl", header=None
+            file_path,
+            sheet_name="Price History Report",
+            engine="openpyxl",
+            header=None
         )
 
         records = []
@@ -400,7 +443,10 @@ class FileReadersService:
         # save_json(records, "pricing_promeus.json")
         return records
 
-    def read_flight_class_mapping(self, file_path: str) -> List[Dict[str, Any]]:
+    def read_flight_class_mapping(
+        self,
+        file_path: str
+    ) -> List[Dict[str, Any]]:
         """
         Reads the flight class mapping file from the first sheet (Class Map)
         and returns a list of records mapped to FlightClassMapping model.
@@ -456,10 +502,15 @@ class FileReadersService:
 
             try:
                 if data:
-                    model_instances = [FlightClassMapping(**item) for item in data]
-                    self.flight_class_mapping_repository.bulk_insert(model_instances)
+                    model_instances = [
+                        FlightClassMapping(**item) for item in data
+                    ]
+                    self.flight_class_mapping_repository.bulk_insert(
+                        model_instances
+                    )
                     print(
-                        f"Successfully inserted {len(data)} flight class mapping records into the database"
+                        f"Successfully inserted {len(data)} flight "
+                        "class mapping records into the database"
                     )
                 else:
                     print("No data to insert")
@@ -476,6 +527,120 @@ class FileReadersService:
 
         except Exception as e:
             print(f"Error reading flight class mapping file: {e}")
+            import traceback
+
+            print(traceback.format_exc())
+            return []
+
+    def read_flight_number_mapping(
+        self,
+        file_path: str
+    ) -> List[Dict[str, Any]]:
+        """
+        Reads the flight number mapping file from
+        the second sheet (Flight No. Map)
+        and returns a list of records mapped to FlightNumberMapping model.
+        Also inserts the data into the database.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to the Excel file
+
+        Returns
+        -------
+        List[Dict[str, Any]]
+            List of flight number mapping records
+        """
+        try:
+            df = pd.read_excel(file_path, sheet_name=1, engine="openpyxl")
+
+            df.dropna(how="all", inplace=True)
+            df.dropna(axis=1, how="all", inplace=True)
+            df.reset_index(drop=True, inplace=True)
+
+            print("Detected columns:", df.columns.tolist())
+
+            column_mapping = {
+                "Promeus Code": "air_company_flight_number",
+                "Inflair Code": "catering_flight_number",
+            }
+
+            df = df.rename(columns=column_mapping)
+
+            expected_model_columns = [
+                "air_company_flight_number",
+                "catering_flight_number",
+            ]
+
+            available_model_columns = [
+                col for col in expected_model_columns if col in df.columns
+            ]
+
+            if not available_model_columns:
+                raise ValueError(
+                    "No expected columns found after mapping. "
+                    f"Available columns: {df.columns.tolist()}"
+                )
+
+            df = df[available_model_columns]
+
+            for col in df.select_dtypes(include=["object"]).columns:
+                df[col] = df[col].apply(
+                    lambda x: x.strip() if isinstance(x, str) else x
+                )
+
+            if "air_company_flight_number" in df.columns:
+                df["air_company_flight_number"] = df[
+                    "air_company_flight_number"
+                ].astype(str)
+            if "catering_flight_number" in df.columns:
+                df["catering_flight_number"] = (
+                    df["catering_flight_number"].astype(str)
+                )
+
+            df = df.replace({np.nan: None})
+            df = df.replace({"nan": None})
+
+            valid_rows = df[
+                (
+                    df["air_company_flight_number"].notna()
+                    & (df["air_company_flight_number"] != "None")
+                )
+                | (
+                    df["catering_flight_number"].notna()
+                    & (df["catering_flight_number"] != "None")
+                )
+            ]
+
+            data = valid_rows.to_dict(orient="records")
+
+            try:
+                if data:
+                    model_instances = (
+                        [FlightNumberMapping(**item) for item in data]
+                    )
+                    self.flight_number_mapping_repository.bulk_insert(
+                        model_instances
+                        )
+                    print(
+                        f"Successfully inserted {len(data)} "
+                        "flight number mapping records into the database"
+                    )
+                else:
+                    print("No data to insert")
+            except Exception as e:
+                print(f"Error inserting flight number mapping data: {e}")
+                import traceback
+
+                print(traceback.format_exc())
+
+            # save_json(data, "flight_number_mapping.json")
+
+            return data
+
+        except Exception as e:
+            print(f"Error reading flight number mapping file: {e}")
             import traceback
 
             print(traceback.format_exc())
@@ -511,7 +676,9 @@ def group_data_by_class(data):
 
     for item in data:
         class_name = item.get("class")
-        if not class_name or "facility" not in item or item["facility"] == "Facility":
+        if (not class_name or "facility" not in item
+            or item["facility"] == "Facility"
+        ):
             continue
 
         item_copy = item.copy()

@@ -10,13 +10,15 @@ READER_FUNCTIONS = {
     'billing_promeus_invoice_report': 'billing_promeus_invoice_report',
     'pricing_read_inflair': 'pricing_read_inflair',
     'pricing_read_promeus_with_flight_classes': 'pricing_read_promeus_with_flight_classes',
-    'read_flight_class_mapping': 'read_flight_class_mapping'
+    'read_flight_class_mapping': 'read_flight_class_mapping',
+    'read_flight_number_mapping': 'read_flight_number_mapping'
 }
 
 PREFIX_TO_PROCESSOR = {
     'public/airline_files/Airline Billing History/': 'billing_inflair_recon_report',
     'public/airline_files/GCG Invoice History/': 'billing_promeus_invoice_report',
     'public/airline_files/FlightClassMapping/': 'read_flight_class_mapping',
+    'public/airline_files/FlightNumberMapping/': 'read_flight_number_mapping'
 }
 
 
