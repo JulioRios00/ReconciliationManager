@@ -29,9 +29,9 @@ class AnalyseDataServices:
 
         try:
             with get_session() as session:
-                reconciliation_epository = ReconciliationRepository(session)
+                reconciliation_repository = ReconciliationRepository(session)
                 
-                reports = reconciliation_epository.get_flight_class_mapping()
+                reports = reconciliation_repository.get_flight_class_mapping()
                 flight_map = pd.DataFrame([{
                     key: value
                     for key, value in report.__dict__.items()
@@ -43,7 +43,7 @@ class AnalyseDataServices:
 
 
 
-                reports = reconciliation_epository.get_all_catering_reports()
+                reports = reconciliation_repository.get_all_catering_reports()
                 billing = pd.DataFrame([{
                     key: value
                     for key, value in report.__dict__.items()
@@ -51,7 +51,7 @@ class AnalyseDataServices:
                 } for report in reports])
 
 
-                reports = reconciliation_epository.get_all_air_company_reports()
+                reports = reconciliation_repository.get_all_air_company_reports()
                 invoice = pd.DataFrame([{
                     key: value
                     for key, value in report.__dict__.items()
@@ -71,8 +71,8 @@ class AnalyseDataServices:
                                                 'TotalAmount': 'Billing_TotalAmount'})
                 billing['Billing_FlightDate'] = pd.to_datetime(billing['Billing_FlightDate'], format='%d/%m/%y')
 
-                invoic_columns = ['FlightDate', 'FlightNo', 'Class', 'ServiceCode', 'Qty', 'UnitPrice', 'SubTotal']
-                invoice = invoice[invoic_columns]
+                invoice_columns = ['FlightDate', 'FlightNo', 'Class', 'ServiceCode', 'Qty', 'UnitPrice', 'SubTotal']
+                invoice = invoice[invoice_columns]
                 # Ensure consistent column naming
                 invoice = invoice.rename(columns={'FlightDate': 'Invoice_FlightDate', 
                                                 'FlightNo': 'Invoice_FlightNo', 
