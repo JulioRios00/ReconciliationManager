@@ -9,15 +9,14 @@ READER_FUNCTIONS = {
     'billing_inflair_recon_report': 'billing_inflair_recon_report',
     'billing_promeus_invoice_report': 'billing_promeus_invoice_report',
     'pricing_read_inflair': 'pricing_read_inflair',
-    'pricing_read_promeus_with_flight_classes':
-        'pricing_read_promeus_with_flight_classes'
+    'pricing_read_promeus_with_flight_classes': 'pricing_read_promeus_with_flight_classes',
+    'read_flight_class_mapping': 'read_flight_class_mapping'
 }
 
 PREFIX_TO_PROCESSOR = {
-    'public/airline_files/Airline Billing History/':
-        'billing_inflair_recon_report',
-    'public/airline_files/GCG Invoice History/':
-        'billing_promeus_invoice_report',
+    'public/airline_files/Airline Billing History/': 'billing_inflair_recon_report',
+    'public/airline_files/GCG Invoice History/': 'billing_promeus_invoice_report',
+    'public/airline_files/FlightClassMapping/': 'read_flight_class_mapping',
 }
 
 
@@ -36,6 +35,7 @@ def main(event, context):
         }
 
     processor_function_name = None
+    
     for prefix, processor in PREFIX_TO_PROCESSOR.items():
         if key.startswith(prefix):
             processor_function_name = processor
@@ -58,9 +58,10 @@ def main(event, context):
             })
         }
 
-    print(f"Using processor: {processor_function_name},"
-          f" method: {reader_method_name}"
-          )
+    print(
+        f"Using processor: {processor_function_name}, "
+        f"method: {reader_method_name}"
+    )
 
     file, size = get_file_body_by_key(key, bucket)
     file_content = file.read()
@@ -97,6 +98,7 @@ def main(event, context):
             'statusCode': 200,
             'body': json.dumps({
                 'message': 'File read successfully',
+                'processor_used': processor_function_name,
                 'data': serialized_data,
                 'records_count': records_count
             }, default=str)
@@ -108,6 +110,7 @@ def main(event, context):
         return {
             'statusCode': 500,
             'body': json.dumps({
-                'error': str(e)
+                'error': str(e),
+                'processor_attempted': processor_function_name
             })
         }
