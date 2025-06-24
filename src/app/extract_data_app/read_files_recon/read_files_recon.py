@@ -36,13 +36,6 @@ def main(event, context):
 
     processor_function_name = None
     
-
-
-
-
-
-
-
     for prefix, processor in PREFIX_TO_PROCESSOR.items():
         if key.startswith(prefix):
             processor_function_name = processor
