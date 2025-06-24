@@ -30,85 +30,177 @@ class AnalyseDataServices:
         try:
             with get_session() as session:
                 reconciliation_repository = ReconciliationRepository(session)
-                
+
+                # Get all flight numbe mapping reports
+                reports = reconciliation_repository.get_flight_number_mapping()
+                flight_map = pd.DataFrame(
+                    [
+                        {
+                            key: value
+                            for key, value in report.__dict__.items()
+                            if not key.startswith("_")
+                        }
+                        for report in reports
+                    ]
+                )
+
+                cols = ["AirCompanyFlightNumber", "CateringFlightNumber"]
+                flight_map = flight_map[cols].rename(
+                    columns={
+                        "AirCompanyFlightNumber": "Billing_FlightNo",
+                        "CateringFlightNumber": "Invoice_FlightNo",
+                    }
+                )
+                flight_map = flight_map[
+                    ~flight_map["Invoice_FlightNo"].isin(["Charter"])
+                ]
+
+                # Get all flight class mapping reports
                 reports = reconciliation_repository.get_flight_class_mapping()
-                flight_map = pd.DataFrame([{
-                    key: value
-                    for key, value in report.__dict__.items()
-                    if not key.startswith("_")
-                } for report in reports])
+                class_map = pd.DataFrame(
+                    [
+                        {
+                            key: value
+                            for key, value in report.__dict__.items()
+                            if not key.startswith("_")
+                        }
+                        for report in reports
+                    ]
+                )
 
-                print(len(reports))
-                print(flight_map)
+                cols = ["ItemCode", "ALBillCode"]
+                class_map = class_map[cols].rename(
+                    columns={
+                        "ItemCode": "Billing_Itemcode",
+                        "ALBillCode": "Invoice_ServiceCode",
+                    }
+                )
 
-
-
+                # Get BillingRecon
                 reports = reconciliation_repository.get_all_catering_reports()
-                billing = pd.DataFrame([{
-                    key: value
-                    for key, value in report.__dict__.items()
-                    if not key.startswith("_")
-                } for report in reports])
+                billing = pd.DataFrame(
+                    [
+                        {
+                            key: value
+                            for key, value in report.__dict__.items()
+                            if not key.startswith("_")
+                        }
+                        for report in reports
+                    ]
+                )
 
-
+                # Get ErpInvoiceReport
                 reports = reconciliation_repository.get_all_air_company_reports()
-                invoice = pd.DataFrame([{
-                    key: value
-                    for key, value in report.__dict__.items()
-                    if not key.startswith("_")
-                } for report in reports])
+                invoice = pd.DataFrame(
+                    [
+                        {
+                            key: value
+                            for key, value in report.__dict__.items()
+                            if not key.startswith("_")
+                        }
+                        for report in reports
+                    ]
+                )
 
-
-                billing_columns = ['FltDate', 'FltNo', 'Class', 'Itemcode', 'Qty', 'UnitPrice', 'TotalAmount']
+                billing_columns = [
+                    "FltDate",
+                    "FltNo",
+                    "Class",
+                    "Itemcode",
+                    "Qty",
+                    "UnitPrice",
+                    "TotalAmount",
+                ]
                 billing = billing[billing_columns]
                 # Ensure consistent column naming
-                billing = billing.rename(columns={'FltDate': 'Billing_FlightDate', 
-                                                'FltNo': 'Billing_FlightNo', 
-                                                'Class': 'Billing_Class', 
-                                                'Itemcode': 'Billing_Itemcode', 
-                                                'Qty': 'Billing_Qty', 
-                                                'UnitPrice': 'Billing_UnitPrice', 
-                                                'TotalAmount': 'Billing_TotalAmount'})
-                billing['Billing_FlightDate'] = pd.to_datetime(billing['Billing_FlightDate'], format='%d/%m/%y')
+                billing = billing.rename(
+                    columns={
+                        "FltDate": "Billing_FlightDate",
+                        "FltNo": "Billing_FlightNo",
+                        "Class": "Billing_Class",
+                        "Itemcode": "Billing_Itemcode",
+                        "Qty": "Billing_Qty",
+                        "UnitPrice": "Billing_UnitPrice",
+                        "TotalAmount": "Billing_TotalAmount",
+                    }
+                )
+                billing["Billing_FlightDate"] = pd.to_datetime(
+                    billing["Billing_FlightDate"], format="%d/%m/%y"
+                )
 
-                invoice_columns = ['FlightDate', 'FlightNo', 'Class', 'ServiceCode', 'Qty', 'UnitPrice', 'SubTotal']
+                invoice_columns = [
+                    "FlightDate",
+                    "FlightNo",
+                    "Class",
+                    "ServiceCode",
+                    "Qty",
+                    "UnitPrice",
+                    "SubTotal",
+                ]
                 invoice = invoice[invoice_columns]
                 # Ensure consistent column naming
-                invoice = invoice.rename(columns={'FlightDate': 'Invoice_FlightDate', 
-                                                'FlightNo': 'Invoice_FlightNo', 
-                                                'Class':  'Invoice_Class', 
-                                                'ServiceCode':  'Invoice_ServiceCode', 
-                                                'Qty':  'Invoice_Qty', 
-                                                'UnitPrice':  'Invoice_UnitPrice',
-                                                'SubTotal':  'Invoice_SubTotal'})
+                invoice = invoice.rename(
+                    columns={
+                        "FlightDate": "Invoice_FlightDate",
+                        "FlightNo": "Invoice_FlightNo",
+                        "Class": "Invoice_Class",
+                        "ServiceCode": "Invoice_ServiceCode",
+                        "Qty": "Invoice_Qty",
+                        "UnitPrice": "Invoice_UnitPrice",
+                        "SubTotal": "Invoice_SubTotal",
+                    }
+                )
 
-                invoice['Invoice_FlightNo'] = invoice['Invoice_FlightNo'].str.strip()
-                invoice['Invoice_FlightDate'] = pd.to_datetime(invoice['Invoice_FlightDate'], errors='coerce')
+                invoice["Invoice_FlightNo"] = invoice["Invoice_FlightNo"].str.strip()
+                invoice["Invoice_FlightDate"] = pd.to_datetime(
+                    invoice["Invoice_FlightDate"], errors="coerce"
+                )
 
-                # # Merge the billing with flight_map
-                # # Merge dataframes on ALBillCode
-                # merged_df = pd.merge(billing, flight_map, on=['Billing_FlightNo'], how='left')
+                # Merge dataframes on Billing_FlightNo
+                merged_df = pd.merge(
+                    billing, flight_map, on=["Billing_FlightNo"], how="left"
+                )
 
-                # # Eliminate rows where column 'Invoice_FlightNo' is None
-                # merged_df = merged_df.dropna(subset=['Invoice_FlightNo'])
+                # Eliminate rows where column 'Invoice_FlightNo' is None
+                merged_df = merged_df.dropna(subset=["Invoice_FlightNo"])
 
+                # Merge dataframes on Billing_Itemcode
+                merged_df = pd.merge(
+                    merged_df, class_map, on=["Billing_Itemcode"], how="left"
+                )
+
+                # Merge dataframes on Billing_Itemcode
+                merged_df = pd.merge(
+                    merged_df,
+                    invoice,
+                    on=["Invoice_FlightNo", "Invoice_ServiceCode"],
+                    how="left",
+                )
+
+                df = merged_df[
+                    (merged_df["Billing_FlightDate"] == merged_df["Invoice_FlightDate"])
+                ]
+
+                print("The sum of the incove_TotalAmount", df["Invoice_SubTotal"].sum())
+                print(
+                    "The sum of the Billing_TotalAmount",
+                    df["Billing_TotalAmount"].sum(),
+                )
 
                 end_time = time.time()
                 exec_time = datetime.timedelta(seconds=(end_time - start_time))
-                print(f'\n --- O tempo de excursão para a previsão: {exec_time} (h:m:s) ---')
-                print('=====================')  
+                print(
+                    f"\n --- O tempo de excursão para a previsão: {exec_time} (h:m:s) ---"
+                )
+                print("=====================")
 
-                return '200'
+                return "200"
 
         except CustomException as e:
             print(f"CustomException: {e}")
             logger.error(f"CustomException: {e}")
-            return jsonify({'error': str(e)}), 400
+            return jsonify({"error": str(e)}), 400
         except Exception as e:
             print(f"Unexpected exception: {e}")
             logger.error(f"Unexpected exception: {e}", exc_info=True)
-            return jsonify({'error': 'Internal server error'}), 500
-
-
-
-
+            return jsonify({"error": "Internal server error"}), 500

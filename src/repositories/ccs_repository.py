@@ -1467,3 +1467,9 @@ class ReconciliationRepository:
         from models.schema_ccs import FlightClassMapping
         
         return self.session.query(FlightClassMapping).all()
+    
+    def get_flight_number_mapping(self):
+        """Get all FlightNumberMapping records"""
+        from models.schema_ccs import FlightNumberMapping
+        
+        return self.session.query(FlightNumberMapping).all()
