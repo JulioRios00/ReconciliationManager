@@ -10,6 +10,10 @@ from common.conexao_banco import get_session
 from common.custom_exception import CustomException
 from flask import jsonify
 import logging
+import json
+import boto3
+import os
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,7 +36,7 @@ class AnalyseDataServices:
                 reconciliation_repository = ReconciliationRepository(session)
 
                 # Get all flight numbe mapping reports
-                reports = reconciliation_repository.get_flight_number_mapping()
+                reports = reconciliation_repository.get_all_flight_number_reports()
                 flight_map = pd.DataFrame(
                     [
                         {
@@ -43,20 +47,18 @@ class AnalyseDataServices:
                         for report in reports
                     ]
                 )
-
                 cols = ["AirCompanyFlightNumber", "CateringFlightNumber"]
                 flight_map = flight_map[cols].rename(
                     columns={
-                        "AirCompanyFlightNumber": "Billing_FlightNo",
-                        "CateringFlightNumber": "Invoice_FlightNo",
+                        "CateringFlightNumber": "Billing_FlightNo",
+                        "AirCompanyFlightNumber": "Invoice_FlightNo",
                     }
                 )
-                flight_map = flight_map[
-                    ~flight_map["Invoice_FlightNo"].isin(["Charter"])
-                ]
+                flight_map = flight_map[~flight_map["Invoice_FlightNo"].isin(["Charter"])]
+                print(f'{len(flight_map)=}')
 
                 # Get all flight class mapping reports
-                reports = reconciliation_repository.get_flight_class_mapping()
+                reports = reconciliation_repository.get_all_flight_class_reports()
                 class_map = pd.DataFrame(
                     [
                         {
@@ -67,7 +69,6 @@ class AnalyseDataServices:
                         for report in reports
                     ]
                 )
-
                 cols = ["ItemCode", "ALBillCode"]
                 class_map = class_map[cols].rename(
                     columns={
@@ -75,6 +76,7 @@ class AnalyseDataServices:
                         "ALBillCode": "Invoice_ServiceCode",
                     }
                 )
+                print(f'{len(class_map)=}')
 
                 # Get BillingRecon
                 reports = reconciliation_repository.get_all_catering_reports()
@@ -88,6 +90,7 @@ class AnalyseDataServices:
                         for report in reports
                     ]
                 )
+                print(f'{len(billing)=}')
 
                 # Get ErpInvoiceReport
                 reports = reconciliation_repository.get_all_air_company_reports()
@@ -101,6 +104,7 @@ class AnalyseDataServices:
                         for report in reports
                     ]
                 )
+                print(f'{len(invoice)=}')
 
                 billing_columns = [
                     "FltDate",
@@ -124,9 +128,7 @@ class AnalyseDataServices:
                         "TotalAmount": "Billing_TotalAmount",
                     }
                 )
-                billing["Billing_FlightDate"] = pd.to_datetime(
-                    billing["Billing_FlightDate"], format="%d/%m/%y"
-                )
+                billing['Billing_FlightDate'] = pd.to_datetime(billing['Billing_FlightDate'], format="%Y-%m-%d")
 
                 invoice_columns = [
                     "FlightDate",
@@ -180,9 +182,22 @@ class AnalyseDataServices:
                 df = merged_df[
                     (merged_df["Billing_FlightDate"] == merged_df["Invoice_FlightDate"])
                 ]
+                df["Invoice_SubTotal"] = df["Invoice_SubTotal"].astype(float)
+                df["Billing_TotalAmount"] = df["Billing_TotalAmount"].astype(float)
 
                 print("The sum of the incove_TotalAmount", df["Invoice_SubTotal"].sum())
-                print("The sum of the Billing_TotalAmount", df["Billing_TotalAmount"].sum(),
+                print("The sum of the Billing_TotalAmount", df["Billing_TotalAmount"].sum())
+
+                analyse_results = {'incove_TotalAmount': df["Invoice_SubTotal"].sum(),
+                                   'Billing_TotalAmount': df["Billing_TotalAmount"].sum()}
+                
+                file_key = f'public/airline_analysis/analyse_results.json'                        
+                s3 = boto3.client('s3')
+                bucket_name = os.getenv("MTW_BUCKET_NAME")
+                s3.put_object(
+                    Bucket=bucket_name,
+                    Key=file_key,
+                    Body=json.dumps(analyse_results, default=str)
                 )
 
                 end_time = time.time()
