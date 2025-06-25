@@ -1443,7 +1443,19 @@ class ReconciliationRepository:
                 FlightClassMapping.Ativo.is_(True),
                 FlightClassMapping.Excluido.is_(False),
             )
-            .order_by(FlightClassMapping.FlightDate.desc())
+            .all()
+        )
+
+    def get_all_flight_number_reports(self):
+        """Get all FlightNumberMapping records"""
+        from models.schema_ccs import FlightNumberMapping
+
+        return (
+            self.session.query(FlightNumberMapping)
+            .filter(
+                FlightNumberMapping.Ativo.is_(True),
+                FlightNumberMapping.Excluido.is_(False),
+            )
             .all()
         )
 

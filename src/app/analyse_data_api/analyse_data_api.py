@@ -23,12 +23,12 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 authorize = Authorize(current_user=get_current_user, app=app)
 
-ROUTE_PREFIX = '/analyse_data_api'
+ROUTE_PREFIX = "/analyse_data_api"
 
 
 # Get all Air Company Invoice Reports
-@app.route(ROUTE_PREFIX + '/compare', methods=['POST'])
-@authorize.in_group('admin')
+@app.route(ROUTE_PREFIX + "/compare", methods=["POST"])
+@authorize.in_group("admin")
 def compare():
     """
     compare
@@ -36,14 +36,14 @@ def compare():
     print("Starting compare function")
     analyse_ata_services = AnalyseDataServices()
     analyse_ata_services.compare_billing_invoice()
-    return '200'
+    return "200"
 
 
 def add_body(event):
-    if 'body' not in event:
-        event['body'] = '{}'
-        headers = event['headers']
-        headers['content-type'] = 'application/json'
+    if "body" not in event:
+        event["body"] = "{}"
+        headers = event["headers"]
+        headers["content-type"] = "application/json"
     return event
 
 
