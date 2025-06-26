@@ -460,14 +460,14 @@ class AirCompanyInvoiceReport(Base):
     Excluido = Column(Boolean, nullable=False, default=False)
 
     Supplier = Column(String)
-    FlightDate = Column(Date)
+    FlightDate = Column(Date, nullable=True)
     FlightNo = Column(String)
     Dep = Column(String)
     Arr = Column(String)
     Class = Column(String)
     InvoicedPax = Column(String)
     ServiceCode = Column(String)
-    SupplierCode = Column(String)
+    SupplierCode = Column(String, nullable=True)
     ServiceDescription = Column(String)
     Aircraft = Column(String)
     Qty = Column(Integer)
@@ -478,8 +478,8 @@ class AirCompanyInvoiceReport(Base):
     Currency = Column(String)
     ItemStatus = Column(String)
     InvoiceStatus = Column(String)
-    InvoiceDate = Column(Date)
-    PaidDate = Column(Date)
+    InvoiceDate = Column(Date, nullable=True)
+    PaidDate = Column(Date, nullable=True)
     FlightNoRed = Column(String)
 
     def __init__(
