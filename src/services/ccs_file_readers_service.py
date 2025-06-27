@@ -73,15 +73,23 @@ class FileReadersService:
         )
         df = df[mask]
 
-        for col in df.select_dtypes(include=["datetime64"]).columns:
-            df[col] = df[col].apply(format_date)
+        date_columns = ["FlightDate", "InvoiceDate", "PaidDate"]
+        for col in date_columns:
+            if col in df.columns:
+                try:
+                    df[col] = pd.to_datetime(df[col], errors='coerce').dt.date
+                    df[col] = df[col].where(pd.notnull(df[col]), None)
+                    print(f"{col} conversion successful")
+                except Exception as e:
+                    print(f"Error converting {col}: {e}")
+                    print(f"Original {col} values: {df[col].head()}")
+
+        df = df.replace({np.nan: None, pd.NaT: None})
 
         for col in df.select_dtypes(include=["object"]).columns:
             df[col] = (
                 df[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
             )
-
-        df = df.replace({np.nan: None})
 
         data = df.to_dict(orient="records")
 

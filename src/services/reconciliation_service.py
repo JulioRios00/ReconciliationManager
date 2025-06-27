@@ -1,5 +1,11 @@
 from datetime import datetime
 from repositories.ccs_repository import ReconciliationRepository
+from models.schema_ccs import (
+    AirCompanyInvoiceReport,
+    CateringInvoiceReport,
+    Reconciliation,
+)
+import uuid
 
 
 class ReconciliationService:
@@ -53,12 +59,8 @@ class ReconciliationService:
             )
             parsed_end_date = self._parse_date(end_date) if end_date else None
 
-            if (
-                parsed_start_date
-                and parsed_end_date
-                and flight_number
-                and item_name
-            ):
+            if (parsed_start_date and parsed_end_date and
+                    flight_number and item_name):
                 if filter_type == "all":
                     records = self.reconciliation_repository.get_by_date_range(
                         parsed_start_date, parsed_end_date, limit, offset
@@ -82,7 +84,9 @@ class ReconciliationService:
                     total_count = (
                         self.reconciliation_repository
                         .get_filtered_count_by_date_range(
-                            filter_type, parsed_start_date, parsed_end_date
+                            filter_type,
+                            parsed_start_date,
+                            parsed_end_date
                         )
                     )
             elif parsed_start_date and parsed_end_date and item_name:
@@ -100,52 +104,36 @@ class ReconciliationService:
                     total_count = (
                         self.reconciliation_repository
                         .get_count_by_item_name_and_date_range(
-                            item_name, parsed_start_date, parsed_end_date
+                            item_name,
+                            parsed_start_date,
+                            parsed_end_date
                         )
                     )
                 else:
-                    records = (
-                        self.reconciliation_repository
-                        .get_filtered_by_date_range(
-                            filter_type,
-                            parsed_start_date,
-                            parsed_end_date,
-                            limit,
-                            offset
-                        )
+                    records = self.reconciliation_repository.get_filtered_by_date_range(
+                        filter_type, parsed_start_date, parsed_end_date, limit, offset
                     )
                     total_count = (
-                        self.reconciliation_repository
-                        .get_filtered_count_by_date_range(
+                        self.reconciliation_repository.get_filtered_count_by_date_range(
                             filter_type, parsed_start_date, parsed_end_date
                         )
                     )
             elif flight_number and item_name:
                 if filter_type == "all":
-                    records = (
-                        self.reconciliation_repository
-                        .get_by_item_name_and_flight_number(
-                            item_name, flight_number, limit, offset
-                        )
+                    records = self.reconciliation_repository.get_by_item_name_and_flight_number(
+                        item_name, flight_number, limit, offset
                     )
-                    total_count = (
-                        self.reconciliation_repository
-                        .get_count_by_item_name_and_flight_number(
-                            item_name, flight_number
-                        )
+                    total_count = self.reconciliation_repository.get_count_by_item_name_and_flight_number(
+                        item_name, flight_number
                     )
                 else:
                     records = (
-                        self.reconciliation_repository.
-                        get_filtered_by_flight_number(
+                        self.reconciliation_repository.get_filtered_by_flight_number(
                             filter_type, flight_number, limit, offset
                         )
                     )
-                    total_count = (
-                        self.reconciliation_repository
-                        .get_filtered_count_by_flight_number(
-                            filter_type, flight_number
-                        )
+                    total_count = self.reconciliation_repository.get_filtered_count_by_flight_number(
+                        filter_type, flight_number
                     )
             elif parsed_start_date and parsed_end_date:
                 if filter_type == "all":
@@ -158,71 +146,47 @@ class ReconciliationService:
                         )
                     )
                 else:
-                    records = (
-                        self.reconciliation_repository
-                        .get_filtered_by_date_range(
-                            filter_type,
-                            parsed_start_date,
-                            parsed_end_date,
-                            limit,
-                            offset
-                        )
+                    records = self.reconciliation_repository.get_filtered_by_date_range(
+                        filter_type, parsed_start_date, parsed_end_date, limit, offset
                     )
                     total_count = (
-                        self.reconciliation_repository
-                        .get_filtered_count_by_date_range(
+                        self.reconciliation_repository.get_filtered_count_by_date_range(
                             filter_type, parsed_start_date, parsed_end_date
                         )
                     )
             elif flight_number:
                 if filter_type == "all":
-                    records = (
-                        self.reconciliation_repository
-                        .get_by_flight_number(
-                            flight_number, limit, offset
-                        )
+                    records = self.reconciliation_repository.get_by_flight_number(
+                        flight_number, limit, offset
                     )
                     total_count = (
-                        self.reconciliation_repository
-                        .get_count_by_flight_number(
+                        self.reconciliation_repository.get_count_by_flight_number(
                             flight_number
                         )
                     )
                 else:
                     records = (
-                        self.reconciliation_repository
-                        .get_filtered_by_flight_number(
+                        self.reconciliation_repository.get_filtered_by_flight_number(
                             filter_type, flight_number, limit, offset
                         )
                     )
-                    total_count = (
-                        self.reconciliation_repository
-                        .get_filtered_count_by_flight_number(
-                            filter_type, flight_number
-                        )
+                    total_count = self.reconciliation_repository.get_filtered_count_by_flight_number(
+                        filter_type, flight_number
                     )
             elif item_name:
                 if filter_type == "all":
-                    records = (
-                        self.reconciliation_repository.get_by_item_name(
-                            item_name, limit, offset
-                        )
+                    records = self.reconciliation_repository.get_by_item_name(
+                        item_name, limit, offset
                     )
-                    total_count = (
-                        self.reconciliation_repository.get_count_by_item_name(
-                            item_name
-                        )
+                    total_count = self.reconciliation_repository.get_count_by_item_name(
+                        item_name
                     )
                 else:
-                    records = (
-                        self.reconciliation_repository.
-                        get_filtered_by_item_name(
-                            filter_type, item_name, limit, offset
-                        )
+                    records = self.reconciliation_repository.get_filtered_by_item_name(
+                        filter_type, item_name, limit, offset
                     )
                     total_count = (
-                        self.reconciliation_repository
-                        .get_filtered_count_by_item_name(
+                        self.reconciliation_repository.get_filtered_count_by_item_name(
                             filter_type, item_name
                         )
                     )
@@ -233,16 +197,11 @@ class ReconciliationService:
                     )
                     total_count = self.reconciliation_repository.get_count()
                 else:
-                    records = (
-                        self.reconciliation_repository
-                        .get_filtered_paginated(
-                            filter_type, limit, offset
-                        )
+                    records = self.reconciliation_repository.get_filtered_paginated(
+                        filter_type, limit, offset
                     )
-                    total_count = (
-                        self.reconciliation_repository.get_filtered_count(
-                            filter_type
-                        )
+                    total_count = self.reconciliation_repository.get_filtered_count(
+                        filter_type
                     )
 
             result_list = [record.serialize() for record in records]
@@ -254,9 +213,7 @@ class ReconciliationService:
                     "limit": limit,
                     "offset": offset,
                     "next_offset": (
-                        offset + limit
-                        if offset + limit < total_count
-                        else None
+                        offset + limit if offset + limit < total_count else None
                     ),
                 },
                 "filters": {
@@ -290,12 +247,8 @@ class ReconciliationService:
             cat_only_records = sum(
                 1 for r in records if r.Air == "No" and r.Cat == "Yes"
             )
-            quantity_discrepancies = sum(
-                1 for r in records if r.DifQty == "Yes"
-            )
-            price_discrepancies = sum(
-                1 for r in records if r.DifPrice == "Yes"
-            )
+            quantity_discrepancies = sum(1 for r in records if r.DifQty == "Yes")
+            price_discrepancies = sum(1 for r in records if r.DifPrice == "Yes")
             total_discrepancies = sum(
                 1 for r in records if r.DifQty == "Yes" or r.DifPrice == "Yes"
             )
@@ -348,17 +301,14 @@ class ReconciliationService:
             report_type: 'air', 'catering', or 'both' (default)
         """
         try:
-            parsed_start_date = (
-                self._parse_date(start_date) if start_date else None
-            )
+            parsed_start_date = self._parse_date(start_date) if start_date else None
             parsed_end_date = self._parse_date(end_date) if end_date else None
 
             result = {}
 
             if report_type in ["air", "both"]:
                 air_records = (
-                    self.reconciliation_repository
-                    .get_air_company_invoice_reports(
+                    self.reconciliation_repository.get_air_company_invoice_reports(
                         limit=limit,
                         offset=offset,
                         start_date=parsed_start_date,
@@ -366,13 +316,10 @@ class ReconciliationService:
                         flight_number=flight_number,
                     )
                 )
-                air_count = (
-                    self.reconciliation_repository
-                    .get_air_company_invoice_reports_count(
-                        start_date=parsed_start_date,
-                        end_date=parsed_end_date,
-                        flight_number=flight_number,
-                    )
+                air_count = self.reconciliation_repository.get_air_company_invoice_reports_count(
+                    start_date=parsed_start_date,
+                    end_date=parsed_end_date,
+                    flight_number=flight_number,
                 )
                 result["air_company_reports"] = {
                     "data": [record.serialize() for record in air_records],
@@ -381,8 +328,7 @@ class ReconciliationService:
 
             if report_type in ["catering", "both"]:
                 catering_records = (
-                    self.reconciliation_repository
-                    .get_catering_invoice_reports(
+                    self.reconciliation_repository.get_catering_invoice_reports(
                         limit=limit,
                         offset=offset,
                         start_date=parsed_start_date,
@@ -391,17 +337,14 @@ class ReconciliationService:
                     )
                 )
                 catering_count = (
-                    self.reconciliation_repository
-                    .get_catering_invoice_reports_count(
+                    self.reconciliation_repository.get_catering_invoice_reports_count(
                         start_date=parsed_start_date,
                         end_date=parsed_end_date,
                         flight_number=flight_number,
                     )
                 )
                 result["catering_reports"] = {
-                    "data": (
-                        [record.serialize() for record in catering_records]
-                    ),
+                    "data": ([record.serialize() for record in catering_records]),
                     "total_count": catering_count,
                 }
 
@@ -458,14 +401,12 @@ class ReconciliationService:
         try:
             if limit is not None and offset is not None:
                 records = (
-                    self.reconciliation_repository
-                    .get_air_company_invoice_reports(
+                    self.reconciliation_repository.get_air_company_invoice_reports(
                         limit=limit, offset=offset
                     )
                 )
                 total_count = (
-                    self.reconciliation_repository
-                    .get_air_company_invoice_reports_count()
+                    self.reconciliation_repository.get_air_company_invoice_reports_count()
                 )
                 result_list = [record.serialize() for record in records]
                 return {
@@ -478,10 +419,7 @@ class ReconciliationService:
                     },
                 }
             else:
-                records = (
-                    self.reconciliation_repository
-                    .get_all_air_company_reports()
-                )
+                records = self.reconciliation_repository.get_all_air_company_reports()
                 result_list = [record.serialize() for record in records]
                 return {"data": result_list}
         except Exception as e:
@@ -492,20 +430,16 @@ class ReconciliationService:
 
     def get_all_catering_reports(self, limit=None, offset=None):
         """
-        Retrieve all data from the CateringInvoiceReport 
+        Retrieve all data from the CateringInvoiceReport
         table using SQLAlchemy with optional pagination
         """
         try:
             if limit is not None and offset is not None:
-                records = (
-                    self.reconciliation_repository
-                    .get_catering_invoice_reports(
-                        limit=limit, offset=offset
-                    )
+                records = self.reconciliation_repository.get_catering_invoice_reports(
+                    limit=limit, offset=offset
                 )
                 total_count = (
-                    self.reconciliation_repository
-                    .get_catering_invoice_reports_count()
+                    self.reconciliation_repository.get_catering_invoice_reports_count()
                 )
 
                 result_list = [record.serialize() for record in records]
@@ -519,9 +453,7 @@ class ReconciliationService:
                     },
                 }
             else:
-                records = (
-                    self.reconciliation_repository.get_all_catering_reports()
-                )
+                records = self.reconciliation_repository.get_all_catering_reports()
                 result_list = [record.serialize() for record in records]
                 return {"data": result_list}
         except Exception as e:
@@ -529,3 +461,308 @@ class ReconciliationService:
                 "message": "Failed to retrieve catering invoice reports",
                 "error": str(e),
             }, 501
+
+    def populate_reconciliation_table(self):
+        """
+        Populate the Reconciliation table with
+        data from AirCompanyInvoiceReport
+        and CateringInvoiceReport tables using SQLAlchemy ORM.
+        """
+        try:
+            self.session.query(Reconciliation).delete()
+
+            air_records = (
+                self.session.query(AirCompanyInvoiceReport)
+                .filter(
+                    AirCompanyInvoiceReport.Ativo.is_(True),
+                    AirCompanyInvoiceReport.Excluido.is_(False),
+                )
+                .all()
+            )
+
+            catering_records = (
+                self.session.query(CateringInvoiceReport)
+                .filter(
+                    CateringInvoiceReport.Ativo.is_(True),
+                    CateringInvoiceReport.Excluido.is_(False),
+                )
+                .all()
+            )
+
+            catering_lookup = {}
+            for cat_record in catering_records:
+                key = (
+                    cat_record.FltDate,
+                    cat_record.FltNo,
+                    cat_record.AlBillCode
+                )
+                if key not in catering_lookup:
+                    catering_lookup[key] = []
+                catering_lookup[key].append(cat_record)
+
+            processed_catering_keys = set()
+            reconciliation_records = []
+            matched_count = 0
+            air_only_count = 0
+            catering_only_count = 0
+
+            for air_record in air_records:
+                air_key = (
+                    air_record.FlightDate,
+                    air_record.FlightNoRed,
+                    air_record.ServiceCode,
+                )
+
+                if air_key in catering_lookup:
+                    for cat_record in catering_lookup[air_key]:
+                        recon_record = Reconciliation(
+                            Id=uuid.uuid4(),
+                            DataCriacao=datetime.now(),
+                            Ativo=True,
+                            Excluido=False,
+                            AirSupplier=air_record.Supplier,
+                            AirFlightDate=air_record.FlightDate,
+                            AirFlightNo=air_record.FlightNo,
+                            AirDep=air_record.Dep,
+                            AirArr=air_record.Arr,
+                            AirClass=air_record.Class,
+                            AirInvoicedPax=air_record.InvoicedPax,
+                            AirServiceCode=air_record.ServiceCode,
+                            AirSupplierCode=air_record.SupplierCode,
+                            AirServiceDescription=(
+                                air_record.ServiceDescription
+                            ),
+                            AirAircraft=air_record.Aircraft,
+                            AirQty=(
+                                str(air_record.Qty)
+                                if air_record.Qty is not None
+                                else "0"
+                            ),
+                            AirUnitPrice=(
+                                str(air_record.UnitPrice)
+                                if air_record.UnitPrice is not None
+                                else "0"
+                            ),
+                            AirSubTotal=(
+                                str(air_record.SubTotal)
+                                if air_record.SubTotal is not None
+                                else "0.00"
+                            ),
+                            AirTax=(
+                                str(air_record.Tax)
+                                if air_record.Tax is not None
+                                else "0.00"
+                            ),
+                            AirTotalIncTax=(
+                                str(air_record.TotalIncTax)
+                                if air_record.TotalIncTax is not None
+                                else "0.00"
+                            ),
+                            AirCurrency=air_record.Currency,
+                            AirItemStatus=air_record.ItemStatus,
+                            AirInvoiceStatus=air_record.InvoiceStatus,
+                            AirInvoiceDate=air_record.InvoiceDate,
+                            AirPaidDate=air_record.PaidDate,
+                            AirFlightNoRed=air_record.FlightNoRed,
+                            CatFacility=cat_record.Facility,
+                            CatFltDate=cat_record.FltDate,
+                            CatFltNo=cat_record.FltNo,
+                            CatFltInv=cat_record.FltInv,
+                            CatClass=cat_record.Class,
+                            CatItemGroup=cat_record.ItemGroup,
+                            CatItemcode=cat_record.Itemcode,
+                            CatItemDesc=cat_record.ItemDesc,
+                            CatAlBillCode=cat_record.AlBillCode,
+                            CatAlBillDesc=cat_record.AlBillDesc,
+                            CatBillCatg=cat_record.BillCatg,
+                            CatUnit=cat_record.Unit,
+                            CatPax=cat_record.Pax,
+                            CatQty=cat_record.Qty,
+                            CatUnitPrice=cat_record.UnitPrice,
+                            CatTotalAmount=cat_record.TotalAmount,
+                            Air="Yes",
+                            Cat="Yes",
+                        )
+                        reconciliation_records.append(recon_record)
+                        matched_count += 1
+                        processed_catering_keys.add(
+                            (
+                                cat_record.FltDate,
+                                cat_record.FltNo,
+                                cat_record.AlBillCode,
+                            )
+                        )
+                else:
+                    recon_record = Reconciliation(
+                        Id=uuid.uuid4(),
+                        DataCriacao=datetime.now(),
+                        Ativo=True,
+                        Excluido=False,
+                        AirSupplier=air_record.Supplier,
+                        AirFlightDate=air_record.FlightDate,
+                        AirFlightNo=air_record.FlightNo,
+                        AirDep=air_record.Dep,
+                        AirArr=air_record.Arr,
+                        AirClass=air_record.Class,
+                        AirInvoicedPax=air_record.InvoicedPax,
+                        AirServiceCode=air_record.ServiceCode,
+                        AirSupplierCode=air_record.SupplierCode,
+                        AirServiceDescription=air_record.ServiceDescription,
+                        AirAircraft=air_record.Aircraft,
+                        AirQty=(
+                            str(air_record.Qty) if air_record.Qty is not None else "0"
+                        ),
+                        AirUnitPrice=(
+                            str(air_record.UnitPrice)
+                            if air_record.UnitPrice is not None
+                            else "0"
+                        ),
+                        AirSubTotal=(
+                            str(air_record.SubTotal)
+                            if air_record.SubTotal is not None
+                            else "0.00"
+                        ),
+                        AirTax=(
+                            str(air_record.Tax)
+                            if air_record.Tax is not None
+                            else "0.00"
+                        ),
+                        AirTotalIncTax=(
+                            str(air_record.TotalIncTax)
+                            if air_record.TotalIncTax is not None
+                            else "0.00"
+                        ),
+                        AirCurrency=air_record.Currency,
+                        AirItemStatus=air_record.ItemStatus,
+                        AirInvoiceStatus=air_record.InvoiceStatus,
+                        AirInvoiceDate=air_record.InvoiceDate,
+                        AirPaidDate=air_record.PaidDate,
+                        AirFlightNoRed=air_record.FlightNoRed,
+                        Air="Yes",
+                        Cat="No",
+                    )
+                    reconciliation_records.append(recon_record)
+                    air_only_count += 1
+
+            for cat_record in catering_records:
+                cat_key = (
+                    cat_record.FltDate,
+                    cat_record.FltNo,
+                    cat_record.AlBillCode
+                )
+                if cat_key not in processed_catering_keys:
+                    recon_record = Reconciliation(
+                        Id=uuid.uuid4(),
+                        DataCriacao=datetime.now(),
+                        Ativo=True,
+                        Excluido=False,
+                        CatFacility=cat_record.Facility,
+                        CatFltDate=cat_record.FltDate,
+                        CatFltNo=cat_record.FltNo,
+                        CatFltInv=cat_record.FltInv,
+                        CatClass=cat_record.Class,
+                        CatItemGroup=cat_record.ItemGroup,
+                        CatItemcode=cat_record.Itemcode,
+                        CatItemDesc=cat_record.ItemDesc,
+                        CatAlBillCode=cat_record.AlBillCode,
+                        CatAlBillDesc=cat_record.AlBillDesc,
+                        CatBillCatg=cat_record.BillCatg,
+                        CatUnit=cat_record.Unit,
+                        CatPax=cat_record.Pax,
+                        CatQty=cat_record.Qty,
+                        CatUnitPrice=cat_record.UnitPrice,
+                        CatTotalAmount=cat_record.TotalAmount,
+                        Air="No",
+                        Cat="Yes",
+                    )
+                    reconciliation_records.append(recon_record)
+                    catering_only_count += 1
+
+            if reconciliation_records:
+                self.session.bulk_save_objects(reconciliation_records)
+
+            self._calculate_reconciliation_differences()
+
+            self.session.commit()
+
+            total_records = len(reconciliation_records)
+
+            return {
+                "success": True,
+                "message": "Reconciliation table populated successfully",
+                "summary": {
+                    "total_records": total_records,
+                    "matched_records": matched_count,
+                    "catering_only_records": catering_only_count,
+                    "air_only_records": air_only_count,
+                },
+            }
+
+        except Exception as e:
+            self.session.rollback()
+            return {
+                "success": False,
+                "message": f"Error populating reconciliation table: {str(e)}",
+            }
+
+    def _calculate_reconciliation_differences(self):
+        """Calculate differences and update flags for matched records"""
+        try:
+            from models.schema_ccs import Reconciliation
+
+            matched_records = (
+                self.session.query(Reconciliation)
+                .filter(
+                    Reconciliation.Air == "Yes",
+                    Reconciliation.Cat == "Yes"
+                )
+                .all()
+            )
+
+            for record in matched_records:
+                record.DifQty = "No"
+                record.DifPrice = "No"
+                record.AmountDif = "0.00"
+                record.QtyDif = "0"
+
+                air_qty = self._safe_int(record.AirQty, 0)
+                cat_qty = self._safe_int(record.CatQty, 0)
+                air_subtotal = self._safe_float(record.AirSubTotal, 0.0)
+                cat_total = self._safe_float(record.CatTotalAmount, 0.0)
+
+                if air_qty != cat_qty:
+                    record.DifQty = "Yes"
+                    record.QtyDif = str(cat_qty - air_qty)
+
+                if (
+                    abs(air_subtotal - cat_total) > 0.01
+                ):
+                    record.DifPrice = "Yes"
+                    record.AmountDif = str(round(cat_total - air_subtotal, 2))
+
+            self.session.flush()
+
+        except Exception as e:
+            raise Exception(f"Error calculating differences: {str(e)}")
+
+    def _safe_int(self, value, default=0):
+        """Safely convert string to int with default"""
+        if not value or value == "None" or value is None:
+            return default
+        try:
+            return int(
+                float(str(value))
+            )
+        except (ValueError, TypeError):
+            return default
+
+    def _safe_float(self, value, default=0.0):
+        """Safely convert string to float with default"""
+        if not value or value == "None" or value is None:
+            return default
+        try:
+            if isinstance(value, str):
+                value = value.replace(",", ".")
+            return float(value)
+        except (ValueError, TypeError):
+            return default

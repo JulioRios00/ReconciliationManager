@@ -460,14 +460,14 @@ class AirCompanyInvoiceReport(Base):
     Excluido = Column(Boolean, nullable=False, default=False)
 
     Supplier = Column(String)
-    FlightDate = Column(Date)
+    FlightDate = Column(Date, nullable=True)
     FlightNo = Column(String)
     Dep = Column(String)
     Arr = Column(String)
     Class = Column(String)
     InvoicedPax = Column(String)
     ServiceCode = Column(String)
-    SupplierCode = Column(String)
+    SupplierCode = Column(String, nullable=True)
     ServiceDescription = Column(String)
     Aircraft = Column(String)
     Qty = Column(Integer)
@@ -478,8 +478,8 @@ class AirCompanyInvoiceReport(Base):
     Currency = Column(String)
     ItemStatus = Column(String)
     InvoiceStatus = Column(String)
-    InvoiceDate = Column(Date)
-    PaidDate = Column(Date)
+    InvoiceDate = Column(Date, nullable=True)
+    PaidDate = Column(Date, nullable=True)
     FlightNoRed = Column(String)
 
     def __init__(
@@ -754,3 +754,29 @@ class ReconAnnotation(Base):
             c.name: str(getattr(self, c.name))
             for c in self.__table__.columns
         }
+        
+# ##terminar tabela
+# class BillingInvoiceTotalDiference(Base):
+#     __tablename__ = 'BillingInvoiceTotalDifference'
+# 	__table_args__ = {'schema': 'ccs'}
+
+# 	Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+# 	DataCriacao = Column(
+# 		TIMESTAMP,
+# 		nullable=False,
+# 		server_default=text("CURRENT_TIMESTAMP")
+# 	)
+# 	DataAtualizacao = Column(TIMESTAMP)
+# 	Ativo = Column(Boolean, nullable=False, default=True)
+# 	Excluido = Column(Boolean, nullable=False, default=False)
+
+# 	Analyse = Column(String, nullable=False)
+ 
+
+
+
+# 	def serialize(self):
+# 		return {
+# 			c.name: str(getattr(self, c.name))
+# 			for c in self.__table__.columns
+# 		}

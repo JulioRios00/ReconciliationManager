@@ -140,6 +140,9 @@ provider:
       analyse_data_api:
         path: "./src"
         file: Dockerfile.analysedataapi
+      populate_reconciliation_api:
+        path: "./src"
+        file: Dockerfile.populatereconciliationapi
 
   tracing:
     apiGateway: true
@@ -169,6 +172,7 @@ functions:
   recon_annotation_api: ${file(src/app/recon_annotation_api/recon_annotation_api.yml)}
   invoice_reports_api: ${file(src/app/invoice_reports_api/invoice_reports_api.yml)}
   analyse_data_api: ${file(src/app/analyse_data_api/analyse_data_api.yml)}
+  populate_reconciliation_table_api: ${file(src/app/populate_reconciliation_table_api/populate_reconciliation.yml)}
   reconciliation_api:
     image:
       name: reconciliation_api

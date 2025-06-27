@@ -1,0 +1,29 @@
+image:
+  name: populate_reconciliation_api
+memorySize: 3072
+timeout: 300
+events:
+  - httpApi:
+      path: /api/reconciliation/populate
+      method: post
+      cors: true
+      authorizer:
+        name: CognitoAuthorizer
+      request:
+        parameters:
+          querystrings:
+            force_populate: false
+environment:
+  LOG_LEVEL: INFO
+iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - secretsmanager:GetSecretValue
+      - secretsmanager:DescribeSecret
+    Resource:
+      - ${param:ELEMENTAR_SECRETS_MANAGER_ARN}
+  - Effect: Allow
+    Action:
+      - lambda:InvokeFunction
+    Resource:
+      - '*'
