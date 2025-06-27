@@ -1,21 +1,17 @@
 image: analyse_data_api
 description: analyse_data_api
-memorySize: 4096
-timeout: 900
+memorySize: 1024
+timeout: 600
 iamRoleStatementsInherit: true
 iamRoleStatements:
-  - Effect: Allow
+  - Effect: "Allow"
     Action:
-      - s3:ListBucket
-    Resource: "arn:aws:s3:::mtw-elementar-ml-${self:custom.stage}-${aws:accountId}"
-  - Effect: Allow
+      - s3:ListBucket*
+    Resource: "arn:aws:s3:::mtw-make-the-price-${self:custom.stage}-${aws:accountId}"
+  - Effect: "Allow"
     Action:
       - s3:*Object
-    Resource: "arn:aws:s3:::mtw-elementar-ml-${self:custom.stage}-${aws:accountId}/*"
-  - Effect: Allow
-    Action:
-      - sagemaker:*
-    Resource: "*"
+    Resource: "arn:aws:s3:::mtw-make-the-price-${self:custom.stage}-${aws:accountId}/*"
 events:
   - httpApi:
       method: '*'

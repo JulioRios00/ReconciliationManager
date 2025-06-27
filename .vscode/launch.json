@@ -2031,7 +2031,8 @@
 		"memoryMb": 3000, 
 		"runtime": "python3.8",
 		"payload": {
-		"json": {
+      "json": {
+      "action": "sincronize",
 			"resource": "/{proxy+}",
 			"path": "analyse_data_api/compare",
 			"httpMethod": "POST",
