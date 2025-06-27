@@ -755,28 +755,28 @@ class ReconAnnotation(Base):
             for c in self.__table__.columns
         }
         
-##terminar tabela safwan
-class BillingInvoiceTotalDiference(Base):
-    __tablename__ = 'BillingInvoiceTotalDifference'
-	__table_args__ = {'schema': 'ccs'}
+# ##terminar tabela
+# class BillingInvoiceTotalDiference(Base):
+#     __tablename__ = 'BillingInvoiceTotalDifference'
+# 	__table_args__ = {'schema': 'ccs'}
 
-	Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-	DataCriacao = Column(
-		TIMESTAMP,
-		nullable=False,
-		server_default=text("CURRENT_TIMESTAMP")
-	)
-	DataAtualizacao = Column(TIMESTAMP)
-	Ativo = Column(Boolean, nullable=False, default=True)
-	Excluido = Column(Boolean, nullable=False, default=False)
+# 	Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+# 	DataCriacao = Column(
+# 		TIMESTAMP,
+# 		nullable=False,
+# 		server_default=text("CURRENT_TIMESTAMP")
+# 	)
+# 	DataAtualizacao = Column(TIMESTAMP)
+# 	Ativo = Column(Boolean, nullable=False, default=True)
+# 	Excluido = Column(Boolean, nullable=False, default=False)
 
-	Analyse = Column(String, nullable=False)
+# 	Analyse = Column(String, nullable=False)
  
 
 
 
-	def serialize(self):
-		return {
-			c.name: str(getattr(self, c.name))
-			for c in self.__table__.columns
-		}
+# 	def serialize(self):
+# 		return {
+# 			c.name: str(getattr(self, c.name))
+# 			for c in self.__table__.columns
+# 		}
