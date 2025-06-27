@@ -909,6 +909,38 @@
     }
   }
 },
+{
+  "type": "aws-sam",
+  "request": "direct-invoke",
+  "name": "populate_reconciliation.main (python3.8)",
+  "invokeTarget": {
+    "target": "code",
+    "projectRoot": "${workspaceFolder}/src",
+    "lambdaHandler": "app/populate_reconciliation_table_api/populate_reconciliation.main"
+  },
+  "lambda": {
+    "memoryMb": 3072,
+    "runtime": "python3.8",
+    "payload": {
+      "json": {
+        "queryStringParameters": {
+          "force_populate": "true"
+        },
+        "httpMethod": "POST",
+        "path": "/api/reconciliation/populate",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    "environmentVariables": {
+      "MTW_BUCKET_NAME": "mtw-elementar-dev-018061303185",
+      "ELEMENTAR_SECRETS_MANAGER_ARN": "arn:aws:secretsmanager:us-east-1:018061303185:secret:dev/elementarapp/postgresql-gCV4D2",
+      "LOG_LEVEL": "INFO",
+      "ENV": "dev"
+    }
+  }
+},
 	{
 	"type": "aws-sam",
 	"request": "direct-invoke",
