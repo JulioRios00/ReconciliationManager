@@ -47,8 +47,25 @@ def add_body(event):
     return event
 
 
+# def main(event, context):
+#     logger.info("Lambda main function started")
+#     logger.info(f"Event: {json.dumps(event, default=str)}")
+#     event = add_body(event)
+#     return serverless_wsgi.handle_request(app, event, context)
+
+
 def main(event, context):
-    logger.info("Lambda main function started")
-    logger.info(f"Event: {json.dumps(event, default=str)}")
+    print(event)
+    action = event.get('action')
+    if action == 'sincronize':
+        print("Starting compare function")
+        analyse_ata_services = AnalyseDataServices()
+        analyse_ata_services.compare_billing_invoice()
+
+        return {
+            'statusCode': 200,
+            'body': 'success update data'
+        }   
+    
     event = add_body(event)
     return serverless_wsgi.handle_request(app, event, context)
