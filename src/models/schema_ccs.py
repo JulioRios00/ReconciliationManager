@@ -754,29 +754,29 @@ class ReconAnnotation(Base):
             c.name: str(getattr(self, c.name))
             for c in self.__table__.columns
         }
-        
-# ##terminar tabela
-# class BillingInvoiceTotalDiference(Base):
-#     __tablename__ = 'BillingInvoiceTotalDifference'
-# 	__table_args__ = {'schema': 'ccs'}
-
-# 	Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-# 	DataCriacao = Column(
-# 		TIMESTAMP,
-# 		nullable=False,
-# 		server_default=text("CURRENT_TIMESTAMP")
-# 	)
-# 	DataAtualizacao = Column(TIMESTAMP)
-# 	Ativo = Column(Boolean, nullable=False, default=True)
-# 	Excluido = Column(Boolean, nullable=False, default=False)
-
-# 	Analyse = Column(String, nullable=False)
- 
 
 
+class BillingInvoiceTotalDiference(Base):
+    __tablename__ = 'BillingInvoiceTotalDifference'
+    __table_args__ = {'schema': 'ccs'}
 
-# 	def serialize(self):
-# 		return {
-# 			c.name: str(getattr(self, c.name))
-# 			for c in self.__table__.columns
-# 		}
+    Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    DataCriacao = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP")
+    )
+    DataAtualizacao = Column(TIMESTAMP)
+    Ativo = Column(Boolean, nullable=False, default=True)
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+    AnalysedField = Column(String, nullable=False)
+    AnalysedItem = Column(String, nullable=False)
+    FlightDate = Column(Date, nullable=False)
+    TotalAmount = Column(DECIMAL(15, 2), nullable=False)
+
+    def serialize(self):
+        return {
+            c.name: str(getattr(self, c.name))
+            for c in self.__table__.columns
+        }
