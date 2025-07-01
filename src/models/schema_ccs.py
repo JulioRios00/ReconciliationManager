@@ -756,7 +756,7 @@ class ReconAnnotation(Base):
         }
 
 
-class BillingInvoiceTotalDiference(Base):
+class BillingInvoiceTotalDifference(Base):
     __tablename__ = 'BillingInvoiceTotalDifference'
     __table_args__ = {'schema': 'ccs'}
 

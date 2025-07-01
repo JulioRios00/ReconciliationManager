@@ -9,6 +9,7 @@ from sqlalchemy import func
 import logging
 import os
 
+from repositories.repository import Repository
 # Tables
 from models.schema_ccs import (
     Flight,
@@ -20,6 +21,7 @@ from models.schema_ccs import (
     CateringInvoiceReport,
     AirCompanyInvoiceReport,
     Reconciliation,
+    BillingInvoiceTotalDifference,
 )
 
 # Application-Specific Common Utilities
@@ -1591,3 +1593,35 @@ class FlightNumberMappingRepository:
             self.session.rollback()
             print(f"Error clearing flight number mapping records: {e}")
             raise
+
+class BillingInvoiceTotalDifferenceRepository:
+    def __init__(self, session: Session):
+        self.session = session
+        # super().__init__(session, Repository)
+ 
+    def delete_all(self, ):
+        """
+        Delete all records from BillingInvoiceTotalDifference table
+        """
+        try:
+            self.session.query(BillingInvoiceTotalDifference).delete()
+            self.session.commit()
+            print("Successfully deleted all BillingInvoiceTotalDifference records")
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error deleting BillingInvoiceTotalDifference records: {e}")
+            raise
+        
+    def add_record(self, record: BillingInvoiceTotalDifference):
+        """
+        Add a single BillingInvoiceTotalDifference record to the database.
+        """
+        try:
+            self.session.add(record)
+            self.session.commit()
+            # print("Record successfully added")
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error adding record: {e}")
+            raise
+        
