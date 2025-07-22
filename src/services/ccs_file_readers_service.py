@@ -478,7 +478,7 @@ class FileReadersService:
             df.reset_index(drop=True, inplace=True)
 
             column_mapping = {
-                "Promeus Class": "promeus_class",
+                "Class": "promeus_class",
                 "Inflair Class": "inflair_class",
                 "Item Group": "item_group",
                 "Item code": "item_code",
