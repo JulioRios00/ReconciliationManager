@@ -110,9 +110,6 @@ provider:
         audience: ${param:AUDIENCE}
   ecr:
     images:
-      document_api:
-        path: "./src"
-        file: Dockerfile.documentapi
       analyze_flight_file:
         path: "./src"
         file: Dockerfile.flightfile
@@ -163,7 +160,6 @@ package:
     - '!.venv/**'
 
 functions:
-  document_api: ${file(src/app/document_api/document_api.yml)}
   analyze_flight_file: ${file(src/app/extract_data_app/analyze_flight_file/analyze_tp_006.yml)}
   airline_api: ${file(src/app/extract_data_app/airline_api/airline_api.yml)}
   analyze_price_report: ${file(src/app/extract_data_app/analyze_price_report/analyze_tp_100.yml)}
