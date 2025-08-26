@@ -15,4 +15,4 @@ Qualquer outro contexto ou screenshots sobre esse pull request vão aqui.
 
 ***
 
-> Seguindo boas práticas, tente mantér o nome da tarefa declarada no Monday como título do Pull request. 
+> Seguindo boas práticas, tente mantér o nome da tarefa declarada no Monday como título do Pull request.
