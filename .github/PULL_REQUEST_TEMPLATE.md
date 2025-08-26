@@ -1,16 +1,18 @@
-# Pull Request Template
+## Descrição do pull request
+_Por favor inclua um resumo das alterações e qual problema foi resolvido._
 
-## Description
-Please include a summary of the change and which issue is fixed. Also include relevant motivation and context.
 
-Fixes #(issue)
-
-## Type of change
+## Tipo de mudança
 - [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
-- [ ] Other (please describe):
+- [ ] Nova feature
+- [ ] Mudança significativa 
+- [ ] Atualização de documentação
+- [ ] Outra (descreva):
 
-## Additional context
-Add any other context or screenshots about the pull request here.
+## Contextos adicionais
+Qualquer outro contexto ou screenshots sobre esse pull request vão aqui.
+
+
+***
+
+> Seguindo boas práticas, tente mantér o nome da tarefa declarada no Monday como título do Pull request.
