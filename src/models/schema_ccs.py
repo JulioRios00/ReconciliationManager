@@ -1,5 +1,4 @@
 from .base import Base
-from .schema_public import *
 from sqlalchemy import (
     Column,
     Integer,

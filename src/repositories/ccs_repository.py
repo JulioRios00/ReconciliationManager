@@ -69,7 +69,9 @@ class CateringInvoiceRepository(Repository):
                 total_amount=total_amount
             )
             
-            result = self.insert(new_record)
+            self.session.add(new_record)
+            self.session.commit()
+            result = new_record
             logger.info(f"Billing recon record inserted successfully")
             return result
         except Exception as e:
@@ -87,8 +89,12 @@ class CateringInvoiceRepository(Repository):
     def delete_all_catering_data(self):
         """Delete all catering invoice data"""
         try:
-            return self.delete_all()
+            self.session.query(CateringInvoiceReport).delete()
+            self.session.commit()
+            logger.info("All catering invoice data deleted successfully")
+            return True
         except Exception as e:
+            self.session.rollback()
             logger.error(f"Error deleting all catering data: {str(e)}")
             raise CustomException(f"Failed to delete catering data: {str(e)}")
 
@@ -148,7 +154,9 @@ class AirCompanyInvoiceRepository(Repository):
                 flight_no_red=flight_no_red
             )
             
-            result = self.insert(new_record)
+            self.session.add(new_record)
+            self.session.commit()
+            result = new_record
             logger.info(f"Air company invoice record inserted successfully")
             return result
         except Exception as e:
@@ -166,8 +174,12 @@ class AirCompanyInvoiceRepository(Repository):
     def delete_all_air_company_data(self):
         """Delete all air company invoice data"""
         try:
-            return self.delete_all()
+            self.session.query(AirCompanyInvoiceReport).delete()
+            self.session.commit()
+            logger.info("All air company invoice data deleted successfully")
+            return True
         except Exception as e:
+            self.session.rollback()
             logger.error(f"Error deleting all air company data: {str(e)}")
             raise CustomException(f"Failed to delete air company data: {str(e)}")
 
