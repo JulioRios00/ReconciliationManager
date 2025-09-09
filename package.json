@@ -1,9 +1,11 @@
 {
-  "name": "serverless-acesso-bd",
+  "name": "reconciliation-manager",
   "version": "1.0.0",
-  "description": "",
+  "description": "Reconciliation Manager - Cleaned up CCS Backend focusing on reconciliation functionality",
   "main": "index.js",
   "scripts": {
+    "deploy": "serverless deploy",
+    "remove": "serverless remove",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -13,7 +15,6 @@
   },
   "dependencies": {
     "serverless": "^4.0.23",
-    "serverless-plugin-resource-tagging": "^1.2.0",
-    "timers": "^0.1.1"
+    "serverless-plugin-resource-tagging": "^1.2.0"
   }
 }
