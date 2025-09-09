@@ -12,7 +12,5 @@ SQLAlchemy
 coverage
 pytest
 requests
-PyPDF2
-PyMuPDF
 pandas
 openpyxl>=3.0.7

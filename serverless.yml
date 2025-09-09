@@ -110,18 +110,6 @@ provider:
         audience: ${param:AUDIENCE}
   ecr:
     images:
-      analyze_flight_file:
-        path: "./src"
-        file: Dockerfile.flightfile
-      analyze_price_report:
-        path: "./src"
-        file: Dockerfile.pricereport
-      analyze_invoice:
-        path: "./src"
-        file: Dockerfile.invoice
-      airline_api:
-        path: "./src"
-        file: Dockerfile.airlineapi
       read_files_recon:
         path: "./src"
         file: Dockerfile.readfilesrecon
@@ -131,15 +119,6 @@ provider:
       recon_annotation_api:
         path: "./src"
         file: Dockerfile.reconannotationapi
-      invoice_reports_api:
-        path: "./src"
-        file: Dockerfile.invoicereportsapi
-      analyse_data_api:
-        path: "./src"
-        file: Dockerfile.analysedataapi
-      populate_reconciliation_api:
-        path: "./src"
-        file: Dockerfile.populatereconciliationapi
 
   tracing:
     apiGateway: true
@@ -160,15 +139,8 @@ package:
     - '!.venv/**'
 
 functions:
-  analyze_flight_file: ${file(src/app/extract_data_app/analyze_flight_file/analyze_tp_006.yml)}
-  airline_api: ${file(src/app/extract_data_app/airline_api/airline_api.yml)}
-  analyze_price_report: ${file(src/app/extract_data_app/analyze_price_report/analyze_tp_100.yml)}
-  analyze_invoice: ${file(src/app/extract_data_app/analyze_invoice/analyze_invoice.yml)}
   read_files_recon: ${file(src/app/extract_data_app/read_files_recon/read_files_recon.yml)}
   recon_annotation_api: ${file(src/app/recon_annotation_api/recon_annotation_api.yml)}
-  invoice_reports_api: ${file(src/app/invoice_reports_api/invoice_reports_api.yml)}
-  analyse_data_api: ${file(src/app/analyse_data_api/analyse_data_api.yml)}
-  populate_reconciliation_table_api: ${file(src/app/populate_reconciliation_table_api/populate_reconciliation.yml)}
   reconciliation_api:
     image:
       name: reconciliation_api
