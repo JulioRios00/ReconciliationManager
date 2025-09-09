@@ -5,7 +5,7 @@ _Por favor inclua um resumo das alterações e qual problema foi resolvido._
 ## Tipo de mudança
 - [ ] Bug fix
 - [ ] Nova feature
-- [ ] Mudança significativa 
+- [ ] Mudança significativa
 - [ ] Atualização de documentação
 - [ ] Outra (descreva):
 
@@ -15,4 +15,4 @@ Qualquer outro contexto ou screenshots sobre esse pull request vão aqui.
 
 ***
 
-> Seguindo boas práticas, tente mantér o nome da tarefa declarada no Monday como título do Pull request. 
+> Seguindo boas práticas, tente mantér o nome da tarefa declarada no Monday como título do Pull request.

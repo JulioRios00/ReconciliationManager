@@ -117,7 +117,7 @@
       }
     },
 
-    
+
     {
       "type": "aws-sam",
       "request": "direct-invoke",
@@ -566,7 +566,7 @@
           }
       }
     },
-    
+
     {
       "type": "aws-sam",
       "request": "direct-invoke",
@@ -867,7 +867,7 @@
 		"lambdaHandler": "app/reconciliation_api/reconciliation.main"
 	},
 	"lambda": {
-		"memoryMb": 3000, 
+		"memoryMb": 3000,
 		"runtime": "python3.8",
 		"payload": {
 		"json": {
@@ -1216,7 +1216,7 @@
     "lambdaHandler": "app/reconciliation_api/reconciliation.main"
   },
   "lambda": {
-    "memoryMb": 3000, 
+    "memoryMb": 3000,
     "runtime": "python3.8",
     "payload": {
       "json": {
@@ -1296,7 +1296,7 @@
     "lambdaHandler": "app/reconciliation_api/reconciliation.main"
   },
   "lambda": {
-    "memoryMb": 3000, 
+    "memoryMb": 3000,
     "runtime": "python3.8",
     "payload": {
       "json": {
@@ -1376,7 +1376,7 @@
     "lambdaHandler": "app/reconciliation_api/reconciliation.main"
   },
   "lambda": {
-    "memoryMb": 3000, 
+    "memoryMb": 3000,
     "runtime": "python3.8",
     "payload": {
       "json": {
@@ -1456,7 +1456,7 @@
     "lambdaHandler": "app/reconciliation_api/reconciliation.main"
   },
   "lambda": {
-    "memoryMb": 3000, 
+    "memoryMb": 3000,
     "runtime": "python3.8",
     "payload": {
       "json": {
@@ -1537,7 +1537,7 @@
     "lambdaHandler": "app/reconciliation_api/reconciliation.main"
   },
   "lambda": {
-    "memoryMb": 3000, 
+    "memoryMb": 3000,
     "runtime": "python3.8",
     "payload": {
       "json": {
@@ -1620,7 +1620,7 @@
     "lambdaHandler": "app/reconciliation_api/reconciliation.main"
   },
   "lambda": {
-    "memoryMb": 3000, 
+    "memoryMb": 3000,
     "runtime": "python3.8",
     "payload": {
       "json": {
@@ -1702,7 +1702,7 @@
     "lambdaHandler": "app/reconciliation_api/reconciliation.main"
   },
   "lambda": {
-    "memoryMb": 3000, 
+    "memoryMb": 3000,
     "runtime": "python3.8",
     "payload": {
       "json": {
@@ -1944,7 +1944,7 @@
 		"lambdaHandler": "app/analyse_data_api/analyse_data_api.main"
 	},
 	"lambda": {
-		"memoryMb": 3000, 
+		"memoryMb": 3000,
 		"runtime": "python3.8",
 		"payload": {
       "json": {
@@ -2010,7 +2010,7 @@
 		"FRONTEND_URL": "https://dev.makethefuture.tech"
 		}
 	}
-},       
+},
 {
   "type": "aws-sam",
   "request": "direct-invoke",

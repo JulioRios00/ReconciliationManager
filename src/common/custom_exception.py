@@ -1,5 +1,5 @@
 class CustomException(Exception):
-    
+
     status_code = 400
     is_custom = True
 
@@ -11,10 +11,10 @@ class CustomException(Exception):
         if is_custom is not None:
             self.is_custom = is_custom
 
-    def to_dict(self):       
+    def to_dict(self):
         body = dict()
-        body['message'] = self.message
-        body['is_custom'] = self.is_custom
+        body["message"] = self.message
+        body["is_custom"] = self.is_custom
         error = dict()
-        error['error'] = body
+        error["error"] = body
         return error

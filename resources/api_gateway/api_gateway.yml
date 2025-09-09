@@ -1,8 +1,8 @@
 Resources:
   ApiGatewayStage:
     Type: AWS::ApiGatewayV2::Stage
-    Properties: 
-      ApiId: 
+    Properties:
+      ApiId:
         Ref: HttpApi
       StageName: $default  # Atualiza o estágio existente em vez de criar um novo
       AutoDeploy: true

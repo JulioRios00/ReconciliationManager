@@ -423,7 +423,7 @@ All main entities include:
 ### Development Environment
 - **Purpose**: Development and testing
 - **Database**: Development PostgreSQL instance
-- **S3 Buckets**: 
+- **S3 Buckets**:
   - `mtw-elementar-dev-018061303185`
   - `mtw-refinado-dev`
   - `mtw-make-the-price-dev-018061303185`
@@ -433,7 +433,7 @@ All main entities include:
 ### QA Environment
 - **Purpose**: Quality assurance and staging
 - **Database**: QA PostgreSQL instance with production-like data
-- **S3 Buckets**: 
+- **S3 Buckets**:
   - `mtw-elementar-dev-018061303185` (shared)
   - `mtw-refinado-qa`
   - `mtw-make-the-price-qa-836450907988`
@@ -445,7 +445,7 @@ __QA environment is not working__
 ### Production Environment
 - **Purpose**: Live production system
 - **Database**: Production PostgreSQL with high availability
-- **S3 Buckets**: 
+- **S3 Buckets**:
   - `mtw-elementar-dev-018061303185` (shared)
   - `mtw-refinado`
   - `mtw-make-the-price-prod-123642328289`
@@ -578,9 +578,9 @@ phases:
       - npm install
       - pip install alembic
       - pip install psycopg2-binary
-      - pip install flask_authorize 
+      - pip install flask_authorize
   build:
-    commands: 
+    commands:
       - alembic upgrade head
       - serverless deploy --stage $ENVIRONMENT
 ```

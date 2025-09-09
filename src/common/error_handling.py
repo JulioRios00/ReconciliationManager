@@ -1,7 +1,9 @@
-#Services
-from .custom_exception import CustomException
-#Libs
+# Services
+# Libs
 from flask import jsonify
+
+from .custom_exception import CustomException
+
 
 def all_exception_handler(e):
     if isinstance(e, CustomException):

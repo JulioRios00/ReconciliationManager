@@ -1,11 +1,12 @@
-from sqlalchemy.orm import Session
-import uuid
-from typing import List, Optional
 import logging
+import uuid
 from datetime import datetime
+from typing import List, Optional
 
-from models.schema_ccs import ReconAnnotation
+from sqlalchemy.orm import Session
+
 from enums.status_enum import StatusEnum
+from models.schema_ccs import ReconAnnotation
 
 
 class ReconAnnotationRepository:
@@ -48,15 +49,15 @@ class ReconAnnotationRepository:
                 annotation=annotation,
                 status=status,
             )
-            
+
             # Set the DataCriacao and DataAtualizacao fields
             new_annotation.DataCriacao = created_at
             new_annotation.DataAtualizacao = updated_at
-            
+
             self.db_session.add(new_annotation)
             self.db_session.commit()
             self.db_session.refresh(new_annotation)
-            
+
             logging.info(f"Created annotation {new_annotation.Id} at {created_at}")
             return new_annotation
         except Exception as e:
@@ -108,7 +109,9 @@ class ReconAnnotationRepository:
                     ReconAnnotation.Ativo.is_(True),
                     ReconAnnotation.Excluido.is_(False),
                 )
-                .order_by(ReconAnnotation.DataCriacao.desc())  # Order by creation date, newest first
+                .order_by(
+                    ReconAnnotation.DataCriacao.desc()
+                )  # Order by creation date, newest first
                 .all()
             )
         except Exception as e:
@@ -155,7 +158,7 @@ class ReconAnnotationRepository:
 
             self.db_session.commit()
             self.db_session.refresh(annotation_obj)
-            
+
             logging.info(f"Updated annotation {annotation_id} at {updated_at}")
             return annotation_obj
         except Exception as e:
@@ -182,9 +185,11 @@ class ReconAnnotationRepository:
             annotation_obj.Ativo = False
             annotation_obj.Excluido = True
             annotation_obj.DataAtualizacao = datetime.utcnow()
-            
+
             self.db_session.commit()
-            logging.info(f"Soft deleted annotation {annotation_id} at {datetime.utcnow()}")
+            logging.info(
+                f"Soft deleted annotation {annotation_id} at {datetime.utcnow()}"
+            )
             return True
         except Exception as e:
             self.db_session.rollback()

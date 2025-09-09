@@ -1,5 +1,6 @@
-#Libs
+# Libs
 import requests
+
 
 def get(url, headers={}, json=True):
     r = requests.get(url, headers=headers)

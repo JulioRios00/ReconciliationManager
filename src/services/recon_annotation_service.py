@@ -1,14 +1,14 @@
-from sqlalchemy.orm import Session
-import uuid
-from typing import Dict, Any, Optional, Tuple
 import logging
+import uuid
 from datetime import datetime
+from typing import Any, Dict, Optional, Tuple
 
-from repositories.recon_annotation_repository import ReconAnnotationRepository
-from repositories.ccs_repository import ReconciliationRepository
+from sqlalchemy.orm import Session
+
 from enums.status_enum import StatusEnum
 from models.schema_ccs import Reconciliation
-
+from repositories.ccs_repository import ReconciliationRepository
+from repositories.recon_annotation_repository import ReconAnnotationRepository
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,9 @@ class ReconAnnotationService:
                 updated_at=current_datetime,
             )
 
-            logger.info(f"Annotation created successfully at {current_datetime} for reconciliation: {reconciliation_uuid}")
+            logger.info(
+                f"Annotation created successfully at {current_datetime} for reconciliation: {reconciliation_uuid}"
+            )
 
             return {"success": True, "error": None, "data": annotation.serialize()}
 
@@ -285,7 +287,9 @@ class ReconAnnotationService:
                 logger.error(f"Annotation not found for update: {annotation_uuid}")
                 return {"success": False, "error": "Annotation not found", "data": None}
 
-            logger.info(f"Annotation updated successfully at {current_datetime} for annotation: {annotation_uuid}")
+            logger.info(
+                f"Annotation updated successfully at {current_datetime} for annotation: {annotation_uuid}"
+            )
 
             return {"success": True, "error": None, "data": annotation.serialize()}
 

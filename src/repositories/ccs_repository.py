@@ -1,26 +1,24 @@
 # Repositories
-from repositories.repository import Repository
-from typing import List, Dict
-from decimal import Decimal
-from datetime import date, datetime
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-
 import logging
 import os
+from datetime import datetime
+from typing import List
 
-# Tables - only keeping essential ones
-from models.schema_ccs import (
-    CateringInvoiceReport,
-    AirCompanyInvoiceReport,
-    Reconciliation,
-    FlightNumberMapping,
-    FlightClassMapping,
-    ReconAnnotation,
-)
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 # Application-Specific Common Utilities
 from common.custom_exception import CustomException
+
+# Tables - only keeping essential ones
+from models.schema_ccs import (
+    AirCompanyInvoiceReport,
+    CateringInvoiceReport,
+    FlightClassMapping,
+    FlightNumberMapping,
+    Reconciliation,
+)
+from repositories.repository import Repository
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
 logger = logging.getLogger()
@@ -47,7 +45,7 @@ class CateringInvoiceRepository(Repository):
         pax=None,
         qty=None,
         unit_price=None,
-        total_amount=None
+        total_amount=None,
     ):
         try:
             new_record = CateringInvoiceReport(
@@ -66,13 +64,13 @@ class CateringInvoiceRepository(Repository):
                 pax=pax,
                 qty=qty,
                 unit_price=unit_price,
-                total_amount=total_amount
+                total_amount=total_amount,
             )
-            
+
             self.session.add(new_record)
             self.session.commit()
             result = new_record
-            logger.info(f"Billing recon record inserted successfully")
+            logger.info("Billing recon record inserted successfully")
             return result
         except Exception as e:
             logger.error(f"Error inserting billing recon record: {str(e)}")
@@ -126,7 +124,7 @@ class AirCompanyInvoiceRepository(Repository):
         invoice_status=None,
         invoice_date=None,
         paid_date=None,
-        flight_no_red=None
+        flight_no_red=None,
     ):
         try:
             new_record = AirCompanyInvoiceReport(
@@ -151,17 +149,19 @@ class AirCompanyInvoiceRepository(Repository):
                 invoice_status=invoice_status,
                 invoice_date=invoice_date,
                 paid_date=paid_date,
-                flight_no_red=flight_no_red
+                flight_no_red=flight_no_red,
             )
-            
+
             self.session.add(new_record)
             self.session.commit()
             result = new_record
-            logger.info(f"Air company invoice record inserted successfully")
+            logger.info("Air company invoice record inserted successfully")
             return result
         except Exception as e:
             logger.error(f"Error inserting air company invoice record: {str(e)}")
-            raise CustomException(f"Failed to insert air company invoice record: {str(e)}")
+            raise CustomException(
+                f"Failed to insert air company invoice record: {str(e)}"
+            )
 
     def get_all_air_company_data(self):
         """Get all air company invoice data"""
@@ -324,9 +324,11 @@ class FlightClassMappingRepository:
     def delete(self, mapping_id):
         """Delete a flight class mapping"""
         try:
-            mapping = self.session.query(FlightClassMapping).filter(
-                FlightClassMapping.Id == mapping_id
-            ).first()
+            mapping = (
+                self.session.query(FlightClassMapping)
+                .filter(FlightClassMapping.Id == mapping_id)
+                .first()
+            )
             if mapping:
                 self.session.delete(mapping)
                 self.session.commit()
@@ -383,9 +385,11 @@ class FlightNumberMappingRepository:
     def delete(self, mapping_id):
         """Delete a flight number mapping"""
         try:
-            mapping = self.session.query(FlightNumberMapping).filter(
-                FlightNumberMapping.Id == mapping_id
-            ).first()
+            mapping = (
+                self.session.query(FlightNumberMapping)
+                .filter(FlightNumberMapping.Id == mapping_id)
+                .first()
+            )
             if mapping:
                 self.session.delete(mapping)
                 self.session.commit()

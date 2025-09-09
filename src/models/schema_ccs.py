@@ -1,19 +1,22 @@
-from .base import Base
 from sqlalchemy import (
-    Column,
-    Integer,
+    DECIMAL,
     TIMESTAMP,
     Boolean,
-    String,
-    text,
-    DECIMAL,
-    ForeignKey,
+    Column,
     Date,
+    DateTime,
     Enum,
-    func)
+    ForeignKey,
+    Integer,
+    String,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from sqlalchemy import DateTime
+
+from .base import Base
+
 try:
     from src.enums.status_enum import StatusEnum
 except ImportError:
@@ -23,14 +26,12 @@ import uuid
 
 
 class CateringInvoiceReport(Base):
-    __tablename__ = 'CateringInvoiceReport'
-    __table_args__ = {'schema': 'ccs'}
+    __tablename__ = "CateringInvoiceReport"
+    __table_args__ = {"schema": "ccs"}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     DataCriacao = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text("CURRENT_TIMESTAMP")
+        TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
     DataAtualizacao = Column(TIMESTAMP)
     Ativo = Column(Boolean, nullable=False, default=True)
@@ -54,10 +55,23 @@ class CateringInvoiceReport(Base):
     TotalAmount = Column(String)
 
     def __init__(
-        self, facility, flt_date, flt_no, flt_inv,
-        class_, item_group, itemcode, item_desc,
-        al_bill_code, al_bill_desc, bill_catg, unit,
-        pax, qty, unit_price, total_amount
+        self,
+        facility,
+        flt_date,
+        flt_no,
+        flt_inv,
+        class_,
+        item_group,
+        itemcode,
+        item_desc,
+        al_bill_code,
+        al_bill_desc,
+        bill_catg,
+        unit,
+        pax,
+        qty,
+        unit_price,
+        total_amount,
     ):
         self.Facility = facility
         self.FltDate = flt_date
@@ -77,21 +91,16 @@ class CateringInvoiceReport(Base):
         self.TotalAmount = total_amount
 
     def serialize(self):
-        return {
-            c.name: str(getattr(self, c.name))
-            for c in self.__table__.columns
-        }
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
 
 
 class AirCompanyInvoiceReport(Base):
-    __tablename__ = 'AirCompanyInvoiceReport'
-    __table_args__ = {'schema': 'ccs'}
+    __tablename__ = "AirCompanyInvoiceReport"
+    __table_args__ = {"schema": "ccs"}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     DataCriacao = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text("CURRENT_TIMESTAMP")
+        TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
     DataAtualizacao = Column(TIMESTAMP)
     Ativo = Column(Boolean, nullable=False, default=True)
@@ -121,13 +130,29 @@ class AirCompanyInvoiceReport(Base):
     FlightNoRed = Column(String)
 
     def __init__(
-        self, supplier=None, flight_date=None, flight_no=None, dep=None,
-        arr=None, class_=None, invoiced_pax=None, service_code=None,
-        supplier_code=None, service_description=None, aircraft=None,
-        qty=None, unit_price=None, sub_total=None, tax=None,
-        total_inc_tax=None, currency=None, item_status=None,
-        invoice_status=None, invoice_date=None, paid_date=None,
-        flight_no_red=None
+        self,
+        supplier=None,
+        flight_date=None,
+        flight_no=None,
+        dep=None,
+        arr=None,
+        class_=None,
+        invoiced_pax=None,
+        service_code=None,
+        supplier_code=None,
+        service_description=None,
+        aircraft=None,
+        qty=None,
+        unit_price=None,
+        sub_total=None,
+        tax=None,
+        total_inc_tax=None,
+        currency=None,
+        item_status=None,
+        invoice_status=None,
+        invoice_date=None,
+        paid_date=None,
+        flight_no_red=None,
     ):
         self.Supplier = supplier
         self.FlightDate = flight_date
@@ -153,22 +178,19 @@ class AirCompanyInvoiceReport(Base):
         self.FlightNoRed = flight_no_red
 
     def serialize(self):
-        return {
-            c.name: str(getattr(self, c.name))
-            for c in self.__table__.columns
-        }
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
 
 
 class Reconciliation(Base):
-    __tablename__ = 'Reconciliation'
-    __table_args__ = {'schema': 'ccs', 'extend_existing': True}
+    __tablename__ = "Reconciliation"
+    __table_args__ = {"schema": "ccs", "extend_existing": True}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     DataCriacao = Column(DateTime, nullable=False, server_default=func.now())
     DataAtualizacao = Column(DateTime)
     Ativo = Column(Boolean, nullable=False, default=True)
     Excluido = Column(Boolean, nullable=False, default=False)
-    
+
     # Air data
     AirSupplier = Column(String)
     AirFlightDate = Column(DateTime)
@@ -192,7 +214,7 @@ class Reconciliation(Base):
     AirInvoiceDate = Column(DateTime)
     AirPaidDate = Column(DateTime)
     AirFlightNoRed = Column(String)
-    
+
     # Cat data
     CatFacility = Column(String)
     CatFltDate = Column(DateTime)
@@ -210,7 +232,7 @@ class Reconciliation(Base):
     CatQty = Column(String)
     CatUnitPrice = Column(String)
     CatTotalAmount = Column(String)
-    
+
     # Comparison flags
     Air = Column(String)
     Cat = Column(String)
@@ -218,80 +240,81 @@ class Reconciliation(Base):
     DifPrice = Column(String)
     AmountDif = Column(String)
     QtyDif = Column(String)
-    
+
     Annotations = relationship(
         "ReconAnnotation",
         back_populates="Reconciliation",
         cascade="all, delete-orphan",
-        order_by="ReconAnnotation.DataCriacao"
+        order_by="ReconAnnotation.DataCriacao",
     )
 
-    
     def serialize(self):
         """Return object data in easily serializable format"""
         return {
-            'Id': str(self.Id),
-            'DataCriacao': str(self.DataCriacao) if self.DataCriacao else None,
-            'DataAtualizacao': str(self.DataAtualizacao) if self.DataAtualizacao else None,
-            'Ativo': str(self.Ativo),
-            'Excluido': str(self.Excluido),
-            'AirSupplier': self.AirSupplier,
-            'AirFlightDate': str(self.AirFlightDate) if self.AirFlightDate else None,
-            'AirFlightNo': self.AirFlightNo,
-            'AirDep': self.AirDep,
-            'AirArr': self.AirArr,
-            'AirClass': self.AirClass,
-            'AirInvoicedPax': self.AirInvoicedPax,
-            'AirServiceCode': self.AirServiceCode,
-            'AirSupplierCode': self.AirSupplierCode,
-            'AirServiceDescription': self.AirServiceDescription,
-            'AirAircraft': self.AirAircraft,
-            'AirQty': self.AirQty,
-            'AirUnitPrice': self.AirUnitPrice,
-            'AirSubTotal': self.AirSubTotal,
-            'AirTax': self.AirTax,
-            'AirTotalIncTax': self.AirTotalIncTax,
-            'AirCurrency': self.AirCurrency,
-            'AirItemStatus': self.AirItemStatus,
-            'AirInvoiceStatus': self.AirInvoiceStatus,
-            'AirInvoiceDate': str(self.AirInvoiceDate) if self.AirInvoiceDate else None,
-            'AirPaidDate': str(self.AirPaidDate) if self.AirPaidDate else None,
-            'AirFlightNoRed': self.AirFlightNoRed,
-            'CatFacility': self.CatFacility,
-            'CatFltDate': str(self.CatFltDate) if self.CatFltDate else None,
-            'CatFltNo': self.CatFltNo,
-            'CatFltInv': self.CatFltInv,
-            'CatClass': self.CatClass,
-            'CatItemGroup': self.CatItemGroup,
-            'CatItemcode': self.CatItemcode,
-            'CatItemDesc': self.CatItemDesc,
-            'CatAlBillCode': self.CatAlBillCode,
-            'CatAlBillDesc': self.CatAlBillDesc,
-            'CatBillCatg': self.CatBillCatg,
-            'CatUnit': self.CatUnit,
-            'CatPax': self.CatPax,
-            'CatQty': self.CatQty,
-            'CatUnitPrice': self.CatUnitPrice,
-            'CatTotalAmount': self.CatTotalAmount,
-            'Air': self.Air,
-            'Cat': self.Cat,
-            'DifQty': self.DifQty,
-            'DifPrice': self.DifPrice,
-            'AmountDif': self.AmountDif,
-            'QtyDif': self.QtyDif,
-            'Annotations': [a.serialize() for a in self.Annotations] if self.Annotations else []
+            "Id": str(self.Id),
+            "DataCriacao": str(self.DataCriacao) if self.DataCriacao else None,
+            "DataAtualizacao": (
+                str(self.DataAtualizacao) if self.DataAtualizacao else None
+            ),
+            "Ativo": str(self.Ativo),
+            "Excluido": str(self.Excluido),
+            "AirSupplier": self.AirSupplier,
+            "AirFlightDate": str(self.AirFlightDate) if self.AirFlightDate else None,
+            "AirFlightNo": self.AirFlightNo,
+            "AirDep": self.AirDep,
+            "AirArr": self.AirArr,
+            "AirClass": self.AirClass,
+            "AirInvoicedPax": self.AirInvoicedPax,
+            "AirServiceCode": self.AirServiceCode,
+            "AirSupplierCode": self.AirSupplierCode,
+            "AirServiceDescription": self.AirServiceDescription,
+            "AirAircraft": self.AirAircraft,
+            "AirQty": self.AirQty,
+            "AirUnitPrice": self.AirUnitPrice,
+            "AirSubTotal": self.AirSubTotal,
+            "AirTax": self.AirTax,
+            "AirTotalIncTax": self.AirTotalIncTax,
+            "AirCurrency": self.AirCurrency,
+            "AirItemStatus": self.AirItemStatus,
+            "AirInvoiceStatus": self.AirInvoiceStatus,
+            "AirInvoiceDate": str(self.AirInvoiceDate) if self.AirInvoiceDate else None,
+            "AirPaidDate": str(self.AirPaidDate) if self.AirPaidDate else None,
+            "AirFlightNoRed": self.AirFlightNoRed,
+            "CatFacility": self.CatFacility,
+            "CatFltDate": str(self.CatFltDate) if self.CatFltDate else None,
+            "CatFltNo": self.CatFltNo,
+            "CatFltInv": self.CatFltInv,
+            "CatClass": self.CatClass,
+            "CatItemGroup": self.CatItemGroup,
+            "CatItemcode": self.CatItemcode,
+            "CatItemDesc": self.CatItemDesc,
+            "CatAlBillCode": self.CatAlBillCode,
+            "CatAlBillDesc": self.CatAlBillDesc,
+            "CatBillCatg": self.CatBillCatg,
+            "CatUnit": self.CatUnit,
+            "CatPax": self.CatPax,
+            "CatQty": self.CatQty,
+            "CatUnitPrice": self.CatUnitPrice,
+            "CatTotalAmount": self.CatTotalAmount,
+            "Air": self.Air,
+            "Cat": self.Cat,
+            "DifQty": self.DifQty,
+            "DifPrice": self.DifPrice,
+            "AmountDif": self.AmountDif,
+            "QtyDif": self.QtyDif,
+            "Annotations": (
+                [a.serialize() for a in self.Annotations] if self.Annotations else []
+            ),
         }
 
 
 class FlightNumberMapping(Base):
-    __tablename__ = 'FlightNumberMapping'
-    __table_args__ = {'schema': 'ccs'}
+    __tablename__ = "FlightNumberMapping"
+    __table_args__ = {"schema": "ccs"}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     DataCriacao = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text("CURRENT_TIMESTAMP")
+        TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
     DataAtualizacao = Column(TIMESTAMP)
     Ativo = Column(Boolean, nullable=False, default=True)
@@ -300,27 +323,21 @@ class FlightNumberMapping(Base):
     AirCompanyFlightNumber = Column(String, nullable=True)
     CateringFlightNumber = Column(String, nullable=True)
 
-    def __init__(self, air_company_flight_number=None,
-                 catering_flight_number=None):
+    def __init__(self, air_company_flight_number=None, catering_flight_number=None):
         self.AirCompanyFlightNumber = air_company_flight_number
         self.CateringFlightNumber = catering_flight_number
 
     def serialize(self):
-        return {
-            c.name: str(getattr(self, c.name))
-            for c in self.__table__.columns
-        }
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
 
 
 class FlightClassMapping(Base):
-    __tablename__ = 'FlightClassMapping'
-    __table_args__ = {'schema': 'ccs'}
+    __tablename__ = "FlightClassMapping"
+    __table_args__ = {"schema": "ccs"}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     DataCriacao = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text("CURRENT_TIMESTAMP")
+        TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
     DataAtualizacao = Column(TIMESTAMP)
     Ativo = Column(Boolean, nullable=False, default=True)
@@ -336,10 +353,18 @@ class FlightClassMapping(Base):
     ALBillDesc = Column(String, nullable=True)
     BillCatg = Column(String, nullable=True)
 
-    def __init__(self, promeus_class=None, inflair_class=None, item_group=None,
-                 item_code=None, item_desc=None, al_bill_code=None,
-                 al_bill_desc=None, bill_catg=None):
-        self.PromeusClass = promeus_class  
+    def __init__(
+        self,
+        promeus_class=None,
+        inflair_class=None,
+        item_group=None,
+        item_code=None,
+        item_desc=None,
+        al_bill_code=None,
+        al_bill_desc=None,
+        bill_catg=None,
+    ):
+        self.PromeusClass = promeus_class
         self.InflairClass = inflair_class
         self.ItemGroup = item_group
         self.ItemCode = item_code
@@ -349,35 +374,25 @@ class FlightClassMapping(Base):
         self.BillCatg = bill_catg
 
     def serialize(self):
-        return {
-            c.name: str(getattr(self, c.name))
-            for c in self.__table__.columns
-        }
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
 
 
 class ReconAnnotation(Base):
-    __tablename__ = 'ReconAnnotation'
-    __table_args__ = {'schema': 'ccs'}
+    __tablename__ = "ReconAnnotation"
+    __table_args__ = {"schema": "ccs"}
 
     Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     DataCriacao = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text("CURRENT_TIMESTAMP")
+        TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
     DataAtualizacao = Column(TIMESTAMP)
     Ativo = Column(Boolean, nullable=False, default=True)
     Excluido = Column(Boolean, nullable=False, default=False)
 
     ReconciliationId = Column(
-        UUID(as_uuid=True),
-        ForeignKey('ccs.Reconciliation.Id'),
-        nullable=False
+        UUID(as_uuid=True), ForeignKey("ccs.Reconciliation.Id"), nullable=False
     )
-    Reconciliation = relationship(
-        "Reconciliation",
-        back_populates="Annotations"
-    )
+    Reconciliation = relationship("Reconciliation", back_populates="Annotations")
 
     Annotation = Column(String, nullable=False)
     Status = Column(Enum(StatusEnum), nullable=True, default=None)
@@ -388,7 +403,4 @@ class ReconAnnotation(Base):
         self.Status = status
 
     def serialize(self):
-        return {
-            c.name: str(getattr(self, c.name))
-            for c in self.__table__.columns
-        }
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}

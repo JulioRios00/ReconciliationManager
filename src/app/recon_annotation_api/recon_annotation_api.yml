@@ -7,12 +7,12 @@ events:
   - httpApi:
       method: '*'
       path: '/api/annotations'
-      authorizer: 
+      authorizer:
         name: CognitoAuthorizer
   - httpApi:
       method: '*'
       path: '/api/annotations/{proxy+}'
-      authorizer: 
+      authorizer:
         name: CognitoAuthorizer
   - httpApi:
       method: 'OPTIONS'
