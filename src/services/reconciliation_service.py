@@ -449,7 +449,6 @@ class ReconciliationService:
 
             deleted = self.session.query(Reconciliation).delete()
             self.session.flush()
-            print(f"Deleted {deleted} existing reconciliation records")
 
             air_records = (
                 self.session.query(AirCompanyInvoiceReport)
@@ -471,15 +470,10 @@ class ReconciliationService:
 
             if not air_records:
                 air_records = self.session.query(AirCompanyInvoiceReport).all()
-                print(
-                    f"⚠️ Using all {len(air_records)} air records (filtered list was empty)"
-                )
+
 
             if not catering_records:
                 catering_records = self.session.query(CateringInvoiceReport).all()
-                print(
-                    f"⚠️ Using all {len(catering_records)} catering records (filtered list was empty)"
-                )
 
             catering_by_date = {}
             catering_by_date_class = {}
@@ -542,12 +536,10 @@ class ReconciliationService:
                     )
                     catering_only_count += 1
 
-            print(f"Saving {len(reconciliation_records)} reconciliation records...")
             if reconciliation_records:
                 self.session.bulk_save_objects(reconciliation_records)
                 self.session.flush()
 
-            print("Calculating differences...")
             self._calculate_reconciliation_differences()
 
             self.session.commit()

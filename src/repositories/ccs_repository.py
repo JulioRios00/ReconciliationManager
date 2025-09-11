@@ -1,27 +1,454 @@
 # Repositories
+from repositories.repository import Repository
+from typing import List, Dict
+from decimal import Decimal
+from datetime import date, datetime
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+
 import logging
 import os
-from datetime import datetime
-from typing import List
 
-from sqlalchemy import func
-from sqlalchemy.orm import Session
+from repositories.repository import Repository
+# Tables
+from models.schema_ccs import (
+    Flight,
+    Configuration,
+    FlightDate,
+    DataSource,
+    PriceReport,
+    InvoiceHistory,
+    CateringInvoiceReport,
+    AirCompanyInvoiceReport,
+    Reconciliation,
+    BillingInvoiceTotalDifference,
+)
 
 # Application-Specific Common Utilities
 from common.custom_exception import CustomException
 
-# Tables - only keeping essential ones
-from models.schema_ccs import (
-    AirCompanyInvoiceReport,
-    CateringInvoiceReport,
-    FlightClassMapping,
-    FlightNumberMapping,
-    Reconciliation,
-)
-from repositories.repository import Repository
-
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
 logger = logging.getLogger()
+
+
+class FlightRepository(Repository):
+    def __init__(self, db_session):
+        super().__init__(db_session, Flight)
+
+    def insert_flight(
+        self,
+        airline_company,
+        period,
+        unit,
+        cycle,
+        vr_voo,
+        origin,
+        destination,
+        departure_time,
+        arrival_time,
+        aircraft,
+    ):
+        """
+        Inserts a new flight record into the Flight table.
+        """
+        flight = Flight(
+            empresa_aerea=airline_company,
+            periodo=period,
+            unidade=unit,
+            ciclo=cycle,
+            vr_voo=vr_voo,
+            origem=origin,
+            destino=destination,
+            hora_partida=departure_time,
+            hora_chegada=arrival_time,
+            aeronave=aircraft,
+        )
+        self.session.add(flight)
+        self.session.commit()
+        print(f"Successfully inserted new flights into the database.")
+        return flight.Id
+
+    def flight_exists(self, flight_data):
+        """
+        Checks if a flight already exists in the database.
+        """
+        filters = {
+            getattr(Flight, key.lower()): value
+            for key, value in flight_data.items()
+            if hasattr(Flight, key.lower())
+        }
+
+        result = self.db_session.query(Flight).filter_by(**filters).first()
+        print("the data is existed")
+        return result is not None
+
+    def bulk_insert_flights(self, flights):
+        """
+        Inserts a list of flights into the database, excluding duplicates.
+        """
+        new_flights = [flight for flight in flights if not self.flight_exists(flight)]
+        self.db_session.bulk_insert_mappings(Flight, new_flights)
+        self.db_session.commit()
+        print(
+            f"Successfully inserted {len(new_flights)} new flights into the database."
+        )
+
+
+class ConfigurationRepository(Repository):
+    def __init__(self, db_session):
+        super().__init__(db_session, Configuration)
+
+    def insert_configuration(
+        self,
+        class_type,
+        packet,
+        destination_packet,
+        item_code,
+        discription,
+        Provision_1,
+        Provision_2,
+        item_type,
+        svc,
+        id_fligth,
+    ):
+        new_config = Configuration(
+            tipo_de_classe=class_type,
+            pacote=packet,
+            destino_packet=destination_packet,
+            código_doItem=item_code,
+            descrição=discription,
+            provision1=Provision_1,
+            provision2=Provision_2,
+            tipo=item_type,
+            svc=svc,
+            id_fligth=id_fligth,
+        )
+        self.session.add(new_config)
+        self.session.commit()
+        print("Configuration data inserted successfully.")
+
+    def check_configuration_item(
+        self,
+        class_type,
+        packet,
+        destination_packet,
+        item_code,
+        discription,
+        Provision_1,
+        Provision_2,
+        item_type,
+        svc,
+    ):
+        query = self.session.query(Configuration).filter(
+            Configuration.Excluido == False
+        )
+        query = query.filter(
+            Configuration.TipoDeClasse == class_type,
+            Configuration.pacote == packet,
+            Configuration.destinoPacket == destination_packet,
+            Configuration.CódigoDoItem == item_code,
+            Configuration.Descrição == discription,
+            Configuration.Provision1 == Provision_1,
+            Configuration.Provision2 == Provision_2,
+            Configuration.Tipo == item_type,
+            Configuration.Svc == svc,
+        )
+        return query.first()
+
+
+class FlightDateRepository(Repository):
+
+    def __init__(self, db_session):
+        super().__init__(db_session, FlightDate)
+
+    def insert_flight_date(self, date, id_fligth):
+        flight_date = FlightDate(date=date, id_fligth=id_fligth)
+        self.session.add(flight_date)
+        self.session.commit()
+        print(f"Inserted flight date {date} for flight ID {id_fligth}")
+
+
+class SourceRepository(Repository):
+
+    def __init__(self, db_session):
+        super().__init__(db_session, DataSource)
+
+    def insert_data_source(self, file_name, page_number, id_fligth):
+        data_source = DataSource(
+            source=file_name, page=page_number, id_fligth=id_fligth
+        )
+        self.session.add(data_source)
+        self.session.commit()
+        print(
+            f"Inserted data source for flight ID {id_fligth} from source {file_name} on page {page_number}"
+        )
+
+
+class PriceReportRepository(Repository):
+    def __init__(self, db_session):
+        super().__init__(db_session, PriceReport)
+
+    def insert_price_report(
+        self,
+        facility,
+        organization,
+        pulled_date,
+        run_date,
+        fac_org,
+        spc_nr,
+        spc_dsc,
+        act_cat_nm,
+        prs_sts_cd,
+        prc_eff_dt,
+        prc_dis_dt,
+        prc_cur_cd,
+        tot_amt,
+        lbr_amt,
+        pkt_nr,
+        pkt_nm,
+    ):
+        new_report = PriceReport(
+            facility=facility,
+            organization=organization,
+            pulled_date=pulled_date,
+            run_date=run_date,
+            fac_org=fac_org,
+            spc_nr=spc_nr,
+            spc_dsc=spc_dsc,
+            act_cat_nm=act_cat_nm,
+            prs_sts_cd=prs_sts_cd,
+            prc_eff_dt=prc_eff_dt,
+            prc_dis_dt=prc_dis_dt,
+            prc_cur_cd=prc_cur_cd,
+            tot_amt=tot_amt,
+            lbr_amt=lbr_amt,
+            pkt_nr=pkt_nr,
+            pkt_nm=pkt_nm,
+        )
+        self.session.add(new_report)
+        self.session.commit()
+        print(f"Inserted new price report {new_report}")
+
+    def insert_packeg_ackeg_price_report(
+        self, facility, organization, pulled_date, run_date, report_table_data
+    ):
+        for report in report_table_data:
+            new_report = PriceReport(
+                facility=facility,
+                organization=organization,
+                pulled_date=pulled_date,
+                run_date=run_date,
+                fac_org=report.get("FAC_ORG"),
+                spc_nr=report.get("SPC_NR"),
+                spc_dsc=report.get("SPC_DSC"),
+                act_cat_nm=report.get("ACT_CAT_NM"),
+                prs_sts_cd=report.get("PRS_STS_CD"),
+                prc_eff_dt=report.get("PRC_EFF_DT"),
+                prc_dis_dt=report.get("PRC_DIS_DT"),
+                prc_cur_cd=report.get("PRC_CUR_CD"),
+                tot_amt=report.get("TOT_AMT"),
+                lbr_amt=report.get("LBR_AMT"),
+                pkt_nr=report.get("PKT_NR"),
+                pkt_nm=report.get("PKT_NM"),
+            )
+            self.session.add(new_report)
+        self.session.commit()
+        print(f"Inserted price reports")
+
+    def delete_price_report(self, id):
+        price_reports = (
+            self.session.query(PriceReport).filter(PriceReport.Id == id).first()
+        )
+        if not price_reports:
+            raise CustomException(f"PriceReport with ID {id} not found")
+        # Commit changes to the database
+        for report in price_reports:
+            report.Excluido = True
+        self.session.commit()
+        return {"message": f"Deleted PriceReport id {id}"}
+
+    def check_item(
+        self,
+        facility,
+        organization,
+        pulled_date,
+        run_date,
+        fac_org,
+        spc_nr,
+        spc_dsc,
+        act_cat_nm,
+        prs_sts_cd,
+        prc_eff_dt,
+        prc_dis_dt,
+        prc_cur_cd,
+        tot_amt,
+        lbr_amt,
+        pkt_nr,
+        pkt_nm,
+    ):
+        query = self.session.query(PriceReport).filter(PriceReport.Excluido == False)
+        query = query.filter(
+            PriceReport.Facility == facility,
+            PriceReport.Organization == organization,
+            PriceReport.PulledDate == pulled_date,
+            PriceReport.RunDate == run_date,
+            PriceReport.FacOrg == fac_org,
+            PriceReport.SpcNr == spc_nr,
+            PriceReport.SpcDsc == spc_dsc,
+            PriceReport.ActCatNm == act_cat_nm,
+            PriceReport.PrsStsCd == prs_sts_cd,
+            PriceReport.PrcEffDt == prc_eff_dt,
+            PriceReport.PrcDisDt == prc_dis_dt,
+            PriceReport.PrcCurCd == prc_cur_cd,
+            PriceReport.TotAmt == tot_amt,
+            PriceReport.LbrAmt == lbr_amt,
+            PriceReport.PktNr == pkt_nr,
+            PriceReport.PktNm == pkt_nm,
+        )
+        return query.first()
+
+    def get_by_id(self, id):
+        return (
+            self.session.query(PriceReport)
+            .filter(PriceReport.Id == id, PriceReport.Excluido == False)
+            .first()
+        )
+
+    def get_by_spc_dsc(self, spc_dsc):
+        return (
+            self.session.query(PriceReport)
+            .filter(
+                PriceReport.SpcDsc.ilike(f"%{spc_dsc}%"), PriceReport.Excluido == False
+            )
+            .all()
+        )
+
+
+class InvoiceRepository(Repository):
+    def __init__(self, db_session):
+        super().__init__(db_session, InvoiceHistory)
+
+    def insert_packeg_invoice(self, invoice_data, FileName):
+        for invoice in invoice_data:
+            new_invoice = InvoiceHistory(
+                brd_fac=invoice.get("Brd Fac"),
+                brd_flt_dt=(
+                    datetime.strptime(invoice.get("Brd Flt Dt"), "%Y-%m-%d")
+                    if invoice.get("Brd Flt Dt")
+                    else None
+                ),
+                brd_flt_nr=(
+                    int(invoice.get("Brd Flt Nr")) if invoice.get("Brd Flt Nr") else 0
+                ),
+                op_cd=int(invoice.get("Op Cd")) if invoice.get("Op Cd") else 0,
+                srv_dpt_sta_cd=invoice.get("Srv Dpt Sta Cd"),
+                srv_arr_sta_cd=invoice.get("Srv Arr Sta Cd"),
+                srv_flt_nr=(
+                    int(invoice.get("Srv Flt Nr")) if invoice.get("Srv Flt Nr") else 0
+                ),
+                srv_flt_dt=(
+                    datetime.strptime(invoice.get("Srv Flt Dt"), "%Y-%m-%d")
+                    if invoice.get("Srv Flt Dt")
+                    else None
+                ),
+                cos=invoice.get("Cos"),
+                psg=int(invoice.get("Psg")) if invoice.get("Psg") else 0,
+                meal=int(invoice.get("Meal")) if invoice.get("Meal") else 0,
+                tray=int(invoice.get("Tray")) if invoice.get("Tray") else 0,
+                total=(
+                    Decimal(invoice.get("Total").replace(",", ""))
+                    if invoice.get("Total")
+                    else 0.00
+                ),
+                paid=(
+                    Decimal(invoice.get("Paid").replace(",", ""))
+                    if invoice.get("Paid")
+                    else 0.00
+                ),
+                variance=(
+                    Decimal(invoice.get("Variance").replace(",", ""))
+                    if invoice.get("Variance")
+                    else 0.00
+                ),
+                grand_total=(
+                    Decimal(invoice.get("Grand Total").replace(",", ""))
+                    if invoice.get("Grand Total")
+                    else 0.00
+                ),
+                ovd_ind=invoice.get("Ovd Ind"),
+                ivc_pcs_dt=(
+                    datetime.strptime(invoice.get("Ivc Pcs Dt"), "%Y-%m-%d")
+                    if invoice.get("Ivc Pcs Dt")
+                    else None
+                ),
+                ivc_dbs_dt=(
+                    datetime.strptime(invoice.get("Ivc Dbs Dt"), "%Y-%m-%d")
+                    if invoice.get("Ivc Dbs Dt")
+                    else None
+                ),
+                org=int(invoice.get("Org")) if invoice.get("Org") else 0,
+                ivc_seq_nr=(
+                    int(invoice.get("Ivc Seq Nr")) if invoice.get("Ivc Seq Nr") else 0
+                ),
+                ivc_cre_dt=(
+                    datetime.strptime(invoice.get("Ivc Cre Dt"), "%Y-%m-%d")
+                    if invoice.get("Ivc Cre Dt")
+                    else None
+                ),
+                comments=invoice.get("Comments"),
+                line_seq_nr=(
+                    int(invoice.get("Line Seq Nr"))
+                    if invoice.get("Line Seq Nr")
+                    else None
+                ),
+                item=int(invoice.get("Item")) if invoice.get("Item") else 0,
+                act_amt=(
+                    Decimal(invoice.get("Act Amt").replace(",", ""))
+                    if invoice.get("Act Amt")
+                    else 0.00
+                ),
+                act_qty=int(invoice.get("Act Qty")) if invoice.get("Act Qty") else 0,
+                sch_amt=(
+                    Decimal(invoice.get("Sch Amt").replace(",", ""))
+                    if invoice.get("Sch Amt")
+                    else 0.00
+                ),
+                sch_qty=int(invoice.get("Sch Qty")) if invoice.get("Sch Qty") else 0,
+                act_lbr_amt=(
+                    Decimal(invoice.get("Act Lbr Amt").replace(",", ""))
+                    if invoice.get("Act Lbr Amt")
+                    else 0.00
+                ),
+                sch_lbr_amt=(
+                    Decimal(invoice.get("Sch Lbr Amt").replace(",", ""))
+                    if invoice.get("Sch Lbr Amt")
+                    else 0.00
+                ),
+                item_desc=invoice.get("Item Desc"),
+                pkt_typ=invoice.get("Pkt Typ"),
+                pkt_nr=int(invoice.get("Pkt Nr")) if invoice.get("Pkt Nr") else 0,
+                pkt_nm=invoice.get("Pkt Nm"),
+                pkt_var=int(invoice.get("Pkt Var")) if invoice.get("Pkt Var") else 0,
+                file_name=FileName,
+            )
+            self.session.add(new_invoice)
+        self.session.commit()
+        print(f"Inserted successfully invoice data")
+
+    def delete_invoices(self, filename):
+        invoices = (
+            self.session.query(InvoiceHistory)
+            .filter(InvoiceHistory.SourceName == filename)
+            .all()
+        )
+        if not invoices:
+            raise CustomException(f"invoice for {filename} not found")
+
+        for invoice in invoices:
+            print(invoice)
+            invoice.Excluido = True
+        self.session.commit()
+        return {"message": f"Deleted all {filename} invoices."}
 
 
 class CateringInvoiceRepository(Repository):
@@ -47,61 +474,196 @@ class CateringInvoiceRepository(Repository):
         unit_price=None,
         total_amount=None,
     ):
-        try:
-            new_record = CateringInvoiceReport(
-                facility=facility,
-                flt_date=flt_date,
-                flt_no=flt_no,
-                flt_inv=flt_inv,
-                class_=class_,
-                item_group=item_group,
-                itemcode=itemcode,
-                item_desc=item_desc,
-                al_bill_code=al_bill_code,
-                al_bill_desc=al_bill_desc,
-                bill_catg=bill_catg,
-                unit=unit,
-                pax=pax,
-                qty=qty,
-                unit_price=unit_price,
-                total_amount=total_amount,
+        billing_recon = CateringInvoiceReport(
+            facility=facility,
+            flt_date=flt_date,
+            flt_no=flt_no,
+            flt_inv=flt_inv,
+            class_=class_,
+            item_group=item_group,
+            itemcode=itemcode,
+            item_desc=item_desc,
+            al_bill_code=al_bill_code,
+            al_bill_desc=al_bill_desc,
+            bill_catg=bill_catg,
+            unit=unit,
+            pax=pax,
+            qty=qty,
+            unit_price=unit_price,
+            total_amount=total_amount,
+        )
+        self.session.add(billing_recon)
+        self.session.commit()
+        print(f"Inserted billing reconciliation record for flight {flt_no}")
+        return billing_recon.Id
+
+    def insert_package_billing_recon(self, billing_data, filename=None):
+        for record in billing_data:
+            billing_recon = CateringInvoiceReport(
+                facility=record.get("facility"),
+                flt_date=record.get("flt_date"),
+                flt_no=record.get("flt_no"),
+                flt_inv=record.get("flt_inv"),
+                class_=record.get("class_"),
+                item_group=record.get("item_group"),
+                itemcode=record.get("itemcode"),
+                item_desc=record.get("item_desc"),
+                al_bill_code=record.get("al_bill_code"),
+                al_bill_desc=record.get("al_bill_desc"),
+                bill_catg=record.get("bill_catg"),
+                unit=record.get("unit"),
+                pax=record.get("pax"),
+                qty=record.get("qty"),
+                unit_price=record.get("unit_price"),
+                total_amount=record.get("total_amount"),
             )
+            self.session.add(billing_recon)
+            self.session.flush()
+            print(f"{billing_recon.Id} has been successfully inserted")
+        self.session.commit()
 
-            self.session.add(new_record)
-            self.session.commit()
-            result = new_record
-            logger.info("Billing recon record inserted successfully")
-            return result
-        except Exception as e:
-            logger.error(f"Error inserting billing recon record: {str(e)}")
-            raise CustomException(f"Failed to insert billing recon record: {str(e)}")
+        print(f"Inserted {len(billing_data)} billing reconciliation records")
+        return True
 
-    def get_all_catering_data(self):
-        """Get all catering invoice data"""
+    def bulk_insert(self, model_instances):
+        """
+        Bulk insert CateringInvoiceReport instances
+        """
         try:
-            return self.get_all()
-        except Exception as e:
-            logger.error(f"Error getting all catering data: {str(e)}")
-            raise CustomException(f"Failed to get catering data: {str(e)}")
-
-    def delete_all_catering_data(self):
-        """Delete all catering invoice data"""
-        try:
-            self.session.query(CateringInvoiceReport).delete()
+            self.session.add_all(model_instances)
             self.session.commit()
-            logger.info("All catering invoice data deleted successfully")
+            print(f"Successfully bulk inserted {len(model_instances)} records")
             return True
         except Exception as e:
             self.session.rollback()
-            logger.error(f"Error deleting all catering data: {str(e)}")
-            raise CustomException(f"Failed to delete catering data: {str(e)}")
+            print(f"Error during bulk insert: {e}")
+            raise e
+
+    def delete_billing_recon(self, id):
+        billing_recon = (
+            self.session.query(CateringInvoiceReport)
+            .filter(CateringInvoiceReport.Id == id)
+            .first()
+        )
+        if not billing_recon:
+            raise CustomException(f"CateringInvoiceReport with ID {id} not found")
+
+        billing_recon.Excluido = True
+        self.session.commit()
+        return {"message": f"Deleted CateringInvoiceReport id {id}"}
+
+    def delete_billing_recon_by_filename(self, filename):
+        """
+        Delete billing reconciliation records by source filename
+        """
+        billing_recons = (
+            self.session.query(CateringInvoiceReport)
+            .filter(
+                CateringInvoiceReport.SourceFile == filename,
+                CateringInvoiceReport.Excluido == False,
+            )
+            .all()
+        )
+
+        if not billing_recons:
+            raise CustomException(
+                f"No CateringInvoiceReport records found for filename {filename}"
+            )
+
+        for billing_recon in billing_recons:
+            billing_recon.Excluido = True
+
+        self.session.commit()
+        return {
+            "message": f"Deleted {len(billing_recons)} CateringInvoiceReport records for filename {filename}"
+        }
+
+    def get_by_id(self, id):
+        return (
+            self.session.query(CateringInvoiceReport)
+            .filter(
+                CateringInvoiceReport.Id == id, CateringInvoiceReport.Excluido == False
+            )
+            .first()
+        )
+
+    def get_by_flight_no(self, flight_no):
+        return (
+            self.session.query(CateringInvoiceReport)
+            .filter(
+                CateringInvoiceReport.FltNo == flight_no,
+                CateringInvoiceReport.Excluido == False,
+            )
+            .all()
+        )
+
+    def get_by_facility(self, facility):
+        return (
+            self.session.query(CateringInvoiceReport)
+            .filter(
+                CateringInvoiceReport.Facility == facility,
+                CateringInvoiceReport.Excluido == False,
+            )
+            .all()
+        )
+
+    def get_by_date_range(self, start_date, end_date):
+        return (
+            self.session.query(CateringInvoiceReport)
+            .filter(
+                CateringInvoiceReport.FltDate >= start_date,
+                CateringInvoiceReport.FltDate <= end_date,
+                CateringInvoiceReport.Excluido == False,
+            )
+            .all()
+        )
+
+    def get_all_active(self):
+        return (
+            self.session.query(CateringInvoiceReport)
+            .filter(CateringInvoiceReport.Excluido == False)
+            .all()
+        )
+
+    def check_duplicate_record(
+        self, facility, flt_date, flt_no, itemcode, al_bill_code
+    ):
+        """
+        Check if a record with the same key fields already exists
+        """
+        return (
+            self.session.query(CateringInvoiceReport)
+            .filter(
+                CateringInvoiceReport.Facility == facility,
+                CateringInvoiceReport.FltDate == flt_date,
+                CateringInvoiceReport.FltNo == flt_no,
+                CateringInvoiceReport.Itemcode == itemcode,
+                CateringInvoiceReport.AlBillCode == al_bill_code,
+                CateringInvoiceReport.Excluido == False,
+            )
+            .first()
+        )
 
 
 class AirCompanyInvoiceRepository(Repository):
     def __init__(self, db_session):
         super().__init__(db_session, AirCompanyInvoiceReport)
 
-    def insert_air_company_invoice(
+    def bulk_insert(self, model_instances):
+        """
+        Bulk insert AirCompanyInvoiceReport instances
+        """
+        try:
+            self.session.add_all(model_instances)
+            self.session.commit()
+            print(f"Successfully bulk inserted {len(model_instances)} records")
+            return True
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error during bulk insert: {e}")
+            raise e
+
+    def insert_erp_invoice_report(
         self,
         supplier=None,
         flight_date=None,
@@ -126,62 +688,114 @@ class AirCompanyInvoiceRepository(Repository):
         paid_date=None,
         flight_no_red=None,
     ):
-        try:
-            new_record = AirCompanyInvoiceReport(
-                supplier=supplier,
-                flight_date=flight_date,
-                flight_no=flight_no,
-                dep=dep,
-                arr=arr,
-                class_=class_,
-                invoiced_pax=invoiced_pax,
-                service_code=service_code,
-                supplier_code=supplier_code,
-                service_description=service_description,
-                aircraft=aircraft,
-                qty=qty,
-                unit_price=unit_price,
-                sub_total=sub_total,
-                tax=tax,
-                total_inc_tax=total_inc_tax,
-                currency=currency,
-                item_status=item_status,
-                invoice_status=invoice_status,
-                invoice_date=invoice_date,
-                paid_date=paid_date,
-                flight_no_red=flight_no_red,
+        erp_invoice = AirCompanyInvoiceReport(
+            supplier=supplier,
+            flight_date=flight_date,
+            flight_no=flight_no,
+            dep=dep,
+            arr=arr,
+            class_=class_,
+            invoiced_pax=invoiced_pax,
+            service_code=service_code,
+            supplier_code=supplier_code,
+            service_description=service_description,
+            aircraft=aircraft,
+            qty=qty,
+            unit_price=unit_price,
+            sub_total=sub_total,
+            tax=tax,
+            total_inc_tax=total_inc_tax,
+            currency=currency,
+            item_status=item_status,
+            invoice_status=invoice_status,
+            invoice_date=invoice_date,
+            paid_date=paid_date,
+            flight_no_red=flight_no_red,
+        )
+        self.session.add(erp_invoice)
+        self.session.commit()
+        print(f"Inserted ERP invoice report for flight {flight_no}")
+        return erp_invoice.Id
+
+    def insert_air_company_invoice(self, invoice_data, filename=None):
+        inserted_count = 0
+        for record in invoice_data:
+            # Check if record exists based on key fields
+            existing_record = (
+                self.session.query(AirCompanyInvoiceReport)
+                .filter(
+                    AirCompanyInvoiceReport.FlightNo == record.get("FlightNo"),
+                    AirCompanyInvoiceReport.FlightDate == record.get("FlightDate"),
+                    AirCompanyInvoiceReport.ServiceCode == record.get("ServiceCode"),
+                    AirCompanyInvoiceReport.Excluido.is_(False),
+                )
+                .first()
             )
 
-            self.session.add(new_record)
-            self.session.commit()
-            result = new_record
-            logger.info("Air company invoice record inserted successfully")
-            return result
-        except Exception as e:
-            logger.error(f"Error inserting air company invoice record: {str(e)}")
-            raise CustomException(
-                f"Failed to insert air company invoice record: {str(e)}"
+            if not existing_record:
+                erp_invoice = AirCompanyInvoiceReport(
+                    supplier=record.get("Supplier"),
+                    flight_date=record.get("FlightDate"),
+                    flight_no=record.get("FlightNo"),
+                    dep=record.get("Dep"),
+                    arr=record.get("Arr"),
+                    class_=record.get("Class"),
+                    invoiced_pax=record.get("InvoicedPax"),
+                    service_code=record.get("ServiceCode"),
+                    supplier_code=record.get("SupplierCode"),
+                    service_description=record.get("ServiceDescription"),
+                    aircraft=record.get("Aircraft"),
+                    qty=record.get("Qty"),
+                    unit_price=record.get("UnitPrice"),
+                    sub_total=record.get("SubTotal"),
+                    tax=record.get("Tax"),
+                    total_inc_tax=record.get("TotalIncTax"),
+                    currency=record.get("Currency"),
+                    item_status=record.get("ItemStatus"),
+                    invoice_status=record.get("InvoiceStatus"),
+                    invoice_date=record.get("InvoiceDate"),
+                    paid_date=record.get("PaidDate"),
+                    flight_no_red=record.get("FlightNoRed"),
+                )
+                self.session.add(erp_invoice)
+                inserted_count += 1
+
+        self.session.commit()
+        print(f"Inserted {inserted_count} new ERP invoice reports")
+        return True
+
+    def delete_erp_invoice(self, id):
+        erp_invoice = (
+            self.session.query(AirCompanyInvoiceReport)
+            .filter(AirCompanyInvoiceReport.Id == id)
+            .first()
+        )
+        if not erp_invoice:
+            raise CustomException(f"AirCompanyInvoiceReport with ID {id} not found")
+
+        erp_invoice.Excluido = True
+        self.session.commit()
+        return {"message": f"Deleted AirCompanyInvoiceReport id {id}"}
+
+    def get_by_id(self, id):
+        return (
+            self.session.query(AirCompanyInvoiceReport)
+            .filter(
+                AirCompanyInvoiceReport.Id == id,
+                AirCompanyInvoiceReport.Excluido.is_(False),
             )
+            .first()
+        )
 
-    def get_all_air_company_data(self):
-        """Get all air company invoice data"""
-        try:
-            return self.get_all()
-        except Exception as e:
-            logger.error(f"Error getting all air company data: {str(e)}")
-            raise CustomException(f"Failed to get air company data: {str(e)}")
-
-    def delete_all_air_company_data(self):
-        """Delete all air company invoice data"""
-        try:
-            self.session.query(AirCompanyInvoiceReport).delete()
-            self.session.commit()
-            logger.info("All air company invoice data deleted successfully")
-            return True
-        except Exception as e:
-            self.session.rollback()
-            logger.error(f"Error deleting all air company data: {str(e)}")
-            raise CustomException(f"Failed to delete air company data: {str(e)}")
+    def get_by_flight_no(self, flight_no):
+        return (
+            self.session.query(AirCompanyInvoiceReport)
+            .filter(
+                AirCompanyInvoiceReport.FlightNo == flight_no,
+                AirCompanyInvoiceReport.Excluido.is_(False),
+            )
+            .all()
+        )
 
 
 class ReconciliationRepository:
@@ -277,124 +891,737 @@ class ReconciliationRepository:
             .count()
         )
 
-
-class FlightClassMappingRepository:
-    def __init__(self, session: Session):
-        self.session = session
-
-    def get_all(self):
-        """Get all flight class mappings"""
-        return self.session.query(FlightClassMapping).all()
-
-    def get_by_promeus_class(self, promeus_class):
-        """Get mapping by Promeus class"""
-        return (
-            self.session.query(FlightClassMapping)
-            .filter(FlightClassMapping.PromeusClass == promeus_class)
-            .first()
+    def get_filtered_by_date_range(
+        self, filter_type, start_date, end_date, limit=None, offset=None
+    ):
+        """Get filtered reconciliation records within flight date range"""
+        air_base_query = self.session.query(Reconciliation).filter(
+            func.date(Reconciliation.AirFlightDate) >= start_date,
+            func.date(Reconciliation.AirFlightDate) <= end_date,
         )
 
-    def get_by_inflair_class(self, inflair_class):
-        """Get mapping by Inflair class"""
-        return (
-            self.session.query(FlightClassMapping)
-            .filter(FlightClassMapping.InflairClass == inflair_class)
-            .first()
+        cat_base_query = self.session.query(Reconciliation).filter(
+            func.date(Reconciliation.CatFltDate) >= start_date,
+            func.date(Reconciliation.CatFltDate) <= end_date,
         )
 
-    def insert(self, mapping):
-        """Insert a new flight class mapping"""
-        try:
-            self.session.add(mapping)
-            self.session.commit()
-            return mapping
-        except Exception as e:
-            self.session.rollback()
-            raise e
-
-    def update(self, mapping):
-        """Update a flight class mapping"""
-        try:
-            self.session.commit()
-            return mapping
-        except Exception as e:
-            self.session.rollback()
-            raise e
-
-    def delete(self, mapping_id):
-        """Delete a flight class mapping"""
-        try:
-            mapping = (
-                self.session.query(FlightClassMapping)
-                .filter(FlightClassMapping.Id == mapping_id)
-                .first()
+        if filter_type == "discrepancies":
+            air_query = air_base_query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
             )
-            if mapping:
-                self.session.delete(mapping)
-                self.session.commit()
-                return True
-            return False
+            cat_query = cat_base_query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
+            )
+        elif filter_type == "quantity_difference":
+            air_query = air_base_query.filter(Reconciliation.DifQty == "Yes")
+            cat_query = cat_base_query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            air_query = air_base_query.filter(Reconciliation.DifPrice == "Yes")
+            cat_query = cat_base_query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
+            air_query = air_base_query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+            cat_query = cat_base_query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+        elif filter_type == "cat_only":
+            air_query = air_base_query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+            cat_query = cat_base_query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+        else:
+            air_query = air_base_query
+            cat_query = cat_base_query
+
+        combined_query = air_query.union(cat_query).order_by(
+            Reconciliation.AirFlightDate, Reconciliation.AirFlightNo
+        )
+
+        if offset is not None:
+            combined_query = combined_query.offset(offset)
+        if limit is not None:
+            combined_query = combined_query.limit(limit)
+
+        return combined_query.all()
+
+    def get_filtered_count_by_date_range(self, filter_type, start_date, end_date):
+        """Get count of filtered records in flight date range"""
+        air_base_query = self.session.query(Reconciliation).filter(
+            func.date(Reconciliation.AirFlightDate) >= start_date,
+            func.date(Reconciliation.AirFlightDate) <= end_date,
+        )
+
+        cat_base_query = self.session.query(Reconciliation).filter(
+            func.date(Reconciliation.CatFltDate) >= start_date,
+            func.date(Reconciliation.CatFltDate) <= end_date,
+        )
+
+        if filter_type == "discrepancies":
+            air_query = air_base_query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
+            )
+            cat_query = cat_base_query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
+            )
+        elif filter_type == "quantity_difference":
+            air_query = air_base_query.filter(Reconciliation.DifQty == "Yes")
+            cat_query = cat_base_query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            air_query = air_base_query.filter(Reconciliation.DifPrice == "Yes")
+            cat_query = cat_base_query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
+            air_query = air_base_query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+            cat_query = cat_base_query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+        elif filter_type == "cat_only":
+            air_query = air_base_query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+            cat_query = cat_base_query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+        else:
+            air_query = air_base_query
+            cat_query = cat_base_query
+
+        combined_query = air_query.union(cat_query)
+        return combined_query.count()
+
+    def get_filtered_by_flight_number(
+        self, filter_type, flight_number, limit=None, offset=None
+    ):
+        """Get filtered reconciliation records by flight number"""
+        query = self.session.query(Reconciliation).filter(
+            (Reconciliation.AirFlightNo.ilike(f"%{flight_number}%"))
+            | (Reconciliation.CatFltNo.ilike(f"%{flight_number}%"))
+        )
+
+        if filter_type == "discrepancies":
+            query = query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
+            )
+        elif filter_type == "quantity_difference":
+            query = query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            query = query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
+            query = query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+        elif filter_type == "cat_only":
+            query = query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+
+        query = query.order_by(Reconciliation.AirFlightDate, Reconciliation.AirFlightNo)
+
+        if offset is not None:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+
+        return query.all()
+
+    def get_filtered_count_by_flight_number(self, filter_type, flight_number):
+        """Get count of filtered records by flight number"""
+        query = self.session.query(Reconciliation).filter(
+            (Reconciliation.AirFlightNo.ilike(f"%{flight_number}%"))
+            | (Reconciliation.CatFltNo.ilike(f"%{flight_number}%"))
+        )
+
+        if filter_type == "discrepancies":
+            query = query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
+            )
+        elif filter_type == "quantity_difference":
+            query = query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            query = query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
+            query = query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+        elif filter_type == "cat_only":
+            query = query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+
+        return query.count()
+
+    def get_filtered(self, filter_type):
+        """Get filtered reconciliation records"""
+        query = self.session.query(Reconciliation)
+
+        if filter_type == "discrepancies":
+            query = query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
+            )
+        elif filter_type == "quantity_difference":
+            query = query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            query = query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
+            query = query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+        elif filter_type == "cat_only":
+            query = query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+
+        return query.order_by(
+            Reconciliation.AirFlightDate, Reconciliation.AirFlightNo
+        ).all()
+
+    def get_filtered_count(self, filter_type):
+        """Get count of filtered reconciliation records"""
+        query = self.session.query(Reconciliation)
+
+        if filter_type == "discrepancies":
+            query = query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
+            )
+        elif filter_type == "quantity_difference":
+            query = query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            query = query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
+            query = query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+        elif filter_type == "cat_only":
+            query = query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+
+        return query.count()
+
+    def get_filtered_paginated(self, filter_type, limit, offset):
+        """Get filtered records with pagination applied at database level"""
+        query = self.session.query(Reconciliation)
+
+        if filter_type == "discrepancies":
+            query = query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
+            )
+        elif filter_type == "quantity_difference":
+            query = query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            query = query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
+            query = query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+        elif filter_type == "cat_only":
+            query = query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+
+        return (
+            query.order_by(Reconciliation.AirFlightDate, Reconciliation.AirFlightNo)
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+    def get_by_item_name(self, item_name, limit=None, offset=None):
+        """Get reconciliation records filtered by item name/description"""
+        query = (
+            self.session.query(Reconciliation)
+            .filter(
+                (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
+                | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+            )
+            .order_by(Reconciliation.AirFlightDate, Reconciliation.AirFlightNo)
+        )
+
+        if offset is not None:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+
+        return query.all()
+
+    def get_count_by_item_name(self, item_name):
+        """Get count of records filtered by item name/description"""
+        return (
+            self.session.query(Reconciliation)
+            .filter(
+                (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
+                | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+            )
+            .count()
+        )
+
+    def get_filtered_by_item_name(
+        self, filter_type, item_name, limit=None, offset=None
+    ):
+        """Get filtered reconciliation records by item name/description"""
+        query = self.session.query(Reconciliation).filter(
+            (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
+            | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+        )
+
+        if filter_type == "discrepancies":
+            query = query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
+            )
+        elif filter_type == "quantity_difference":
+            query = query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            query = query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
+            query = query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+        elif filter_type == "cat_only":
+            query = query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+
+        query = query.order_by(Reconciliation.AirFlightDate, Reconciliation.AirFlightNo)
+
+        if offset is not None:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+
+        return query.all()
+
+    def get_filtered_count_by_item_name(self, filter_type, item_name):
+        """Get count of filtered records by item name/description"""
+        query = self.session.query(Reconciliation).filter(
+            (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
+            | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+        )
+
+        if filter_type == "discrepancies":
+            query = query.filter(
+                (Reconciliation.DifQty == "Yes") | (Reconciliation.DifPrice == "Yes")
+            )
+        elif filter_type == "quantity_difference":
+            query = query.filter(Reconciliation.DifQty == "Yes")
+        elif filter_type == "price_difference":
+            query = query.filter(Reconciliation.DifPrice == "Yes")
+        elif filter_type == "air_only":
+            query = query.filter(
+                Reconciliation.Air == "Yes", Reconciliation.Cat == "No"
+            )
+        elif filter_type == "cat_only":
+            query = query.filter(
+                Reconciliation.Air == "No", Reconciliation.Cat == "Yes"
+            )
+
+        return query.count()
+
+    def get_by_item_name_and_date_range(
+        self, item_name, start_date, end_date, limit=None, offset=None
+    ):
+        """Get reconciliation records filtered by item name and date range"""
+        air_query = self.session.query(Reconciliation).filter(
+            func.date(Reconciliation.AirFlightDate) >= start_date,
+            func.date(Reconciliation.AirFlightDate) <= end_date,
+            Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"),
+        )
+
+        cat_query = self.session.query(Reconciliation).filter(
+            func.date(Reconciliation.CatFltDate) >= start_date,
+            func.date(Reconciliation.CatFltDate) <= end_date,
+            Reconciliation.CatItemDesc.ilike(f"%{item_name}%"),
+        )
+
+        combined_query = air_query.union(cat_query).order_by(
+            Reconciliation.AirFlightDate, Reconciliation.AirFlightNo
+        )
+
+        if offset is not None:
+            combined_query = combined_query.offset(offset)
+        if limit is not None:
+            combined_query = combined_query.limit(limit)
+
+        return combined_query.all()
+
+    def get_count_by_item_name_and_date_range(self, item_name, start_date, end_date):
+        """Get count of records filtered by item name and date range"""
+        air_query = self.session.query(Reconciliation).filter(
+            func.date(Reconciliation.AirFlightDate) >= start_date,
+            func.date(Reconciliation.AirFlightDate) <= end_date,
+            Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"),
+        )
+
+        cat_query = self.session.query(Reconciliation).filter(
+            func.date(Reconciliation.CatFltDate) >= start_date,
+            func.date(Reconciliation.CatFltDate) <= end_date,
+            Reconciliation.CatItemDesc.ilike(f"%{item_name}%"),
+        )
+
+        combined_query = air_query.union(cat_query)
+        return combined_query.count()
+
+    def get_by_item_name_and_flight_number(
+        self, item_name, flight_number, limit=None, offset=None
+    ):
+        """
+        Get reconciliation records filtered by item name and flight number
+        """
+        query = (
+            self.session.query(Reconciliation)
+            .filter(
+                (
+                    (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
+                    | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+                )
+                & (
+                    (Reconciliation.AirFlightNo.ilike(f"%{flight_number}%"))
+                    | (Reconciliation.CatFltNo.ilike(f"%{flight_number}%"))
+                )
+            )
+            .order_by(Reconciliation.AirFlightDate, Reconciliation.AirFlightNo)
+        )
+
+        if offset is not None:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+
+        return query.all()
+
+    def get_count_by_item_name_and_flight_number(self, item_name, flight_number):
+        """Get count of records filtered by item name and flight number"""
+        return (
+            self.session.query(Reconciliation)
+            .filter(
+                (
+                    (Reconciliation.AirServiceDescription.ilike(f"%{item_name}%"))
+                    | (Reconciliation.CatItemDesc.ilike(f"%{item_name}%"))
+                )
+                & (
+                    (Reconciliation.AirFlightNo.ilike(f"%{flight_number}%"))
+                    | (Reconciliation.CatFltNo.ilike(f"%{flight_number}%"))
+                )
+            )
+            .count()
+        )
+
+    def get_air_company_invoice_reports(
+        self, limit=100, offset=0, start_date=None, end_date=None, flight_number=None
+    ):
+        """Get AirCompanyInvoiceReport records with optional filters"""
+        from models.schema_ccs import AirCompanyInvoiceReport
+
+        query = self.session.query(AirCompanyInvoiceReport).filter(
+            AirCompanyInvoiceReport.Ativo.is_(True),
+            AirCompanyInvoiceReport.Excluido.is_(False),
+        )
+
+        if start_date:
+            query = query.filter(AirCompanyInvoiceReport.FlightDate >= start_date)
+        if end_date:
+            query = query.filter(AirCompanyInvoiceReport.FlightDate <= end_date)
+        if flight_number:
+            query = query.filter(
+                AirCompanyInvoiceReport.FlightNo.ilike(f"%{flight_number}%")
+            )
+
+        return (
+            query.order_by(AirCompanyInvoiceReport.FlightDate.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+    def get_air_company_invoice_reports_count(
+        self, start_date=None, end_date=None, flight_number=None
+    ):
+        """Get count of AirCompanyInvoiceReport records with optional filters"""
+        from models.schema_ccs import AirCompanyInvoiceReport
+
+        query = self.session.query(AirCompanyInvoiceReport).filter(
+            AirCompanyInvoiceReport.Ativo.is_(True),
+            AirCompanyInvoiceReport.Excluido.is_(False),
+        )
+
+        if start_date:
+            query = query.filter(AirCompanyInvoiceReport.FlightDate >= start_date)
+        if end_date:
+            query = query.filter(AirCompanyInvoiceReport.FlightDate <= end_date)
+        if flight_number:
+            query = query.filter(
+                AirCompanyInvoiceReport.FlightNo.ilike(f"%{flight_number}%")
+            )
+
+        return query.count()
+
+    def get_catering_invoice_reports(
+        self, limit=100, offset=0, start_date=None, end_date=None, flight_number=None
+    ):
+        """Get CateringInvoiceReport records with optional filters"""
+        from models.schema_ccs import CateringInvoiceReport
+
+        query = self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.Ativo.is_(True),
+            CateringInvoiceReport.Excluido.is_(False),
+        )
+
+        if start_date:
+            query = query.filter(CateringInvoiceReport.FltDate >= start_date)
+        if end_date:
+            query = query.filter(CateringInvoiceReport.FltDate <= end_date)
+        if flight_number:
+            query = query.filter(
+                CateringInvoiceReport.FltNo.ilike(f"%{flight_number}%")
+            )
+
+        return (
+            query.order_by(CateringInvoiceReport.FltDate.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+    def get_catering_invoice_reports_count(
+        self, start_date=None, end_date=None, flight_number=None
+    ):
+        """Get count of CateringInvoiceReport records with optional filters"""
+        from models.schema_ccs import CateringInvoiceReport
+
+        query = self.session.query(CateringInvoiceReport).filter(
+            CateringInvoiceReport.Ativo.is_(True),
+            CateringInvoiceReport.Excluido.is_(False),
+        )
+
+        if start_date:
+            query = query.filter(CateringInvoiceReport.FltDate >= start_date)
+        if end_date:
+            query = query.filter(CateringInvoiceReport.FltDate <= end_date)
+        if flight_number:
+            query = query.filter(
+                CateringInvoiceReport.FltNo.ilike(f"%{flight_number}%")
+            )
+
+        return query.count()
+
+    def get_all_air_company_reports(self):
+        """Get all AirCompanyInvoiceReport records"""
+        from models.schema_ccs import AirCompanyInvoiceReport
+
+        return (
+            self.session.query(AirCompanyInvoiceReport)
+            .filter(
+                AirCompanyInvoiceReport.Ativo.is_(True),
+                AirCompanyInvoiceReport.Excluido.is_(False),
+            )
+            .order_by(AirCompanyInvoiceReport.FlightDate.desc())
+            .all()
+        )
+
+    def get_all_catering_reports(self):
+        """Get all CateringInvoiceReport records"""
+        from models.schema_ccs import CateringInvoiceReport
+
+        return (
+            self.session.query(CateringInvoiceReport)
+            .filter(
+                CateringInvoiceReport.Ativo.is_(True),
+                CateringInvoiceReport.Excluido.is_(False),
+            )
+            .order_by(CateringInvoiceReport.FltDate.desc())
+            .all()
+        )
+
+    def get_all_flight_class_reports(self):
+        """Get all FlightClassReport records"""
+        from models.schema_ccs import FlightClassMapping
+
+        return (
+            self.session.query(FlightClassMapping)
+            .filter(
+                FlightClassMapping.Ativo.is_(True),
+                FlightClassMapping.Excluido.is_(False),
+            )
+            .all()
+        )
+
+    def get_all_flight_number_reports(self):
+        """Get all FlightNumberMapping records"""
+        from models.schema_ccs import FlightNumberMapping
+
+        return (
+            self.session.query(FlightNumberMapping)
+            .filter(
+                FlightNumberMapping.Ativo.is_(True),
+                FlightNumberMapping.Excluido.is_(False),
+            )
+            .all()
+        )
+
+
+# Esse repositório só está sendo utilizado devido a um ajuste de
+# classificação enviado pela empresa de Catering
+class FlightClassMappingRepository:
+    def __init__(self, db_session):
+        self.session = db_session
+
+    def bulk_insert(self, model_instances):
+        """
+        Bulk insert FlightClassMapping instances
+
+        Parameters
+        ----------
+        model_instances : List[FlightClassMapping]
+            List of FlightClassMapping model instances to insert
+        """
+        try:
+            self.session.add_all(model_instances)
+            self.session.commit()
+            print(
+                f"Successfully inserted {len(model_instances)} flight class mapping records"
+            )
         except Exception as e:
             self.session.rollback()
-            raise e
+            print(f"Error inserting flight class mapping records: {e}")
+            raise
+
+    def insert_flight_class_mapping(self, data):
+        """
+        Insert flight class mapping data
+
+        Parameters
+        ----------
+        data : List[Dict[str, Any]]
+            List of dictionaries containing flight class mapping data
+        """
+        try:
+            from models.schema_ccs import FlightClassMapping
+
+            model_instances = []
+            for item in data:
+                instance = FlightClassMapping(
+                    promeus_class=item.get("promeus_class"),
+                    inflair_class=item.get("inflair_class"),
+                    item_group=item.get("item_group"),
+                    item_code=item.get("item_code"),
+                    item_desc=item.get("item_desc"),
+                    al_bill_code=item.get("al_bill_code"),
+                    al_bill_desc=item.get("al_bill_desc"),
+                    bill_catg=item.get("bill_catg"),
+                )
+                model_instances.append(instance)
+
+            self.bulk_insert(model_instances)
+
+        except Exception as e:
+            print(f"Error processing flight class mapping data: {e}")
+            raise
+
+    def clear_all(self):
+        """Clear all flight class mapping records"""
+        try:
+            from models.schema_ccs import FlightClassMapping
+
+            self.session.query(FlightClassMapping).delete()
+            self.session.commit()
+            print("Successfully cleared all flight class mapping records")
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error clearing flight class mapping records: {e}")
+            raise
 
 
 class FlightNumberMappingRepository:
+    def __init__(self, db_session):
+        self.session = db_session
+
+    def bulk_insert(self, model_instances):
+        """
+        Bulk insert FlightNumberMapping instances
+        
+        Parameters
+        ----------
+        model_instances : List[FlightNumberMapping]
+            List of FlightNumberMapping model instances to insert
+        """
+        try:
+            self.session.add_all(model_instances)
+            self.session.commit()
+            print(f"Successfully inserted {len(model_instances)} flight number mapping records")
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error inserting flight number mapping records: {e}")
+            raise
+
+    def insert_flight_number_mapping(self, data):
+        """
+        Insert flight number mapping data
+        
+        Parameters
+        ----------
+        data : List[Dict[str, Any]]
+            List of dictionaries containing flight number mapping data
+        """
+        try:
+            from models.schema_ccs import FlightNumberMapping
+            
+            model_instances = []
+            for item in data:
+                instance = FlightNumberMapping(
+                    air_company_flight_number=item.get('air_company_flight_number'),
+                    catering_flight_number=item.get('catering_flight_number')
+                )
+                model_instances.append(instance)
+            
+            self.bulk_insert(model_instances)
+            
+        except Exception as e:
+            print(f"Error processing flight number mapping data: {e}")
+            raise
+
+    def clear_all(self):
+        """Clear all flight number mapping records"""
+        try:
+            from models.schema_ccs import FlightNumberMapping
+            self.session.query(FlightNumberMapping).delete()
+            self.session.commit()
+            print("Successfully cleared all flight number mapping records")
+        except Exception as e:
+            self.session.rollback()
+            print(f"Error clearing flight number mapping records: {e}")
+            raise
+
+class BillingInvoiceTotalDifferenceRepository:
     def __init__(self, session: Session):
         self.session = session
-
-    def get_all(self):
-        """Get all flight number mappings"""
-        return self.session.query(FlightNumberMapping).all()
-
-    def get_by_air_company_flight_number(self, flight_number):
-        """Get mapping by air company flight number"""
-        return (
-            self.session.query(FlightNumberMapping)
-            .filter(FlightNumberMapping.AirCompanyFlightNumber == flight_number)
-            .first()
-        )
-
-    def get_by_catering_flight_number(self, flight_number):
-        """Get mapping by catering flight number"""
-        return (
-            self.session.query(FlightNumberMapping)
-            .filter(FlightNumberMapping.CateringFlightNumber == flight_number)
-            .first()
-        )
-
-    def insert(self, mapping):
-        """Insert a new flight number mapping"""
+        # super().__init__(session, Repository)
+ 
+    def delete_all(self, ):
+        """
+        Delete all records from BillingInvoiceTotalDifference table
+        """
         try:
-            self.session.add(mapping)
+            self.session.query(BillingInvoiceTotalDifference).delete()
             self.session.commit()
-            return mapping
+            print("Successfully deleted all BillingInvoiceTotalDifference records")
         except Exception as e:
             self.session.rollback()
-            raise e
-
-    def update(self, mapping):
-        """Update a flight number mapping"""
+            print(f"Error deleting BillingInvoiceTotalDifference records: {e}")
+            raise
+        
+    def add_record(self, record: BillingInvoiceTotalDifference):
+        """
+        Add a single BillingInvoiceTotalDifference record to the database.
+        """
         try:
+            self.session.add(record)
             self.session.commit()
-            return mapping
+            # print("Record successfully added")
         except Exception as e:
             self.session.rollback()
-            raise e
-
-    def delete(self, mapping_id):
-        """Delete a flight number mapping"""
-        try:
-            mapping = (
-                self.session.query(FlightNumberMapping)
-                .filter(FlightNumberMapping.Id == mapping_id)
-                .first()
-            )
-            if mapping:
-                self.session.delete(mapping)
-                self.session.commit()
-                return True
-            return False
-        except Exception as e:
-            self.session.rollback()
-            raise e
+            print(f"Error adding record: {e}")
+            raise
+        
