@@ -1,31 +1,30 @@
 # Repositories
-from repositories.repository import Repository
-from typing import List, Dict
-from decimal import Decimal
-from datetime import date, datetime
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-
 import logging
 import os
+from datetime import date, datetime
+from decimal import Decimal
+from typing import Dict, List
 
-from repositories.repository import Repository
-# Tables
-from models.schema_ccs import (
-    Flight,
-    Configuration,
-    FlightDate,
-    DataSource,
-    PriceReport,
-    InvoiceHistory,
-    CateringInvoiceReport,
-    AirCompanyInvoiceReport,
-    Reconciliation,
-    BillingInvoiceTotalDifference,
-)
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 # Application-Specific Common Utilities
 from common.custom_exception import CustomException
+
+# Tables
+from models.schema_ccs import (
+    AirCompanyInvoiceReport,
+    BillingInvoiceTotalDifference,
+    CateringInvoiceReport,
+    Configuration,
+    DataSource,
+    Flight,
+    FlightDate,
+    InvoiceHistory,
+    PriceReport,
+    Reconciliation,
+)
+from repositories.repository import Repository
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
 logger = logging.getLogger()
@@ -157,7 +156,6 @@ class ConfigurationRepository(Repository):
 
 
 class FlightDateRepository(Repository):
-
     def __init__(self, db_session):
         super().__init__(db_session, FlightDate)
 
@@ -169,7 +167,6 @@ class FlightDateRepository(Repository):
 
 
 class SourceRepository(Repository):
-
     def __init__(self, db_session):
         super().__init__(db_session, DataSource)
 
@@ -1541,7 +1538,7 @@ class FlightNumberMappingRepository:
     def bulk_insert(self, model_instances):
         """
         Bulk insert FlightNumberMapping instances
-        
+
         Parameters
         ----------
         model_instances : List[FlightNumberMapping]
@@ -1550,7 +1547,9 @@ class FlightNumberMappingRepository:
         try:
             self.session.add_all(model_instances)
             self.session.commit()
-            print(f"Successfully inserted {len(model_instances)} flight number mapping records")
+            print(
+                f"Successfully inserted {len(model_instances)} flight number mapping records"
+            )
         except Exception as e:
             self.session.rollback()
             print(f"Error inserting flight number mapping records: {e}")
@@ -1559,7 +1558,7 @@ class FlightNumberMappingRepository:
     def insert_flight_number_mapping(self, data):
         """
         Insert flight number mapping data
-        
+
         Parameters
         ----------
         data : List[Dict[str, Any]]
@@ -1567,17 +1566,17 @@ class FlightNumberMappingRepository:
         """
         try:
             from models.schema_ccs import FlightNumberMapping
-            
+
             model_instances = []
             for item in data:
                 instance = FlightNumberMapping(
-                    air_company_flight_number=item.get('air_company_flight_number'),
-                    catering_flight_number=item.get('catering_flight_number')
+                    air_company_flight_number=item.get("air_company_flight_number"),
+                    catering_flight_number=item.get("catering_flight_number"),
                 )
                 model_instances.append(instance)
-            
+
             self.bulk_insert(model_instances)
-            
+
         except Exception as e:
             print(f"Error processing flight number mapping data: {e}")
             raise
@@ -1586,6 +1585,7 @@ class FlightNumberMappingRepository:
         """Clear all flight number mapping records"""
         try:
             from models.schema_ccs import FlightNumberMapping
+
             self.session.query(FlightNumberMapping).delete()
             self.session.commit()
             print("Successfully cleared all flight number mapping records")
@@ -1594,12 +1594,15 @@ class FlightNumberMappingRepository:
             print(f"Error clearing flight number mapping records: {e}")
             raise
 
+
 class BillingInvoiceTotalDifferenceRepository:
     def __init__(self, session: Session):
         self.session = session
         # super().__init__(session, Repository)
- 
-    def delete_all(self, ):
+
+    def delete_all(
+        self,
+    ):
         """
         Delete all records from BillingInvoiceTotalDifference table
         """
@@ -1611,7 +1614,7 @@ class BillingInvoiceTotalDifferenceRepository:
             self.session.rollback()
             print(f"Error deleting BillingInvoiceTotalDifference records: {e}")
             raise
-        
+
     def add_record(self, record: BillingInvoiceTotalDifference):
         """
         Add a single BillingInvoiceTotalDifference record to the database.
@@ -1624,4 +1627,3 @@ class BillingInvoiceTotalDifferenceRepository:
             self.session.rollback()
             print(f"Error adding record: {e}")
             raise
-        

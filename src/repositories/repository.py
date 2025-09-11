@@ -9,7 +9,6 @@ from sqlalchemy_pagination import paginate
 
 
 class Repository:
-
     def __init__(self, db_session, entity):
         self.session = db_session
         self.entity_type = entity

@@ -6,9 +6,7 @@ from flask_parameter_validation import Route, ValidateParameters
 from common.authorization import get_current_user
 from common.conexao_banco import get_session
 from common.custom_exception import CustomException
-from common.error_handling import (
-    flask_parameter_validation_handler,
-)
+from common.error_handling import flask_parameter_validation_handler
 
 # Application-Specific Services
 from services.recon_annotation_service import ReconAnnotationService

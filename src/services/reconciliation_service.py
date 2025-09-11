@@ -471,7 +471,6 @@ class ReconciliationService:
             if not air_records:
                 air_records = self.session.query(AirCompanyInvoiceReport).all()
 
-
             if not catering_records:
                 catering_records = self.session.query(CateringInvoiceReport).all()
 
