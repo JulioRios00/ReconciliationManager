@@ -377,6 +377,32 @@ class FlightClassMapping(Base):
         return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
 
 
+class BillingInvoiceTotalDifference(Base):
+    __tablename__ = "BillingInvoiceTotalDifference"
+    __table_args__ = {"schema": "ccs"}
+
+    Id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    DataCriacao = Column(
+        TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP")
+    )
+    DataAtualizacao = Column(TIMESTAMP)
+    Ativo = Column(Boolean, nullable=False, default=True)
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+    # Add basic fields - can be expanded as needed
+    InvoiceId = Column(String, nullable=True)
+    TotalDifference = Column(DECIMAL(15, 2), nullable=True)
+    Description = Column(String, nullable=True)
+
+    def __init__(self, invoice_id=None, total_difference=None, description=None):
+        self.InvoiceId = invoice_id
+        self.TotalDifference = total_difference
+        self.Description = description
+
+    def serialize(self):
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
+
+
 class ReconAnnotation(Base):
     __tablename__ = "ReconAnnotation"
     __table_args__ = {"schema": "ccs"}

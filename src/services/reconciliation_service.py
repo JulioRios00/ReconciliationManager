@@ -6,7 +6,7 @@ from models.schema_ccs import (
     CateringInvoiceReport,
     Reconciliation,
 )
-from repositories.ccs_repository import ReconciliationRepository
+from repositories.reconciliation_repository import ReconciliationRepository
 
 
 class ReconciliationService:

@@ -16,12 +16,9 @@ from models.schema_ccs import (
     AirCompanyInvoiceReport,
     BillingInvoiceTotalDifference,
     CateringInvoiceReport,
-    Configuration,
-    DataSource,
-    Flight,
-    FlightDate,
-    InvoiceHistory,
-    PriceReport,
+    FlightClassMapping,
+    FlightNumberMapping,
+    ReconAnnotation,
     Reconciliation,
 )
 from repositories.repository import Repository
