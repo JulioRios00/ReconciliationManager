@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="1.038" timestamp="2025-10-16T08:32:50.178980-03:00" hostname="Make-Ideapad3i"><testcase classname="" name="src.tests" time="0.000"><error message="collection failure">../../.pyenv/versions/3.8.20/lib/python3.8/importlib/__init__.py:127: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+&lt;frozen importlib._bootstrap&gt;:1014: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:991: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:975: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:671: in _load_unlocked
+    ???
+venv/lib/python3.8/site-packages/_pytest/assertion/rewrite.py:185: in exec_module
+    exec(co, module.__dict__)
+src/tests/conftest.py:9: in &lt;module&gt;
+    from models.schema_ccs import (
+E   ModuleNotFoundError: No module named 'models'</error></testcase></testsuite></testsuites>

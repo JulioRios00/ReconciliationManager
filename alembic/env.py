@@ -4,6 +4,7 @@ from sqlalchemy import pool
 from alembic import context
 from src.models.base import Base
 from src.common.conexao_banco import SECRET_JSON
+
 # Do not remove this imports
 # from src.models.schema_ccs import *
 from src.models.schema_ccs import *
@@ -14,7 +15,10 @@ config = context.config
 
 # this will overwrite the ini-file sqlalchemy.url path
 # with the path given in the config of the main code
-config.set_main_option('sqlalchemy.url', f"postgresql://{SECRET_JSON['username']}:{SECRET_JSON['password']}@{SECRET_JSON['host']}/postgres")
+config.set_main_option(
+    "sqlalchemy.url",
+    f"postgresql://{SECRET_JSON['username']}:{SECRET_JSON['password']}@{SECRET_JSON['host']}/postgres",
+)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -33,8 +37,9 @@ target_metadata = [Base.metadata]
 
 # SCHEMA_NAME = 'public'
 
+
 def include_object(object, name, type_, reflected, compare_to):
-    if type_ == 'table' and object.schema != 'ccs' and object.schema != None:
+    if type_ == "table" and object.schema != "ccs" and object.schema != None:
         return False
     return True
 
@@ -59,7 +64,7 @@ def run_migrations_offline():
         dialect_opts={"paramstyle": "named"},
         version_table_schema="ccs",
         include_object=include_object,
-        include_schemas=True
+        include_schemas=True,
     )
 
     with context.begin_transaction():
@@ -81,11 +86,12 @@ def run_migrations_online():
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata,
+            connection=connection,
+            target_metadata=target_metadata,
             version_table_schema="ccs",
             include_object=include_object,
             include_schemas=True,
-            compare_type=True
+            compare_type=True,
         )
 
         with context.begin_transaction():

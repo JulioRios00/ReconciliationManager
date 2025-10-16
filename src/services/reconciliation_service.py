@@ -1,12 +1,12 @@
 import uuid
 from datetime import datetime
 
-from models.schema_ccs import (
+from src.models.schema_ccs import (
     AirCompanyInvoiceReport,
     CateringInvoiceReport,
     Reconciliation,
 )
-from repositories.ccs_repository import ReconciliationRepository
+from src.repositories.reconciliation_repository import ReconciliationRepository
 
 
 class ReconciliationService:
