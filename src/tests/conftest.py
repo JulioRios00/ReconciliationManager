@@ -6,15 +6,10 @@ from unittest.mock import MagicMock, Mock
 import pytest
 from sqlalchemy.orm import Session
 
-from src.repositories.reconciliation_repository import ReconciliationRepository
+from repositories.reconciliation_repository import ReconciliationRepository
 
 # Import your application modules
-from src.services.reconciliation_service import ReconciliationService
-
-# Add src directory to Python path for imports
-src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)))
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
+from services.reconciliation_service import ReconciliationService
 
 
 @pytest.fixture

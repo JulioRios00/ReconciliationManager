@@ -404,3 +404,89 @@ class ReconAnnotation(Base):
 
     def serialize(self):
         return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
+
+
+# Stub models for missing classes used in ccs_repository.py
+# These need to be properly implemented based on the actual database schema
+class BillingInvoiceTotalDifference(Base):
+    __tablename__ = "BillingInvoiceTotalDifference"
+    __table_args__ = {"schema": "ccs"}
+
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    CreatedAt = Column(TIMESTAMP, server_default=func.now())
+    UpdatedAt = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+
+class Configuration(Base):
+    __tablename__ = "Configuration"
+    __table_args__ = {"schema": "ccs"}
+
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    CreatedAt = Column(TIMESTAMP, server_default=func.now())
+    UpdatedAt = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    Excluido = Column(Boolean, nullable=False, default=False)
+    TipoDeClasse = Column(String, nullable=True)
+    pacote = Column(String, nullable=True)
+    destinoPacket = Column(String, nullable=True)
+    CódigoDoItem = Column(String, nullable=True)
+    Descrição = Column(String, nullable=True)
+    Provision1 = Column(String, nullable=True)
+    Provision2 = Column(String, nullable=True)
+    Tipo = Column(String, nullable=True)
+    Svc = Column(String, nullable=True)
+
+
+class DataSource(Base):
+    __tablename__ = "DataSource"
+    __table_args__ = {"schema": "ccs"}
+
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    CreatedAt = Column(TIMESTAMP, server_default=func.now())
+    UpdatedAt = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    Excluido = Column(Boolean, nullable=False, default=False)
+    id_fligth = Column(Integer, nullable=True)
+    file_name = Column(String, nullable=True)
+    page_number = Column(Integer, nullable=True)
+
+
+class Flight(Base):
+    __tablename__ = "Flight"
+    __table_args__ = {"schema": "ccs"}
+
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    CreatedAt = Column(TIMESTAMP, server_default=func.now())
+    UpdatedAt = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+
+class FlightDate(Base):
+    __tablename__ = "FlightDate"
+    __table_args__ = {"schema": "ccs"}
+
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    CreatedAt = Column(TIMESTAMP, server_default=func.now())
+    UpdatedAt = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    Excluido = Column(Boolean, nullable=False, default=False)
+    date = Column(Date, nullable=True)
+    id_fligth = Column(Integer, nullable=True)
+
+
+class InvoiceHistory(Base):
+    __tablename__ = "InvoiceHistory"
+    __table_args__ = {"schema": "ccs"}
+
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    CreatedAt = Column(TIMESTAMP, server_default=func.now())
+    UpdatedAt = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    Excluido = Column(Boolean, nullable=False, default=False)
+
+
+class PriceReport(Base):
+    __tablename__ = "PriceReport"
+    __table_args__ = {"schema": "ccs"}
+
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    CreatedAt = Column(TIMESTAMP, server_default=func.now())
+    UpdatedAt = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    Excluido = Column(Boolean, nullable=False, default=False)
